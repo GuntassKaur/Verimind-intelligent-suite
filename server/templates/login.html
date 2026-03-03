@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriMind // Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+    <div class="control-panel" style="width: 100%; max-width: 440px; padding: 48px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-indigo)" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" style="width: 48px; height: 48px; margin-bottom: 24px;">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px;">Welcome Back</h1>
+            <p style="font-size: 14px; color: var(--text-secondary);">Access the VeriMind verification platform.</p>
+        </div>
+
+        <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--border); margin-bottom: 32px;">
+            <div id="tab-login" class="input-label"
+                style="padding-bottom: 12px; border-bottom: 2px solid var(--accent-indigo); color: white; cursor: pointer;">
+                Sign In
+            </div>
+            <div id="tab-reg" class="input-label"
+                style="padding-bottom: 12px; border-bottom: 2px solid transparent; cursor: pointer;">Register</div>
+        </div>
+
+        <form id="form-login">
+            <span class="input-label">Email Address</span>
+            <input type="email" id="l-email" class="text-input" placeholder="name@company.com" required>
+
+            <span class="input-label">Password</span>
+            <input type="password" id="l-pass" class="text-input" placeholder="••••••••" required>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">SIGN IN</button>
+        </form>
+
+        <form id="form-reg" style="display: none;">
+            <span class="input-label">Full Name</span>
+            <input type="text" id="r-name" class="text-input" placeholder="Jane Doe" required>
+
+            <span class="input-label">Email Address</span>
+            <input type="email" id="r-email" class="text-input" placeholder="name@company.com" required>
+
+            <span class="input-label">Password</span>
+            <input type="password" id="r-pass" class="text-input" placeholder="••••••••" required>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">CREATE ACCOUNT</button>
+        </form>
+
+        <div style="margin-top: 32px; text-align: center;">
+            <button id="guest-btn" class="btn btn-ghost" style="width: 100%; font-size: 13px;">CONTINUE AS
+                GUEST</button>
+        </div>
+    </div>
+
+    <script>
+        const tabL = document.getElementById('tab-login'),
+            tabR = document.getElementById('tab-reg'),
+            formL = document.getElementById('form-login'),
+            formR = document.getElementById('form-reg');
+
+        tabL.onclick = () => {
+            tabL.style.borderColor = 'var(--accent-indigo)';
+            tabL.style.color = 'white';
+            tabR.style.borderColor = 'transparent';
+            tabR.style.color = 'var(--text-muted)';
+            formL.style.display = 'block';
+            formR.style.display = 'none';
+        };
+
+        tabR.onclick = () => {
+            tabR.style.borderColor = 'var(--accent-indigo)';
+            tabR.style.color = 'white';
+            tabL.style.borderColor = 'transparent';
+            tabL.style.color = 'var(--text-muted)';
+            formR.style.display = 'block';
+            formL.style.display = 'none';
+        };
+
+        formL.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = formL.querySelector('button');
+            btn.innerText = 'SIGNING IN...';
+            const email = document.getElementById('l-email').value;
+            const password = document.getElementById('l-pass').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.token) window.location.href = '/';
+                else { alert(data.error); btn.innerText = 'SIGN IN'; }
+            } catch (err) { alert("Server connection failed."); btn.innerText = 'ACTIVATE SESSION'; }
+        };
+
+        formR.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = formR.querySelector('button');
+            const name = document.getElementById('r-name').value;
+            const email = document.getElementById('r-email').value;
+            const password = document.getElementById('r-pass').value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (data.success) { alert("Registration complete. Please sign in."); tabL.click(); }
+                else { alert(data.error); }
+            } catch (err) { alert("Server connection failed."); }
+        };
+
+        document.getElementById('guest-btn').onclick = () => window.location.href = '/';
+    </script>
+</body>
+
+</html>

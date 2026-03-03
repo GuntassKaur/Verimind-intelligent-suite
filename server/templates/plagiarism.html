@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriMind // Plagiarism Scan</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .risk-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .risk-med {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .segment-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>VeriMind</span>
+        </a>
+
+        <div class="nav-menu">
+            <a href="/" class="nav-item">Dashboard</a>
+            <a href="/generation" class="nav-item">Generator</a>
+            <a href="/analyzer" class="nav-item">Analyzer</a>
+            <a href="/plagiarism" class="nav-item active">Plagiarism</a>
+            <a href="/humanize" class="nav-item">Humanizer</a>
+            <a href="/typing-test" class="nav-item">Typing Test</a>
+            <a href="/history" class="nav-item">Archive</a>
+        </div>
+
+        <div class="nav-auth">
+            <a href="/history" class="btn btn-ghost" style="padding: 8px 16px; font-size: 13px;">Records</a>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <header style="margin-bottom: 40px;">
+            <span class="badge">Integrity Check</span>
+            <h1 style="font-size: 32px; font-weight: 800; margin-top: 8px;">Plagiarism Checker</h1>
+        </header>
+
+        <div class="app-split">
+            <!-- Left: Inputs -->
+            <section class="control-panel">
+                <span class="input-label">Source Content</span>
+                <textarea id="text" class="text-input" style="height: 420px; font-size: 14px;"
+                    placeholder="Paste the content you wish to audit for originality..."></textarea>
+
+                <button id="scan-btn" class="btn btn-primary" style="width: 100%;">START SCAN</button>
+            </section>
+
+            <!-- Right: Results -->
+            <section class="result-panel">
+                <div id="results-placeholder" style="text-align: center; color: var(--text-muted); padding: 120px 0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <p>Enter parameters to start scan.</p>
+                </div>
+
+                <div id="results-content" style="display: none;">
+                    <div
+                        style="display: flex; gap: 16px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <span class="input-label">Verdict</span>
+                            <div id="verdict" style="font-size: 20px; font-weight: 800; color: white;"></div>
+                        </div>
+                        <div style="margin-left: auto; text-align: right;">
+                            <span class="input-label">Similarity Index</span>
+                            <div id="score" style="font-size: 24px; font-weight: 800; color: var(--accent-indigo);">0%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 32px;">
+                        <span class="input-label">Summary</span>
+                        <p id="summary" style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;"></p>
+                    </div>
+
+                    <span class="input-label">Similar Segments</span>
+                    <div id="segments-list" style="margin-top: 16px;"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const btn = document.getElementById('scan-btn');
+        const resultsPlaceholder = document.getElementById('results-placeholder');
+        const resultsContent = document.getElementById('results-content');
+
+        btn.onclick = async () => {
+            const text = document.getElementById('text').value;
+            if (!text.trim()) return alert("Content required.");
+
+            btn.innerText = 'SCANNING...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/plagiarism', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                const data = await res.json();
+
+                resultsPlaceholder.style.display = 'none';
+                resultsContent.style.display = 'block';
+
+                document.getElementById('verdict').innerText = data.verdict;
+                document.getElementById('score').innerText = (data.score || 0) + '%';
+                document.getElementById('summary').innerText = data.explanation;
+
+                const segments = document.getElementById('segments-list');
+                segments.innerHTML = '';
+                const suspicious = data.suspicious_segments || [];
+                suspicious.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'segment-card';
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 11px; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase;">Segment Audit</span>
+                            <span class="risk-badge risk-${s.risk.toLowerCase()}">${s.risk}</span>
+                        </div>
+                        <p style="font-size: 14px; color: white; font-weight: 600; margin-bottom: 8px;">"${s.sentence}"</p>
+                        <p style="font-size: 12px; color: var(--text-secondary);">${s.reason}</p>
+                    `;
+                    segments.appendChild(card);
+                });
+
+            } catch (err) {
+                alert("Scan failed.");
+            } finally {
+                btn.innerText = 'START SCAN';
+                btn.disabled = false;
+            }
+        };
+    </script>
+    <script src="/static/typing_tracker.js"></script>
+</body>
+
+</html>

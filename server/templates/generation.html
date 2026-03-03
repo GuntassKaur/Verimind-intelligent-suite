@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriMind // Content Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>VeriMind</span>
+        </a>
+
+        <div class="nav-menu">
+            <a href="/" class="nav-item">Dashboard</a>
+            <a href="/generation" class="nav-item active">Generator</a>
+            <a href="/analyzer" class="nav-item">Analyzer</a>
+            <a href="/plagiarism" class="nav-item">Plagiarism</a>
+            <a href="/humanize" class="nav-item">Humanizer</a>
+            <a href="/typing-test" class="nav-item">Typing Test</a>
+            <a href="/history" class="nav-item">Archive</a>
+        </div>
+
+        <div class="nav-auth">
+            <a href="/history" class="btn btn-ghost" style="padding: 8px 16px; font-size: 13px;">Records</a>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <header style="margin-bottom: 40px;">
+            <span class="badge">Research Tool</span>
+            <h1 style="font-size: 32px; font-weight: 800; margin-top: 8px;">Content Generator</h1>
+        </header>
+
+        <div class="app-split">
+            <!-- Left: Inputs -->
+            <section class="control-panel">
+                <span class="input-label">Category</span>
+                <select id="domain" class="text-input" style="height: 56px;">
+                    <option value="Scientific Research">Scientific Research</option>
+                    <option value="Legal Analysis">Legal Analysis</option>
+                    <option value="Technical Documentation">Technical Documentation</option>
+                    <option value="Academic Essay">Academic Essay</option>
+                    <option value="Business Strategy">Business Strategy</option>
+                </select>
+
+                <span class="input-label">Topic Description</span>
+                <textarea id="prompt" class="text-input" style="height: 320px;"
+                    placeholder="Describe the content you wish to synthesize in detail..."></textarea>
+
+                <button id="gen-btn" class="btn btn-primary" style="width: 100%;">GENERATE</button>
+            </section>
+
+            <!-- Right: Results -->
+            <section class="result-panel">
+                <div id="results-placeholder" style="text-align: center; color: var(--text-muted); padding: 120px 0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Enter parameters to start generation.</p>
+                </div>
+
+                <div id="results-content" style="display: none; height: 100%; display: flex; flex-direction: column;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <span class="input-label">Generated Content</span>
+                        <button onclick="copyOutput()" class="btn btn-ghost"
+                            style="padding: 4px 12px; font-size: 11px;">Copy Text</button>
+                    </div>
+                    <div id="output-area"
+                        style="flex: 1; overflow-y: auto; font-size: 15px; color: var(--text-secondary); line-height: 1.7; padding-right: 12px;"
+                        class="prose prose-invert"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const btn = document.getElementById('gen-btn');
+        const resultsPlaceholder = document.getElementById('results-placeholder');
+        const resultsContent = document.getElementById('results-content');
+        const outputArea = document.getElementById('output-area');
+
+        btn.onclick = async () => {
+            const prompt = document.getElementById('prompt').value;
+            const domain = document.getElementById('domain').value;
+            if (!prompt.trim()) return alert("Prompt required.");
+
+            btn.innerText = 'GENERATING...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, domain })
+                });
+                const data = await res.json();
+
+                resultsPlaceholder.style.display = 'none';
+                resultsContent.style.display = 'flex';
+                outputArea.innerHTML = marked.parse(data.answer);
+
+            } catch (err) {
+                alert("Synthesis failed.");
+            } finally {
+                btn.innerText = 'GENERATE';
+                btn.disabled = false;
+            }
+        };
+
+        function copyOutput() {
+            navigator.clipboard.writeText(outputArea.innerText);
+            alert("Copied to clipboard.");
+        }
+    </script>
+    <script src="/static/typing_tracker.js"></script>
+</body>
+
+</html>

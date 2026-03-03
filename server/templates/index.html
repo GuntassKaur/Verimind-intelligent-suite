@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriMind // Verification & Integrity</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>VeriMind</span>
+        </a>
+
+        <div class="nav-menu">
+            <a href="/" class="nav-item active">Dashboard</a>
+            <a href="/generation" class="nav-item">Generator</a>
+            <a href="/analyzer" class="nav-item">Analyzer</a>
+            <a href="/plagiarism" class="nav-item">Plagiarism</a>
+            <a href="/humanize" class="nav-item">Humanizer</a>
+            <a href="/typing-test" class="nav-item">Typing Test</a>
+            <a href="/history" class="nav-item">Archive</a>
+        </div>
+
+        <div class="nav-auth">
+            {% if is_logged_in %}
+            <a href="/api/auth/logout" class="btn btn-ghost" style="padding: 8px 16px; font-size: 13px;">Logout</a>
+            {% else %}
+            <a href="/login" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <span class="badge">v2.1 Now Live</span>
+            <h1>VeriMind AI</h1>
+            <p>
+                The advanced research and verification engine for reliable AI interactions.
+                Generate, analyze, and refine your content with precision.
+            </p>
+    </main>
+
+    <!-- Module Grid -->
+    <div class="card-grid">
+        <a href="/generation" class="module-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <div>
+                <h3>Content Generator</h3>
+                <p>Generate summaries and research content based on your specified topics.</p>
+            </div>
+        </a>
+
+        <a href="/analyzer" class="module-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <div>
+                <h3>Analyzer</h3>
+                <p>Check content for factual consistency and identify potential errors or risks.</p>
+            </div>
+        </a>
+
+        <a href="/plagiarism" class="module-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <div>
+                <h3>Plagiarism Scan</h3>
+                <p>Verify content originality and cross-reference against institutional datasets.</p>
+            </div>
+        </a>
+
+        <a href="/humanize" class="module-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <div>
+                <h3>Humanizer</h3>
+                <p>Refine text to improve readability and match professional business standards.</p>
+            </div>
+        </a>
+
+        <a href="/typing-test" class="module-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                <line x1="9" y1="20" x2="15" y2="20"></line>
+                <line x1="12" y1="4" x2="12" y2="20"></line>
+            </svg>
+            <div>
+                <h3>Typing Test</h3>
+                <p>Measure your transcription speed and accuracy with real-time tracking.</p>
+            </div>
+        </a>
+
+        <a href="/history" class="module-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+            </svg>
+            <div>
+                <h3>History</h3>
+                <p>Review all previous reports, audits, and saved documents in one place.</p>
+            </div>
+        </a>
+    </div>
+
+    {% if not is_logged_in %}
+    <div style="margin-top: 80px; text-align: center; color: var(--text-secondary); font-size: 14px;">
+        <p>Accessing as Guest. Session logs are ephemeral. <a href="/login"
+                style="color: var(--accent-indigo); text-decoration: none; font-weight: 700;">Sign In</a> for
+            persistence.</p>
+    </div>
+    {% endif %}
+
+    <footer
+        style="margin-top: 120px; padding: 40px 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 12px;">
+        © 2026 VeriMind // Content Verification Suite
+    </footer>
+    </main>
+
+    <!-- Global Typing Tracker Badge -->
+    <script src="/static/typing_tracker.js"></script>
+</body>
+
+</html>

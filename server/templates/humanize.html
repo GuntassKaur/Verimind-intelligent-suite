@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriMind // Content Refinement</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .tone-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0 24px 0;
+        }
+
+        .tone-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .tone-btn.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-indigo);
+            border-color: var(--accent-indigo);
+        }
+
+        .tone-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>VeriMind</span>
+        </a>
+
+        <div class="nav-menu">
+            <a href="/" class="nav-item">Dashboard</a>
+            <a href="/generation" class="nav-item">Generator</a>
+            <a href="/analyzer" class="nav-item">Analyzer</a>
+            <a href="/plagiarism" class="nav-item">Plagiarism</a>
+            <a href="/humanize" class="nav-item active">Humanizer</a>
+            <a href="/typing-test" class="nav-item">Typing Test</a>
+            <a href="/history" class="nav-item">Archive</a>
+        </div>
+
+        <div class="nav-auth">
+            <a href="/history" class="btn btn-ghost" style="padding: 8px 16px; font-size: 13px;">Records</a>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <header style="margin-bottom: 40px;">
+            <span class="badge">Refinement Tool</span>
+            <h1 style="font-size: 32px; font-weight: 800; margin-top: 8px;">Humanizer</h1>
+        </header>
+
+        <div class="app-split">
+            <!-- Left: Inputs -->
+            <section class="control-panel">
+                <span class="input-label">Source Content</span>
+                <textarea id="text" class="text-input" style="height: 280px; font-size: 14px;"
+                    placeholder="Paste the content you wish to refine for human tone..."></textarea>
+
+                <span class="input-label">Refinement Style</span>
+                <div class="tone-grid">
+                    <div class="tone-btn active" onclick="setTone(this, 'Professional')">Professional</div>
+                    <div class="tone-btn" onclick="setTone(this, 'Creative')">Creative</div>
+                    <div class="tone-btn" onclick="setTone(this, 'Academic')">Academic</div>
+                </div>
+
+                <button id="hum-btn" class="btn btn-primary" style="width: 100%;">START</button>
+            </section>
+
+            <!-- Right: Results -->
+            <section class="result-panel">
+                <div id="results-placeholder" style="text-align: center; color: var(--text-muted); padding: 120px 0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <p>Enter parameters to start refinement.</p>
+                </div>
+
+                <div id="results-content" style="display: none; height: 100%; display: flex; flex-direction: column;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <span class="input-label">Result</span>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span class="badge"
+                                style="margin-bottom: 0; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">98%
+                                Human</span>
+                            <button onclick="copyOutput()" class="btn btn-ghost"
+                                style="padding: 4px 12px; font-size: 11px;">Copy Text</button>
+                        </div>
+                    </div>
+                    <div id="final-text"
+                        style="flex: 1; overflow-y: auto; font-size: 15px; color: var(--text-secondary); line-height: 1.7; padding-right: 12px; white-space: pre-wrap;">
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        let currentTone = 'Professional';
+        function setTone(el, tone) {
+            document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            currentTone = tone;
+        }
+
+        const btn = document.getElementById('hum-btn'),
+            textIn = document.getElementById('text'),
+            emptyState = document.getElementById('results-placeholder'),
+            resultView = document.getElementById('results-content'),
+            finalText = document.getElementById('final-text');
+
+        btn.onclick = async () => {
+            const txt = textIn.value;
+            if (!txt.trim()) return alert("Content required.");
+
+            btn.innerText = 'PROCESSING...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/humanize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: txt, tone: currentTone })
+                });
+                const data = await response.json();
+
+                emptyState.style.display = 'none';
+                resultView.style.display = 'flex';
+                finalText.innerText = data.humanized_text;
+
+            } catch (err) {
+                alert("Refinement failed.");
+            } finally {
+                btn.innerText = 'START';
+                btn.disabled = false;
+            }
+        };
+
+        function copyOutput() {
+            navigator.clipboard.writeText(finalText.innerText);
+            alert("Copied to clipboard.");
+        }
+    </script>
+    <script src="/static/typing_tracker.js"></script>
+</body>
+
+</html>

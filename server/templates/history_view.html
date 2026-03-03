@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriMind // History</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>VeriMind</span>
+        </a>
+
+        <div class="nav-menu">
+            <a href="/" class="nav-item">Dashboard</a>
+            <a href="/generation" class="nav-item">Generator</a>
+            <a href="/analyzer" class="nav-item">Analyzer</a>
+            <a href="/plagiarism" class="nav-item">Plagiarism</a>
+            <a href="/humanize" class="nav-item">Humanizer</a>
+            <a href="/typing-test" class="nav-item">Typing Test</a>
+            <a href="/history" class="nav-item active">History</a>
+        </div>
+
+        <div class="nav-auth">
+            <a href="/" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">New Task</a>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <header style="margin-bottom: 40px;">
+            <span class="badge">System Logs</span>
+            <h1 style="font-size: 32px; font-weight: 800; margin-top: 8px;">History</h1>
+        </header>
+
+        <div style="display: grid; gap: 24px;">
+            {% if history %}
+            {% for entry in history %}
+            <div class="control-panel" style="padding: 24px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div>
+                        <span class="input-label" style="color: var(--accent-indigo);">{{ entry.type | upper }}
+                            Record</span>
+                        <span style="font-size: 12px; color: var(--text-muted);">{{ entry.timestamp }}</span>
+                    </div>
+                    <div class="badge" style="margin-bottom: 0;">Verified</div>
+                </div>
+                <p style="font-size: 15px; font-weight: 600; color: white; margin-bottom: 12px;">"{{ entry.input_snippet
+                    }}"</p>
+                <div
+                    style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); max-height: 120px; overflow-y: auto;">
+                    {{ entry.result_summary | tojson(indent=2) }}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="result-panel" style="text-align: center; padding: 80px 0; border-style: dashed;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <p>History is currently empty. Start a new verification task.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <footer
+            style="margin-top: 80px; text-align: center; padding: 40px 0; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12px;">
+            © 2026 VeriMind // Verification Suite
+        </footer>
+    </main>
+
+    <!-- Global Typing Tracker Badge -->
+    <script src="/static/typing_tracker.js"></script>
+</body>
+
+</html>
