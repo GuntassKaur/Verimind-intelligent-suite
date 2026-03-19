@@ -2,3 +2,20 @@ node_modules/
 .env
 dist/
 build/
+# Python
+__pycache__/
+*.pyc
+
+# Logs & Outputs
+lint_output*.txt
+tsc_output*.txt
+models_out.txt
+working_model_report.txt
+
+# Environment
+.env
+
+# Node
+node_modules/
+dist/
+build/

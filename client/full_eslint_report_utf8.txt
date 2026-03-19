@@ -1,0 +1,23 @@
+﻿
+> client@0.0.0 lint
+> eslint . unix
+
+node.exe : 
+At C:\Program Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecifi 
+   ed: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeComm 
+   andError
+ 
+Oops! Something went wrong! :(
+
+ESLint: 9.39.2
+
+No files matching the pattern "unix" 
+were found.
+Please check for typing mistakes in the 
+pattern.
+

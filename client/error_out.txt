@@ -1,0 +1,72 @@
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m[39m 39 modules transformed.
+node.exe : [31m[39m Build 
+failed in 1.83s
+At C:\Program 
+Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : No 
+   tSpecified: ([31m[39m B  
+  uild failed in 1.83s:String)   
+  [], RemoteException
+    + FullyQualifiedErrorId : Na 
+   tiveCommandError
+ 
+[31merror during build:
+[31m[vite:css] [postcss] 
+C:/Users/Guntass Kaur/Downloads/a
+iproject/client/src/index.css:189
+:3: The `custom-scrollbar` class 
+does not exist. If 
+`custom-scrollbar` is a custom 
+class, make sure it is defined 
+within a `@layer` directive.[31m
+file: [36mC:/Users/Guntass Kaur/
+Downloads/aiproject/client/src/in
+dex.css:189:2[31m
+    at Input.error 
+(C:\Users\Guntass Kaur\Downloads\
+aiproject\client\node_modules\pos
+tcss\lib\input.js:135:16)
+    at AtRule.error 
+(C:\Users\Guntass Kaur\Downloads\
+aiproject\client\node_modules\pos
+tcss\lib\node.js:146:32)
+    at processApply 
+(C:\Users\Guntass Kaur\Downloads\
+aiproject\client\node_modules\tai
+lwindcss\lib\lib\expandApplyAtRul
+es.js:380:29)
+    at C:\Users\Guntass Kaur\Down
+loads\aiproject\client\node_modul
+es\tailwindcss\lib\lib\expandAppl
+yAtRules.js:551:9
+    at C:\Users\Guntass Kaur\Down
+loads\aiproject\client\node_modul
+es\tailwindcss\lib\processTailwin
+dFeatures.js:55:50
+    at async plugins 
+(C:\Users\Guntass Kaur\Downloads\
+aiproject\client\node_modules\tai
+lwindcss\lib\plugin.js:38:17)
+    at async LazyResult.runAsync 
+(C:\Users\Guntass Kaur\Downloads\
+aiproject\client\node_modules\pos
+tcss\lib\lazy-result.js:293:11)
+    at async runPostCSS (file:///
+C:/Users/Guntass%20Kaur/Downloads
+/aiproject/client/node_modules/vi
+te/dist/node/chunks/config.js:301
+45:19)
+    at async compilePostCSS (file
+:///C:/Users/Guntass%20Kaur/Downl
+oads/aiproject/client/node_module
+s/vite/dist/node/chunks/config.js
+:30129:6)
+    at async compileCSS (file:///
+C:/Users/Guntass%20Kaur/Downloads
+/aiproject/client/node_modules/vi
+te/dist/node/chunks/config.js:300
+59:26)[39m

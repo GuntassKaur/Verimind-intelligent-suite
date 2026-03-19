@@ -1,0 +1,30 @@
+﻿
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx
+   5:48  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  29:33  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx:29:33
+  27 |                     initial={{ x: 0, y: 0 }}
+  28 |                     animate={{ 
+> 29 |                         x: [0, (Math.random() - 0.5) * 400, 0],
+     |                                 ^^^^^^^^^^^^^ Cannot call impure function
+  30 |                         y: [0, (Math.random() - 0.5) * 400, 0]
+  31 |                     }}
+  32 |                     transition={{   react-hooks/purity
+  30:33  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx:30:33
+  28 |                     animate={{ 
+  29 |                         x: [0, (Math.random() - 0.5) * 400, 0],
+> 30 |                         y: [0, (Math.random() - 0.5) * 400, 0]
+     |                                 ^^^^^^^^^^^^^ Cannot call impure function
+  31 |                     }}
+  32 |                     transition={{
+  33 |                         duration: p.duration,  react-hooks/purity
+
+Γ£û 3 problems (3 errors, 0 warnings)
+

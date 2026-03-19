@@ -4,9 +4,10 @@ import api from '../services/api';
 
 interface SmartProcessingToolbarProps {
     onTextExtracted: (text: string) => void;
+    onAuditResult?: (audit: unknown) => void;
 }
 
-export const SmartProcessingToolbar: React.FC<SmartProcessingToolbarProps> = ({ onTextExtracted }) => {
+export const SmartProcessingToolbar: React.FC<SmartProcessingToolbarProps> = ({ onTextExtracted, onAuditResult }) => {
     const [url, setUrl] = useState('');
     const [isUrlInputVisible, setIsUrlInputVisible] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ export const SmartProcessingToolbar: React.FC<SmartProcessingToolbarProps> = ({ 
                 setStatus('success');
                 setTimeout(() => setStatus('idle'), 2000);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("URL processing error:", err);
             setStatus('error');
         } finally {
@@ -63,6 +64,7 @@ export const SmartProcessingToolbar: React.FC<SmartProcessingToolbarProps> = ({ 
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('is_screenshot', 'true'); // Automatically audit images as screenshots
 
         setLoading(true);
         setStatus('idle');
@@ -72,6 +74,9 @@ export const SmartProcessingToolbar: React.FC<SmartProcessingToolbarProps> = ({ 
             });
             if (data.text) {
                 onTextExtracted(data.text);
+                if (data.audit && onAuditResult) {
+                    onAuditResult(data.audit);
+                }
                 setStatus('success');
                 setTimeout(() => setStatus('idle'), 2000);
             }
@@ -90,8 +95,8 @@ export const SmartProcessingToolbar: React.FC<SmartProcessingToolbarProps> = ({ 
                 <button
                     onClick={() => setIsUrlInputVisible(!isUrlInputVisible)}
                     className={`p-2 rounded-lg transition-all border ${isUrlInputVisible
-                        ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400'
-                        : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                        ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]'
+                        : 'bg-white/10 border-white/20 text-slate-100 hover:text-white hover:bg-white/20'
                         }`}
                     title="Extract from URL"
                 >
@@ -99,13 +104,13 @@ export const SmartProcessingToolbar: React.FC<SmartProcessingToolbarProps> = ({ 
                 </button>
 
                 {/* PDF BUTTON */}
-                <label className="p-2 rounded-lg transition-all bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer" title="Extract from PDF">
+                <label className="p-2 rounded-lg transition-all bg-white/10 border border-white/20 text-slate-100 hover:text-white hover:bg-white/20 cursor-pointer shadow-sm" title="Extract from PDF">
                     <FileText size={18} />
                     <input type="file" accept=".pdf" className="hidden" onChange={handleFileUpload} disabled={loading} />
                 </label>
 
-                {/* IMAGE BUTTON */}
-                <label className="p-2 rounded-lg transition-all bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer" title="Extract from Image">
+                {/* IMAGE BUTTON / SCREENSHOT DETECTOR */}
+                <label className="p-2 rounded-lg transition-all bg-white/10 border border-white/20 text-slate-100 hover:text-white hover:bg-white/20 cursor-pointer shadow-sm" title="Extract & Audit Fake News Screenshot">
                     <Sparkles size={18} />
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={loading} />
                 </label>

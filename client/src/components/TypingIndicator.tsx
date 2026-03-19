@@ -8,7 +8,7 @@ export const TypingIndicator = () => {
     const [charCount, setCharCount] = useState(0);
 
     useEffect(() => {
-        let hideTimeout: NodeJS.Timeout;
+        let hideTimeout: ReturnType<typeof setTimeout>;
 
         const handleInput = (e: Event) => {
             const target = e.target as HTMLElement;

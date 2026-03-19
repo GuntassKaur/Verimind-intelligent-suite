@@ -16,3 +16,6 @@ bcrypt
 flask-limiter
 PyPDF2
 pdfplumber
+flask-talisman
+pydantic[email]
+email-validator

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +16,7 @@ export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscription }) => {
     useEffect(() => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognition) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSupported(false);
             return;
         }

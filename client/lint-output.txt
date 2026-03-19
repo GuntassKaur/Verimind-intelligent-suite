@@ -1,0 +1,49 @@
+﻿
+> client@0.0.0 lint
+> eslint .
+
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\App.tsx
+  22:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:16  error  'err' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\SmartProcessingToolbar.tsx
+  7:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\BlogGenerator.tsx
+  56:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\EmailGenerator.tsx
+  73:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+  93:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Login.tsx
+   31:22  error  'err' is defined but never used           @typescript-eslint/no-unused-vars
+   31:27  error  Empty block statement                     no-empty
+  153:90  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Research.tsx
+  82:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Visualizer.tsx
+   16:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   31:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  132:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\WordOptimizer.tsx
+  61:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Workspace.tsx
+   21:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   38:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  267:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  279:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  302:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  325:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  348:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  357:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 24 problems (24 errors, 0 warnings)
+
