@@ -1,92 +1,122 @@
-import { motion } from 'framer-motion';
-import { Globe, Search, BookOpen, ArrowRight, Sparkles } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Globe, Search, BookOpen, ArrowRight, Sparkles, Cpu, Activity, Zap, History, Database, Network } from 'lucide-react';
+import api from '../services/api';
+
+const RESEARCH_NODES = [
+    { icon: Globe, title: 'Web Context', desc: 'Real-time academic & news scraping' },
+    { icon: BookOpen, title: 'Citation Audit', desc: 'Verify primary source documents' },
+    { icon: Database, title: 'Neural Archive', desc: 'Access global verification sets' }
+];
 
 export default function Research() {
+    const [query, setQuery] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    // Update global assistant
+    useEffect(() => {
+        window.dispatchEvent(new CustomEvent('typing_update', { 
+            detail: { wpm: 0, suggestions: ["Scan Web", "Analyze Journals", "Extract Citations"], tips: ["Research Lab Active", "Neural Scan Ready"] } 
+        }));
+    }, []);
+
+    const handleResearch = () => {
+        if (!query.trim()) return;
+        setLoading(true);
+        setTimeout(() => setLoading(false), 2000); // Simulate
+    };
+
     return (
-        <div className="tool-container pb-20">
-            <header className="mb-8 md:mb-12">
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-4 md:mb-6"
-                >
-                    <Globe size={14} className="text-indigo-400" />
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Deep Scan Active</span>
-                </motion.div>
-                <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">Research Assistant</h1>
-                <p className="text-slate-400 font-medium text-base md:text-lg max-w-2xl">
-                    Automated intelligence gathering and verification engine for complex topics.
-                </p>
-            </header>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="glass-card p-6 md:p-8 bg-[#0d1117]/40">
-                        <div className="flex items-center gap-4 mb-6 md:mb-8">
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/20 text-indigo-400 shrink-0">
-                                <Search size={20} className="md:w-6 md:h-6" />
-                            </div>
-                            <div>
-                                <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">Intelligence Query</h2>
-                                <p className="text-slate-500 text-[10px] md:text-xs font-medium">Define your research objective</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <textarea
-                                className="custom-editor min-h-[120px] md:min-h-[150px] w-full"
-                                placeholder="Describe what you want to research or verify in detail..."
-                            />
-                            <div className="flex justify-end">
-                                <button className="premium-btn-primary w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 flex items-center justify-center gap-2">
-                                    <Sparkles size={18} />
-                                    <span className="text-[10px] md:text-xs">START DEEP SCAN</span>
-                                    <ArrowRight size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <ResearchFeatureCard
-                            icon={Globe}
-                            title="Live Web Context"
-                            desc="Real-time data scraping from academic and news sources."
-                        />
-                        <ResearchFeatureCard
-                            icon={BookOpen}
-                            title="Citation Audit"
-                            desc="Verify claims against primary source documents."
-                        />
-                    </div>
+        <div className="workspace-center-content">
+            {/* TOP AREA: INPUT */}
+            <section className="input-top-area no-print">
+                <div className="tool-grid-wrapper">
+                      <button className="modern-tool-btn active">
+                         <Globe size={20} className="text-indigo-400" />
+                         <span>Research</span>
+                      </button>
+                      <button className="modern-tool-btn" onClick={() => window.location.href='/workspace'}>
+                         <Database size={20} className="text-blue-400" />
+                         <span>Archive</span>
+                      </button>
                 </div>
 
-                <div className="space-y-6">
-                    <div className="glass-panel p-6 bg-indigo-500/[0.03] border-indigo-500/10 h-full">
-                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Recent Reports</h3>
-                        <div className="space-y-4">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="p-4 rounded-xl border border-white/5 bg-white/5 hover:border-indigo-500/30 transition-all cursor-pointer">
-                                    <h4 className="text-xs font-bold text-slate-200 mb-1">Quantum Computing Ethics</h4>
-                                    <p className="text-[10px] text-slate-500">2 hours ago · 14 sources verified</p>
-                                </div>
-                            ))}
+                <div className="smart-gpt-editor">
+                    <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-4 px-4 opacity-50">
+                        <div className="flex items-center gap-2">
+                             <Search size={14} className="text-indigo-400" />
+                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Deep Inquiry Lab v3.0</span>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    );
-}
+                    
+                    <textarea
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Define your research objective or verify a complex topic..."
+                        className="custom-scrollbar"
+                    />
 
-function ResearchFeatureCard({ icon: Icon, title, desc }: { icon: React.ElementType, title: string, desc: string }) {
-    return (
-        <div className="glass-card p-6 bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 transition-all group">
-            <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mb-4 group-hover:bg-indigo-500/10 transition-colors">
-                <Icon size={18} className="text-slate-400 group-hover:text-indigo-400 transition-colors" />
-            </div>
-            <h4 className="text-sm font-black text-white uppercase mb-2">{title}</h4>
-            <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                    <div className="flex justify-center mt-6">
+                        <button
+                            onClick={handleResearch}
+                            disabled={loading || !query.trim()}
+                            className="premium-btn-primary flex items-center gap-4 py-4 px-12 rounded-2xl group transition-all"
+                        >
+                            {loading ? (
+                                <><Activity className="animate-spin" size={18} /> Gathering Context...</>
+                            ) : (
+                                <><Zap size={18} className="text-white" /> INITIATE DEEP SCAN</>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* BOTTOM AREA: NODES */}
+            <section className="output-bottom-area">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                      {RESEARCH_NODES.map((node, i) => (
+                          <motion.div 
+                            key={i} 
+                            initial={{ opacity: 0, y: 20 }} 
+                            animate={{ opacity: 1, y: 0 }} 
+                            transition={{ delay: i * 0.1 }}
+                            className="modern-card p-10 flex flex-col items-center text-center group hover:border-indigo-500/30 transition-all"
+                          >
+                               <div className="w-16 h-16 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 flex items-center justify-center mb-8 group-hover:bg-indigo-500/10 group-hover:scale-110 transition-all">
+                                    <node.icon size={32} className="text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+                               </div>
+                               <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-4 italic">{node.title}</h3>
+                               <p className="text-sm text-slate-500 font-medium italic opacity-70 leading-relaxed">{node.desc}</p>
+                          </motion.div>
+                      ))}
+                 </div>
+
+                 <div className="mt-12 max-w-6xl mx-auto">
+                      <div className="modern-card bg-white/[0.01] border-white/5 p-10">
+                           <div className="flex items-center gap-4 mb-8">
+                                <History size={20} className="text-slate-600" />
+                                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Recent Research Logs</h4>
+                           </div>
+                           <div className="space-y-4">
+                                {[1,2].map(i => (
+                                    <div key={i} className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-2xl hover:border-indigo-500/20 transition-all cursor-pointer group">
+                                         <div className="flex items-center gap-6">
+                                              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors">
+                                                  <Network size={20} className="text-slate-700 group-hover:text-indigo-400" />
+                                              </div>
+                                              <div>
+                                                   <h5 className="text-[11px] font-black text-white uppercase tracking-widest italic group-hover:text-indigo-100 transition-colors">Quantum Ethics Analysis #{i}</h5>
+                                                   <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest">Neural Scan Complete</span>
+                                              </div>
+                                         </div>
+                                         <ArrowRight size={16} className="text-slate-800 group-hover:text-indigo-500 translate-x-0 group-hover:translate-x-2 transition-all" />
+                                    </div>
+                                ))}
+                           </div>
+                      </div>
+                 </div>
+            </section>
         </div>
     );
 }

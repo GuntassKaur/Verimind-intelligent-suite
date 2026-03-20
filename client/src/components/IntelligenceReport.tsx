@@ -1,10 +1,36 @@
+import React from 'react';
 import { Shield, ShieldCheck, AlertTriangle, FileText, ListChecks, Network } from 'lucide-react';
 import { Logo } from './Logo';
 import { Mermaid } from './Mermaid';
 
+interface Claim {
+    claim: string;
+    verdict: string;
+    reasoning: string;
+    confidence: number;
+}
+
+interface Diagram {
+    type: string;
+    code: string;
+}
 
 interface IntelligenceReportProps {
-    data: any;
+    data: {
+        humanized_text?: string;
+        answer?: string;
+        summary?: string;
+        explanation?: string;
+        simple_explanation?: string;
+        score?: number;
+        credibility_score?: number;
+        ai_probability?: number;
+        risk_level?: string;
+        key_concepts?: string[];
+        mermaid_diagrams?: Diagram[];
+        claims?: Claim[];
+        suggestions?: string[];
+    };
     type: 'plagiarism' | 'analyze' | 'generate' | 'humanize' | 'visualize' | 'general';
     content: string;
 }
@@ -13,12 +39,13 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
     if (!data) return null;
 
     // Normalize data for display
-    const resultText = data.humanized_text || data.answer || data.summary || data.explanation || (typeof data === 'string' ? data : '');
+    const resultText = data.humanized_text || data.answer || data.summary || data.explanation || '';
 
     // Derived Metrics
-    const wordCount = content.trim() ? content.split(/\s+/).length : 0;
-    const aiProbability = data.ai_probability !== undefined ? data.ai_probability : (data.score !== undefined ? data.score : (data.credibility_score !== undefined ? 100 - data.credibility_score : 50));
-
+    const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+    const aiProbability = data.ai_probability !== undefined 
+        ? data.ai_probability 
+        : (data.score !== undefined ? data.score : (data.credibility_score !== undefined ? 100 - data.credibility_score : 50));
 
     return (
         <div 
@@ -47,7 +74,7 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                 </div>
             </div>
 
-            {/* Document Executive Summary - Focus on Typography */}
+            {/* Document Executive Summary */}
             <section className="mb-14 relative">
                 <div className="absolute -left-6 top-0 bottom-0 w-1.5 bg-indigo-500 rounded-full" />
                 <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
@@ -63,25 +90,23 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                 </div>
             </section>
 
-            {/* Core Metrics Grid - Premium Cards */}
+            {/* Core Metrics Grid */}
             <section className="mb-14">
                 <div className="grid grid-cols-2 gap-8">
-                    {/* Primary Gauge */}
                     <div className="bg-slate-900 text-white p-10 rounded-[3rem] shadow-2xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-3xl" />
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 relative z-10">
                             {type === 'analyze' ? 'Factual Credibility' : 'Originality Index'}
                         </span>
                         <div className="text-7xl font-black mb-4 tracking-tighter relative z-10">
-                            {type === 'analyze' ? data.credibility_score : (data.score !== undefined ? data.score : 100 - aiProbability)}<span className="text-2xl text-indigo-400">%</span>
+                            {type === 'analyze' ? (data.credibility_score ?? 0) : (data.score !== undefined ? data.score : 100 - aiProbability)}<span className="text-2xl text-indigo-400">%</span>
                         </div>
                         <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-2 relative z-10">
-                            <div className="bg-indigo-500 h-full shadow-[0_0_10px_rgba(99,102,241,0.5)]" style={{ width: `${(type === 'analyze' ? data.credibility_score : (data.score || (100 - aiProbability)))}%` }} />
+                            <div className="bg-indigo-500 h-full shadow-[0_0_10px_rgba(99,102,241,0.5)]" style={{ width: `${(type === 'analyze' ? (data.credibility_score ?? 0) : (data.score || (100 - aiProbability)))}%` }} />
                         </div>
                         <p className="text-[9px] font-black text-indigo-500 uppercase tracking-widest relative z-10">System Status: Optimal</p>
                     </div>
 
-                    {/* Secondary Metrics */}
                     <div className="grid grid-cols-2 gap-4">
                         <MetricBox label="Word Count" value={wordCount} color="slate" />
                         <MetricBox label="Neural Tags" value={data.key_concepts?.length || 4} color="indigo" />
@@ -91,7 +116,7 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                 </div>
             </section>
 
-            {/* KEY CONCEPTS & KNOWLEDGE MAP (New Section) */}
+            {/* KEY CONCEPTS & KNOWLEDGE MAP */}
             {(data.key_concepts || data.mermaid_diagrams) && (
                 <section className="mb-14 grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="md:col-span-1 bg-indigo-50 p-8 rounded-[2rem] border border-indigo-100">
@@ -99,7 +124,7 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                             <ListChecks size={14} /> Semantic Tags
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                            {data.key_concepts?.map((c: string, i: number) => (
+                            {data.key_concepts?.map((c, i) => (
                                 <span key={i} className="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-[10px] font-bold text-indigo-700">
                                     {c}
                                 </span>
@@ -110,9 +135,9 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                             <Network size={14} className="text-indigo-500" /> Structural Knowledge Map
                         </h4>
-                        {data.mermaid_diagrams ? (
+                        {data.mermaid_diagrams && data.mermaid_diagrams.length > 0 ? (
                             <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                                <Mermaid code={data.mermaid_diagrams[0]?.code} isPrint />
+                                <Mermaid code={data.mermaid_diagrams[0].code} isPrint />
                             </div>
                         ) : (
                             <div className="h-full flex items-center justify-center text-slate-300 italic text-xs">
@@ -120,7 +145,6 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                             </div>
                         )}
                     </div>
-
                 </section>
             )}
 
@@ -130,16 +154,16 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                     <Shield size={16} /> SUB-SEGMENT INTELLIGENCE BREAKDOWN
                 </h3>
                 <div className="space-y-6">
-                    {data.claims?.map((claim: any, i: number) => (
+                    {data.claims?.map((claim, i) => (
                         <div key={i} className={`p-8 rounded-[2.5rem] border-2 ${
-                            claim.verdict === 'Verified' ? 'border-emerald-100 bg-emerald-50/30' : 
+                            claim.verdict === 'True' || claim.verdict === 'Verified' ? 'border-emerald-100 bg-emerald-50/30' : 
                             claim.verdict === 'Uncertain' ? 'border-amber-100 bg-amber-50/30' : 
                             'border-rose-100 bg-rose-50/30'
                         }`}>
                             <div className="flex justify-between items-start mb-4">
                                 <p className="text-lg font-bold text-slate-800 leading-tight">"{claim.claim}"</p>
                                 <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                                    claim.verdict === 'Verified' ? 'bg-emerald-500 text-white' : 
+                                    claim.verdict === 'True' || claim.verdict === 'Verified' ? 'bg-emerald-500 text-white' : 
                                     claim.verdict === 'Uncertain' ? 'bg-amber-500 text-white' : 
                                     'bg-rose-500 text-white'
                                 }`}>
@@ -171,7 +195,7 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                         "Refactor repetitive semantic structures for better clarity.",
                         "Lower AI-typical linguistic variance in segment 2.",
                         "Cross-verify claim #4 with updated peer-reviewed literature."
-                    ]).map((s: string, i: number) => (
+                    ]).map((s, i) => (
                         <div key={i} className="flex items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                             <div className="w-2 h-2 rounded-full bg-slate-900 shrink-0" />
                             <p className="text-xs font-bold text-slate-700 tracking-tight leading-snug">{s}</p>
@@ -196,7 +220,13 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
     );
 };
 
-const MetricBox = ({ label, value, color }: { label: string; value: string | number; color: 'slate' | 'indigo' | 'rose' | 'amber' | 'emerald' }) => {
+interface MetricBoxProps {
+    label: string;
+    value: string | number;
+    color: 'slate' | 'indigo' | 'rose' | 'amber' | 'emerald';
+}
+
+const MetricBox: React.FC<MetricBoxProps> = ({ label, value, color }) => {
     const colors = {
         slate: 'bg-slate-50 border-slate-100 text-slate-900',
         indigo: 'bg-indigo-50 border-indigo-100 text-indigo-700',

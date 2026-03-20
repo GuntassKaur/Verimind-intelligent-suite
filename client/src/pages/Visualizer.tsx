@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Zap, Loader2, Sparkles,
-    Info, AlertCircle,
-    Plus, BrainCircuit, ListChecks,
-    Network, MousePointer2, Printer
+    Info,
+    BrainCircuit, ListChecks,
+    Network, MousePointer2, Cpu, FileText
 } from 'lucide-react';
 import { SmartProcessingToolbar } from '../components/SmartProcessingToolbar';
 import { Mermaid } from '../components/Mermaid';
@@ -25,6 +25,15 @@ export default function Visualizer() {
     const [result, setResult] = useState<VisualizerResult | null>(null);
     const [error, setError] = useState('');
 
+    // Update global assistant
+    useEffect(() => {
+        if (result) {
+            window.dispatchEvent(new CustomEvent('typing_update', { 
+              detail: { wpm: 0, suggestions: ["Expand diagram", "Export as SVG", "Generate report"] } 
+            }));
+        }
+    }, [result]);
+
     const handleVisualize = useCallback(async () => {
         if (!content.trim()) {
             setError("Please provide content to visualize.");
@@ -36,149 +45,168 @@ export default function Visualizer() {
 
         try {
             const { data } = await api.post('/api/ai/visualize', { text: content });
-            setResult(data);
-        } catch (err: unknown) {
-            if (err && typeof err === 'object' && 'response' in err) {
-                const e = err as { response?: { data?: { error?: string } } };
-                setError(e.response?.data?.error || "Visualization failed.");
-            } else {
-                setError("Visualization failed.");
-            }
+            setResult(data.success ? data.data : data as unknown as VisualizerResult);
+        } catch (err: any) {
+            setError(err.response?.data?.error || "Visualization failed.");
         } finally {
             setLoading(false);
         }
     }, [content]);
 
     return (
-        <div className="tool-container pb-40">
-            <header className="mb-8 md:mb-12 text-center px-4">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-4 md:mb-6"
-                >
-                    <BrainCircuit size={14} className="text-indigo-400" />
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Advanced Visualizer</span>
-                </motion.div>
-                <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">Visualizer</h1>
-                <p className="text-slate-500 font-medium text-sm md:text-lg max-w-2xl mx-auto italic">Transform complex documents into concise summaries and visual knowledge maps.</p>
-            </header>
+        <div className="workspace-center-content">
+            {/* TOP INPUT AREA */}
+            <section className="input-top-area no-print">
+                <div className="tool-grid-wrapper">
+                      <button className="modern-tool-btn active">
+                         <Network size={20} className="text-cyan-400" />
+                         <span>Visualize</span>
+                      </button>
+                      <button className="modern-tool-btn" onClick={() => window.location.href='/analyzer'}>
+                         <BrainCircuit size={20} className="text-indigo-400" />
+                         <span>Audit</span>
+                      </button>
+                      <button className="modern-tool-btn" onClick={() => window.location.href='/generator'}>
+                         <Zap size={20} className="text-amber-400" />
+                         <span>Generate</span>
+                      </button>
+                </div>
 
-            <div className="max-w-6xl mx-auto space-y-12">
-                {/* INPUT SECTION */}
-                {!result && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                        <div className="glass-card p-1 relative overflow-hidden flex flex-col min-h-[400px]">
-                            <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-4">Knowledge Source</span>
-                                <SmartProcessingToolbar onTextExtracted={(t) => setContent(t)} />
-                            </div>
-                            <textarea
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                placeholder="Paste your text, PDF content, or URL data here..."
-                                className="flex-1 w-full p-8 bg-transparent text-slate-200 font-medium leading-relaxed resize-none focus:outline-none placeholder:text-slate-800 text-lg custom-scrollbar"
-                            />
-                            <div className="p-4 border-t border-white/5 bg-white/[0.02] flex justify-center">
-                                <button
-                                    onClick={handleVisualize}
-                                    disabled={loading || !content.trim()}
-                                    className="px-12 py-4 bg-indigo-500 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-500/30 disabled:opacity-50 flex items-center gap-3"
-                                >
-                                    {loading ? <Loader2 className="animate-spin" size={18} /> : <Zap size={18} />}
-                                    Synthesize Knowledge
-                                </button>
-                            </div>
+                <div className="smart-gpt-editor">
+                    <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-4 px-4 opacity-50">
+                        <div className="flex items-center gap-2">
+                             <Cpu size={14} className="text-cyan-400" />
+                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mapping Engine v2.0</span>
                         </div>
-                        {error && (
-                            <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-xs font-bold flex items-center gap-3">
-                                <AlertCircle size={16} /> {error}
-                            </div>
-                        )}
-                    </motion.div>
-                )}
+                        <div className="flex items-center gap-4">
+                             <SmartProcessingToolbar onTextExtracted={setContent} />
+                        </div>
+                    </div>
+                    
+                    <textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="Paste your research, data points, or logic here..."
+                        className="custom-scrollbar"
+                    />
 
-                {/* RESULTS - VISUALS */}
-                <AnimatePresence>
-                    {result && (
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12">
-                            <div className="flex justify-center gap-4">
-                                <button
-                                    onClick={() => setResult(null)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
-                                >
-                                    <Plus size={14} className="rotate-45" /> New Analysis
-                                </button>
-                                <button
-                                    onClick={generatePDF}
-                                    className="flex items-center gap-2 px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20"
-                                >
-                                    <Printer size={14} /> Download PDF
-                                </button>
-                            </div>
-
-                            {/* Summary & Key Concepts */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                                <div className="glass-card p-6 md:p-10 bg-indigo-500/[0.02]">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-6 md:mb-8 flex items-center gap-3">
-                                        <Sparkles size={16} /> Executive Summary
-                                    </h4>
-                                    <p className="text-xl md:text-2xl text-slate-200 font-medium leading-relaxed italic">"{result.summary}"</p>
-                                </div>
-                                <div className="glass-card p-6 md:p-10 bg-white/[0.02]">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6 md:mb-8 flex items-center gap-3">
-                                        <ListChecks size={16} className="text-indigo-400" /> Key Concepts
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2 md:gap-3">
-                                        {result.key_concepts?.map((c: string, i: number) => (
-                                            <span key={i} className="px-4 py-2 md:px-5 md:py-2.5 bg-black/40 border border-white/10 rounded-2xl text-[10px] md:text-xs font-bold text-slate-300">
-                                                {c}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* DIAGRAMS */}
-                            <div className="space-y-8">
-                                <div className="flex items-center gap-4 border-b border-white/5 pb-6">
-                                    <Network className="text-indigo-400" size={24} />
-                                    <div>
-                                        <h3 className="text-lg font-black text-white uppercase tracking-widest">Knowledge Mapping</h3>
-                                        <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mt-1">Generated Schema: {result.mermaid_diagrams?.[0]?.type || 'Standard'}</p>
-                                    </div>
-                                </div>
-
-                                {result.mermaid_diagrams?.map((diag: { type: string; code: string }, i: number) => (
-                                    <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.2 }} className="space-y-4">
-                                        <div className="flex items-center justify-between px-6">
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{diag.type} Projection</span>
-                                            <div className="flex items-center gap-2 text-[9px] font-bold text-slate-700 uppercase tracking-widest">
-                                                <MousePointer2 size={10} /> Interact with nodes
-                                            </div>
-                                        </div>
-                                        <Mermaid code={diag.code} />
-                                    </motion.div>
-                                ))}
-                            </div>
-
-                            {/* Data Insights */}
-                            {result.data_insights && (
-                                <div className="glass-card p-10 border-indigo-500/10">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-3">
-                                        <Info size={16} className="text-indigo-400" /> Structural Insights
-                                    </h4>
-                                    <p className="text-slate-400 font-medium leading-relaxed">{result.data_insights}</p>
-                                </div>
+                    <div className="flex justify-center mt-6">
+                        <button
+                            onClick={handleVisualize}
+                            disabled={loading || !content.trim()}
+                            className="premium-btn-primary flex items-center gap-4 py-4 px-10 rounded-2xl group transition-all"
+                        >
+                            {loading ? (
+                                <><Loader2 className="animate-spin" size={18} /> Mapping Architecture...</>
+                            ) : (
+                                <><Network size={18} className="group-hover:rotate-45 transition-transform" /> INITIATE PROJECTION</>
                             )}
+                        </button>
+                    </div>
+                </div>
+
+                <AnimatePresence>
+                    {error && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 flex justify-center text-rose-400 text-[10px] font-black uppercase tracking-widest">
+                            {error}
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+            </section>
 
-            {/* Hidden Print Report */}
-            {result && <IntelligenceReport data={result} type="visualize" content={content} />}
+            {/* BOTTOM OUTPUT AREA */}
+            <section className="output-bottom-area">
+                <AnimatePresence mode="wait">
+                    {!result && !loading ? (
+                        <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30">
+                             <Network size={64} className="text-slate-800 mb-6" />
+                             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Knowledge projection offline</p>
+                        </motion.div>
+                    ) : loading ? (
+                        <motion.div key="load" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20">
+                             <div className="w-16 h-16 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-6" />
+                             <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest animate-pulse">Scanning Logical Nodes...</span>
+                        </motion.div>
+                    ) : (
+                        <motion.div key="res" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-12 max-w-6xl mx-auto">
+                             <div className="flex items-center justify-between border-b border-white/5 pb-6">
+                                <div className="flex items-center gap-3">
+                                   <Zap size={18} className="text-cyan-400" />
+                                   <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Synthesis Complete</h4>
+                                </div>
+                                <div className="flex gap-4">
+                                     <button onClick={() => setResult(null)} className="px-5 py-2.5 bg-white/5 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500/10 transition-colors">Clear</button>
+                                     <button onClick={() => generatePDF()} className="px-5 py-2.5 bg-cyan-600 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-cyan-700 transition-colors flex items-center gap-2 shadow-lg shadow-cyan-600/20">
+                                         <FileText size={14} /> Export Map
+                                     </button>
+                                </div>
+                             </div>
 
+                             {/* MAIN SUMMARY */}
+                             <div className="modern-card border-cyan-500/10">
+                                 <h5 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-6 flex items-center gap-3">
+                                    <Sparkles size={14} /> Executive Insight
+                                 </h5>
+                                 <p className="text-2xl text-slate-200 font-serif italic text-center px-4 leading-relaxed">
+                                     "{result.summary}"
+                                 </p>
+                             </div>
+
+                             {/* KEY CONCEPTS */}
+                             <div className="modern-card">
+                                 <h5 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-3">
+                                    <ListChecks size={14} className="text-indigo-400" /> Contextual Nodes
+                                 </h5>
+                                 <div className="flex flex-wrap gap-3">
+                                     {result.key_concepts?.map((c, i) => (
+                                         <span key={i} className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                                             {c}
+                                         </span>
+                                     ))}
+                                 </div>
+                             </div>
+
+                             {/* ENLARGED DIAGRAMS */}
+                             <div className="space-y-12">
+                                 {result.mermaid_diagrams?.map((diag, i) => (
+                                     <div key={i} className="space-y-6">
+                                         <div className="flex items-center justify-between px-2">
+                                             <div className="flex items-center gap-4">
+                                                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+                                                     <FileText size={18} className="text-cyan-400" />
+                                                  </div>
+                                                  <h4 className="text-sm font-black text-white uppercase tracking-widest">{diag.type} Projection</h4>
+                                             </div>
+                                             <div className="hidden sm:flex items-center gap-3 text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">
+                                                <MousePointer2 size={12} /> Interactive Workspace
+                                             </div>
+                                         </div>
+                                         <div className="modern-card bg-[#0D1117]/80 p-8 md:p-16 min-h-[600px] flex items-center justify-center overflow-x-auto custom-scrollbar border-white/5">
+                                             <div className="w-full scale-110 transform-gpu">
+                                                <Mermaid code={diag.code} />
+                                             </div>
+                                         </div>
+                                     </div>
+                                 ))}
+                             </div>
+
+                             {result.data_insights && (
+                                 <div className="modern-card border-indigo-500/10 py-12">
+                                     <h5 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-6 flex items-center gap-3">
+                                         <Info size={16} /> Architectural Logic
+                                     </h5>
+                                     <p className="text-slate-400 font-medium leading-relaxed italic text-sm">"{result.data_insights}"</p>
+                                 </div>
+                             )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </section>
+
+            {result && <IntelligenceReport data={{
+                ...result,
+                mermaid_diagrams: result.mermaid_diagrams
+            }} type="visualize" content={content} />}
         </div>
     );
 }
