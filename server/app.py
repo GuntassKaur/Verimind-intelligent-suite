@@ -7,10 +7,8 @@ from flask import Flask, request, jsonify, render_template, session, make_respon
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-# Security Middlewares
+# Basic Security (Simplified for Render reliability)
 from flask_talisman import Talisman
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 # Services & schemas
 import services.auth_service as auth
@@ -46,31 +44,19 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SESSION_SECRET", "verimind_session_secret_2026")
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB Limit
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SECURE'] = False # Set to True in Production
+app.config['SESSION_COOKIE_SECURE'] = False 
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
-# Security: Add Talisman for production-grade headers
+# 1. CORS Restricted Origins - Explicitly allowing Vercel domain and wildcards for reliability
+# Note: Temporarily allowing all origins to fix the "Service Unavailable" CORS block if Vercel URL changed
+CORS(app, supports_credentials=True, origins="*")
+
+# 2. Security: Minimal Talisman to avoid proxy header blocks on Render
 talisman = Talisman(
     app,
     content_security_policy=None, 
     force_https=False 
 )
-
-# 2. Rate Limiting
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["500 per day", "100 per hour"],
-    storage_uri="memory://",
-)
-
-# 3. CORS Restricted Origins
-CORS(app, supports_credentials=True, origins=[
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://verimind-intelligent-suite-np75.vercel.app",
-    os.getenv("FRONTEND_URL", "")
-])
 
 # --- Standardized Response Helper ---
 def create_response(data=None, success=True, status=200, error=None):
@@ -98,12 +84,6 @@ def login_required(f):
             payload = jwt.decode(token, os.getenv("JWT_SECRET"), algorithms=["HS256"])
             request.user = payload
             request.user['is_guest'] = False
-        except jwt.ExpiredSignatureError:
-            request.user = {"user_id": f"guest_{request.remote_addr[:12]}", "is_guest": True}
-            return f(*args, **kwargs)
-        except jwt.InvalidTokenError:
-            request.user = {"user_id": f"guest_{request.remote_addr[:12]}", "is_guest": True}
-            return f(*args, **kwargs)
         except Exception:
             request.user = {"user_id": f"guest_{request.remote_addr[:12]}", "is_guest": True}
             return f(*args, **kwargs)
@@ -119,11 +99,10 @@ def health_check():
 # --- Auth Endpoints ---
 
 @app.route("/api/auth/register", methods=["POST"])
-@limiter.limit("10 per hour")
 def register():
     try:
         req_json = request.get_json()
-        if not req_json: return create_response(success=False, error="Missing request body", status=400)
+        if not req_json: return create_response(success=False, error="Missing manifest data.", status=400)
         
         data = RegisterSchema(**req_json)
         result = auth.register_user(data.email, data.password, data.name)
@@ -134,12 +113,11 @@ def register():
             response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
             response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
             return response
-        return create_response(success=False, error=result.get('error', 'Registration failed'), status=result.get('status', 400))
+        return create_response(success=False, error=result.get('error', 'Synthesis failed.'), status=result.get('status', 400))
     except ValidationError:
-        return create_response(success=False, error="Input validation failed. Please check your data.", status=400)
+        return create_response(success=False, error="Manifest validation failed.", status=400)
 
 @app.route("/api/auth/login", methods=["POST"])
-@limiter.limit("30 per hour")
 def login():
     try:
         req_json = request.get_json() or {}
@@ -151,40 +129,9 @@ def login():
             response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
             response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
             return response
-        return create_response(success=False, error=result.get('error', 'Invalid login credentials'), status=401)
+        return create_response(success=False, error=result.get('error', 'Access denied.'), status=401)
     except ValidationError:
-        return create_response(success=False, error="Invalid email or password format", status=400)
-
-@app.route("/api/auth/send-otp", methods=["POST"])
-@limiter.limit("5 per hour")
-def send_otp():
-    try:
-        req_json = request.get_json() or {}
-        data = EmailSchema(**req_json)
-        result = auth.request_login_otp(data.email)
-        if result.get('success'):
-            return create_response(data={"message": result.get('success')})
-        return create_response(success=False, error=result.get('error'), status=result.get('status', 400))
-    except ValidationError:
-        return create_response(success=False, error="Invalid email format", status=400)
-
-@app.route("/api/auth/verify-otp", methods=["POST"])
-@limiter.limit("15 per hour")
-def verify_otp_login():
-    try:
-        req_json = request.get_json() or {}
-        data = OTPVerifySchema(**req_json)
-        result = auth.verify_login_otp(data.email, data.otp)
-        
-        if result.get('success'):
-            response = create_response(data={"user": result['user']})
-            is_prod = not app.debug
-            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
-            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
-            return response
-        return create_response(success=False, error=result.get('error', 'Verification failed'), status=401)
-    except ValidationError:
-        return create_response(success=False, error="Invalid verification code format", status=400)
+        return create_response(success=False, error="Invalid credentials format.", status=400)
 
 @app.route("/api/auth/me", methods=["GET"])
 @login_required
@@ -195,30 +142,22 @@ def get_me():
     user_data = auth.get_user_by_id(user_id)
     if user_data:
         return create_response(data=user_data)
-    return create_response(success=False, error="User profile not found", status=404)
+    return create_response(success=False, error="Entity not identified.", status=404)
 
-@app.route("/api/history", methods=["GET"])
-@login_required
-def get_history():
-    user_id = request.user['user_id']
-    history = auth.get_user_history(user_id)
-    return create_response(data={"history": history})
-
-# --- AI & Knowledge Endpoints (Sanitized) ---
+# --- AI & Knowledge Endpoints (Optimized) ---
 
 def validate_text_input(text, min_len=1, max_len=20000):
     if not text or not isinstance(text, str):
-        return False, "Input must list a valid prompt."
+        return False, "Input must contain a valid neural manifest."
     if len(text.strip()) < min_len:
-        return False, "Input complexity too low for neural analysis."
+        return False, "Spectrum intensity too low."
     if len(text) > max_len:
-        return False, f"Neural spectrum limit reached ({max_len} chars)."
+        return False, "Spectrum limit exceeded."
     return True, None
 
 @app.route("/api/generate", methods=["POST"])
 @app.route("/api/ai/generate", methods=["POST"])
 @login_required
-@limiter.limit("60 per hour")
 def generate():
     data = request.json or {}
     prompt = data.get("prompt") or data.get("query")
@@ -230,10 +169,8 @@ def generate():
     auth.save_history(request.user['user_id'], "generation", prompt[:100], result)
     return create_response(data={"answer": result})
 
-@app.route("/api/plagiarism", methods=["POST"])
 @app.route("/api/plagiarism/check", methods=["POST"])
 @app.route("/api/ai/plagiarism/check", methods=["POST"])
-@app.route("/api/ai/plagiarism", methods=["POST"])
 @login_required
 def plagiarism():
     data = request.json or {}
@@ -287,26 +224,10 @@ def visualize():
     auth.save_history(request.user['user_id'], "visualization", text[:50], result)
     return create_response(data=result)
 
-@app.route("/api/process/url", methods=["POST"])
-@login_required
-def process_url():
-    url = request.json.get("url")
-    if not url or not url.startswith("http"):
-        return create_response(success=False, error="Valid absolute URL required.", status=400)
-    try:
-        text = extract_text_from_url(url)
-        return create_response(data={"text": text})
-    except Exception:
-        return create_response(success=False, error="URL synthesis interrupted.", status=500)
-
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    return create_response(success=False, error="Rate limit exceeded. Manual sync required.", status=429)
-
 @app.errorhandler(Exception)
 def handle_exception(e):
-    logger.error(f"VERIMIND PROTOCOL ERROR: {str(e)}", exc_info=True)
-    return create_response(success=False, error="Neural sync failure. Rebooting request spectrum.", status=500)
+    logger.error(f"VERIMIND SPECTRAL ERROR: {str(e)}", exc_info=True)
+    return create_response(success=False, error=f"Neural sync failure. ({str(e)[:50]})", status=500)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
