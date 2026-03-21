@@ -1,201 +1,181 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Sparkles, Copy, Loader2, CheckCircle, Send, RefreshCcw, Zap, Printer, Cpu, FileText, Globe } from 'lucide-react';
+import {
+    Mail,
+    Loader2,
+    CheckCircle,
+    Printer,
+    Cpu,
+    Activity
+} from 'lucide-react';
 import api from '../services/api';
-import { IntelligenceReport } from '../components/IntelligenceReport';
 import { generatePDF } from '../utils/pdfExport';
-
-const EMAIL_TYPES = ['Professional', 'Cold Outreach', 'Follow-up', 'Apology', 'Job App'];
-const TONES = ['Professional', 'Friendly', 'Persuasive', 'Formal', 'Concise'];
+import { IntelligenceReport } from '../components/IntelligenceReport';
 
 export default function EmailGenerator() {
-    const [context, setContext] = useState('');
-    const [emailType, setEmailType] = useState('Professional');
+    const [recipient, setRecipient] = useState('');
+    const [purpose, setPurpose] = useState('');
     const [tone, setTone] = useState('Professional');
-    const [generatedEmail, setGeneratedEmail] = useState<{ subject: string; body: string } | null>(null);
     const [loading, setLoading] = useState(false);
-    const [humanizing, setHumanizing] = useState(false);
-    const [copied, setCopied] = useState(false);
+    const [generatedEmail, setGeneratedEmail] = useState<string | null>(null);
     const [error, setError] = useState('');
+    const [copied, setCopied] = useState(false);
 
-    // Update global assistant
     useEffect(() => {
         if (generatedEmail) {
             window.dispatchEvent(new CustomEvent('typing_update', { 
-              detail: { wpm: 0, suggestions: ["Check subject line", "Simplify body", "Call to Action check"] } 
+              detail: { 
+                 wpm: 0, 
+                 suggestions: ["Add high-impact subject line", "Personalization nodes", "Clear action trigger"] 
+              } 
             }));
         }
     }, [generatedEmail]);
 
     const handleGenerate = useCallback(async () => {
-        if (!context.trim()) {
-            setError("Please provide context.");
+        if (!purpose.trim()) {
+            setError('Neural purpose required for synthesis.');
             return;
         }
         setLoading(true);
         setError('');
-        setGeneratedEmail(null);
         try {
-            const prompt = `Generate a ${tone} ${emailType} email for: ${context}. JSON: {subject, body}`;
-            const { data } = await api.post('/api/generate', { query: prompt, response_type: 'Email' });
-            const source = data.success ? data.data?.answer || data.data?.text : data.answer;
-            if (source) {
-                try {
-                    const parsed = JSON.parse(source);
-                    setGeneratedEmail({ subject: parsed.subject || 'Subject Line', body: parsed.body || source });
-                } catch {
-                    setGeneratedEmail({ subject: 'Generated Email', body: source });
-                }
+            const { data } = await api.post('/api/ai/email', { recipient, purpose, tone });
+            if (data.success) {
+                setGeneratedEmail(data.email);
+            } else {
+                setError(data.error || 'Synthesis cycle failed.');
             }
-        } catch {
-            setError("Generation failed.");
+        } catch (err: unknown) {
+             const axiosError = err as { response?: { data?: { error?: string } } };
+             setError(axiosError.response?.data?.error || 'System interrupt in Synthesis module.');
         } finally {
             setLoading(false);
         }
-    }, [context, emailType, tone]);
-
-    const handleHumanize = async () => {
-        if (!generatedEmail) return;
-        setHumanizing(true);
-        try {
-            const { data } = await api.post('/api/humanize', { text: generatedEmail.body, tone: tone });
-            if (data.success) setGeneratedEmail(prev => prev ? { ...prev, body: data.data?.humanized_text || data.data } : null);
-        } finally { setHumanizing(false); }
-    };
+    }, [recipient, purpose, tone]);
 
     return (
         <div className="workspace-center-content">
-            {/* TOP AREA: INPUT */}
             <section className="input-top-area no-print">
-                <div className="tool-grid-wrapper">
+                <div className="tool-grid-wrapper mb-10">
                       <button className="modern-tool-btn active">
-                         <Mail size={20} className="text-blue-400" />
-                         <span>Email</span>
+                         <Mail size={20} className="text-cyan-400" />
+                         <span>Email Synthesis</span>
                       </button>
-                      <button className="modern-tool-btn" onClick={() => window.location.href='/generator'}>
-                         <Sparkles size={20} className="text-indigo-400" />
-                         <span>Generate</span>
+                      <button className="modern-tool-btn" onClick={() => window.location.href='/workspace'}>
+                         <Cpu size={20} className="text-indigo-400" />
+                         <span>Studio Main</span>
                       </button>
                 </div>
 
-                <div className="smart-gpt-editor py-10 px-8">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                          <div className="space-y-4">
-                               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Email Context</label>
-                               <textarea 
-                                  value={context} 
-                                  onChange={(e) => setContext(e.target.value)}
-                                  placeholder="What is this email about? (e.g. follow up with client)"
-                                  className="w-full h-40 bg-white/5 border border-white/5 rounded-2xl p-6 text-slate-200 text-sm focus:border-blue-500/20 focus:outline-none transition-all custom-scrollbar"
-                               />
-                          </div>
-                          <div className="space-y-6">
-                               <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Email Type</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {EMAIL_TYPES.map(t => (
-                                            <button key={t} onClick={() => setEmailType(t)} className={`px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${emailType === t ? 'bg-blue-500 text-white shadow-xl' : 'bg-white/5 text-slate-500'}`}>{t}</button>
-                                        ))}
-                                    </div>
-                               </div>
-                               <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Email Tone</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {TONES.map(t => (
-                                            <button key={t} onClick={() => setTone(t)} className={`px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${tone === t ? 'bg-indigo-500 text-white shadow-xl' : 'bg-white/5 text-slate-500'}`}>{t}</button>
-                                        ))}
-                                    </div>
-                               </div>
-                          </div>
-                     </div>
+                <div className="smart-gpt-editor bg-white/[0.01]">
+                    <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6 px-4 opacity-40">
+                         <div className="flex items-center gap-3">
+                             <Mail size={16} className="text-indigo-400" />
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] italic">Optimization Parameters</span>
+                         </div>
+                         <div className="flex items-center gap-6">
+                              {['Professional', 'Friendly', 'Urgent'].map(t => (
+                                  <button key={t} onClick={() => setTone(t)} className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-all border ${tone === t ? 'bg-indigo-500/10 border-indigo-500/30 text-white' : 'border-transparent text-slate-600'}`}>
+                                      {t}
+                                  </button>
+                              ))}
+                         </div>
+                    </div>
 
-                    <div className="flex justify-center border-t border-white/5 pt-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                        <div className="space-y-4">
+                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Neural Recipient</label>
+                             <input
+                                type="text"
+                                value={recipient}
+                                onChange={(e) => setRecipient(e.target.value)}
+                                placeholder="Target entity identifier..."
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-lg font-serif italic text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
+                             />
+                        </div>
+                        <div className="space-y-4">
+                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Communication Purpose</label>
+                             <input
+                                type="text"
+                                value={purpose}
+                                onChange={(e) => setPurpose(e.target.value)}
+                                placeholder="Core intent for synthesis..."
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-lg font-serif italic text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
+                             />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center">
                         <button
                             onClick={handleGenerate}
-                            disabled={loading || !context.trim()}
-                            className="premium-btn-primary flex items-center gap-4 py-4 px-12 bg-blue-600 hover:bg-blue-500 rounded-2xl transition-all shadow-xl shadow-blue-500/20"
+                            disabled={loading || !purpose.trim()}
+                            className="premium-btn-primary flex items-center gap-4 py-6 px-16 rounded-3xl group shadow-2xl transition-all"
                         >
-                            {loading ? (
-                                <><Loader2 className="animate-spin" size={18} /> Mapping Context...</>
-                            ) : (
-                                <><Mail size={18} /> GENERATE PROTOCOLO</>
-                            )}
+                            {loading ? <Loader2 className="animate-spin" size={20} /> : <Activity size={20} className="group-hover:rotate-45" />}
+                            <span className="text-xs font-black uppercase tracking-[0.3em]">{loading ? 'Synthesizing...' : 'Initiate Communication'}</span>
                         </button>
                     </div>
                 </div>
 
-                {error && <div className="mt-4 text-center text-rose-400 text-[10px] font-black uppercase tracking-widest">{error}</div>}
-            </section>
-
-            {/* BOTTOM AREA: OUTPUT */}
-            <section className="output-bottom-area">
-                <AnimatePresence mode="wait">
-                    {!generatedEmail && !loading ? (
-                        <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30">
-                             <Send size={64} className="text-slate-800 mb-6" />
-                             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Awaiting neural input</p>
-                        </motion.div>
-                    ) : loading ? (
-                        <motion.div key="load" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20">
-                             <div className="w-16 h-16 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-6" />
-                             <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest animate-pulse">Linguistic Assembly Active...</span>
-                        </motion.div>
-                    ) : (
-                        <motion.div key="res" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-10 max-w-5xl mx-auto pb-20">
-                             <div className="flex items-center justify-between border-b border-white/5 pb-6">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                   <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Draft Synthesis Complete</h4>
-                                </div>
-                                <div className="flex gap-3">
-                                     <button onClick={handleHumanize} disabled={humanizing} className="px-5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all flex items-center gap-2">
-                                         {humanizing ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
-                                         Humanize
-                                     </button>
-                                     <button onClick={() => { navigator.clipboard.writeText(generatedEmail.body); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-5 py-2.5 bg-white/5 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
-                                         {copied ? <CheckCircle size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                         {copied ? 'Copied' : 'Copy'}
-                                     </button>
-                                     <button onClick={() => generatePDF()} className="px-5 py-2.5 bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-400 transition-colors flex items-center gap-2">
-                                         <Printer size={14} /> Export
-                                     </button>
-                                </div>
-                             </div>
-
-                             <div className="modern-card p-0 bg-[#0D1117] border-white/5 relative group overflow-hidden">
-                                 <div className="p-8 border-b border-white/5 bg-white/[0.02]">
-                                     <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] block mb-2">Subject Header</span>
-                                     <h2 className="text-xl font-black text-white uppercase tracking-tight italic">{generatedEmail.subject}</h2>
-                                 </div>
-                                 <div className="p-10 md:p-14 relative">
-                                    <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
-                                        <Mail size={180} className="text-blue-400" />
-                                    </div>
-                                    <div className="relative z-10">
-                                        <p className="text-slate-200 font-serif text-xl leading-[2] whitespace-pre-wrap selection:bg-blue-500/30">
-                                            {generatedEmail.body}
-                                        </p>
-                                    </div>
-                                 </div>
-                             </div>
-
-                             <div className="modern-card border-blue-500/10 py-8 bg-blue-500/5">
-                                 <div className="flex items-start gap-5 px-4">
-                                     <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20">
-                                         <Zap size={20} className="text-blue-400" />
-                                     </div>
-                                     <div className="flex-1">
-                                         <h5 className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Neural Guard Verified</h5>
-                                         <p className="text-[11px] text-slate-500 font-medium italic leading-relaxed">Document has been verified for professional compliance and semantic fluidity. Recommended for {tone.toLowerCase()} distribution.</p>
-                                     </div>
-                                 </div>
-                             </div>
+                <AnimatePresence>
+                    {error && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 text-center text-rose-500 text-[10px] font-black uppercase tracking-widest">
+                            {error}
                         </motion.div>
                     )}
                 </AnimatePresence>
             </section>
 
-            {generatedEmail && <IntelligenceReport data={{ answer: generatedEmail.body }} type="generate" content={context} />}
+            <section className="output-bottom-area pb-20">
+                 <AnimatePresence mode="wait">
+                    {!generatedEmail ? (
+                         !loading && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30 text-center">
+                                <Mail size={64} className="text-slate-800 mb-8 grayscale" />
+                                <p className="text-[11px] font-black text-slate-700 uppercase tracking-[0.5em]">Communication Cache Empty</p>
+                            </motion.div>
+                         )
+                    ) : (
+                        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12">
+                             <div className="flex items-center justify-between border-b border-white/5 pb-8">
+                                <div className="flex items-center gap-4">
+                                     <CheckCircle size={22} className="text-cyan-400" />
+                                     <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em] italic">Email Manifest manifested</h3>
+                                </div>
+                                <div className="flex gap-4">
+                                     <button onClick={() => { navigator.clipboard.writeText(generatedEmail); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-6 py-2.5 bg-white/5 border border-white/5 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
+                                         {copied ? 'SYNCHRONIZED' : 'Copy to Stream'}
+                                     </button>
+                                     <button onClick={() => generatePDF()} className="px-6 py-2.5 bg-cyan-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cyan-700 transition-all shadow-lg shadow-cyan-600/20"><Printer size={14} className="inline mr-2" /> Capture Script</button>
+                                </div>
+                             </div>
+
+                             <div className="modern-card p-16 bg-white/[0.01] border-white/5">
+                                  <div className="prose prose-invert max-w-none prose-p:text-xl prose-p:font-serif prose-p:italic prose-p:leading-relaxed prose-p:text-slate-300">
+                                      {generatedEmail.split('\n').map((para, i) => (
+                                          <p key={i} className="mb-8">{para}</p>
+                                      ))}
+                                  </div>
+                             </div>
+
+                             <div className="modern-card border-white/5 p-10 bg-cyan-500/5">
+                                 <div className="flex items-start gap-6">
+                                     <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                                         <Activity size={24} className="text-cyan-400" />
+                                     </div>
+                                     <div>
+                                         <h5 className="text-[11px] font-black text-white uppercase tracking-widest mb-3">Neural Trace</h5>
+                                         <p className="text-[11px] text-slate-500 leading-relaxed font-semibold italic">Communication synthesized through GPT-4o Spectrum with tone synchronization active. Target entity alignment confirmed.</p>
+                                     </div>
+                                 </div>
+                             </div>
+                        </motion.div>
+                    )}
+                 </AnimatePresence>
+            </section>
+
+            {generatedEmail && <IntelligenceReport data={{ summary: generatedEmail }} type="general" content={purpose} />}
         </div>
     );
 }

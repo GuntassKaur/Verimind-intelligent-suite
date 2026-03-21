@@ -1,232 +1,202 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Loader2, CheckCircle2, Shield, Layout, Cpu, Activity, Zap, Info, Printer } from 'lucide-react';
+import { 
+    Activity, ShieldAlert, 
+    FileText, Zap, 
+    Loader2, 
+    Info, Cpu,
+    CheckCircle2
+} from 'lucide-react';
 import api from '../services/api';
 import { IntelligenceReport } from '../components/IntelligenceReport';
 import { generatePDF } from '../utils/pdfExport';
 
-interface Claim {
+interface AnalysisClaims {
+    verdict: string;
+    confidence: number;
     claim: string;
-    veracity: string;
-    explanation: string;
-    risk: string;
-    verdict?: string;
-    confidence?: number;
-    reasoning?: string;
+    reasoning: string;
 }
 
-interface AnalyzerResult {
-    plagiarism_score: number;
-    analysis_text: string;
-    suggestions: string[];
-    claims: Claim[];
-    simple_explanation?: string;
-    credibility_score?: number;
-    ai_probability?: number;
-    risk_level?: string;
+interface AnalysisData {
+    credibility_score: number;
+    summary: string;
+    claims: AnalysisClaims[];
+}
+
+interface ResultState {
+    type: string;
+    data: AnalysisData;
 }
 
 export default function Analyzer() {
-    const [text, setText] = useState('');
+    const [content, setContent] = useState('');
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<AnalyzerResult | null>(null);
+    const [result, setResult] = useState<ResultState | null>(null);
     const [error, setError] = useState('');
 
-    // Global UI state sync
     useEffect(() => {
         if (result) {
             window.dispatchEvent(new CustomEvent('typing_update', { 
-                detail: { 
-                  wpm: 0, 
-                  suggestions: result.suggestions, 
-                  tips: [`Claims: ${result.claims.length}`, `Plagiarism: ${result.plagiarism_score}%`] 
-                } 
+              detail: { 
+                 wpm: 0, 
+                 suggestions: ["Refine audit findings", "Expand verification nodes", "Check cross-references"] 
+              } 
             }));
         }
     }, [result]);
 
-    const handleAnalyze = useCallback(async () => {
-        if (!text.trim()) {
-            setError("Analysis requires content input.");
+    const runAnalysis = useCallback(async () => {
+        if (!content.trim()) {
+            setError('Studio input required for auditing.');
             return;
         }
-
         setLoading(true);
         setError('');
-        setResult(null);
 
         try {
-            const { data } = await api.post('/api/analyze', { text });
+            const { data } = await api.post('/api/analyze', { text: content });
             if (data.success) {
-                setResult(data.data);
+                setResult({ type: 'analyze', data: data.data });
             } else {
-                setResult(data as unknown as AnalyzerResult);
+                setError(data.error || 'Diagnostic cycle failed.');
             }
-        } catch (err: any) {
-            setError(err.response?.data?.error || "Neural link failure.");
+        } catch (err: unknown) {
+             const axiosError = err as { response?: { data?: { error?: string } } };
+             setError(axiosError.response?.data?.error || 'System interrupt in auditing module.');
         } finally {
             setLoading(false);
         }
-    }, [text]);
-
-    const plagiarismDisplay = useMemo(() => {
-        if (!result) return null;
-        return (
-            <div className="modern-card p-10 flex flex-col items-center justify-center bg-rose-500/5 border-rose-500/10">
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Plagiarism Entropy</span>
-                <div className="text-5xl font-black text-rose-500">{result.plagiarism_score}%</div>
-            </div>
-        );
-    }, [result]);
+    }, [content]);
 
     return (
         <div className="workspace-center-content">
-            {/* TOP AREA: INPUT */}
             <section className="input-top-area no-print">
-                <div className="tool-grid-wrapper">
+                <div className="tool-grid-wrapper mb-10">
                       <button className="modern-tool-btn active">
-                         <Shield size={20} className="text-indigo-400" />
-                         <span>Analyze</span>
+                         <ShieldAlert size={20} className="text-blue-400" />
+                         <span>Audit Module</span>
                       </button>
                       <button className="modern-tool-btn" onClick={() => window.location.href='/workspace'}>
-                         <Layout size={20} className="text-blue-400" />
-                         <span>Studio</span>
+                         <Cpu size={20} className="text-indigo-400" />
+                         <span>Studio Main</span>
                       </button>
                 </div>
 
-                <div className="smart-gpt-editor">
-                    <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-4 px-4 opacity-50">
-                        <div className="flex items-center gap-2">
-                             <Activity size={14} className="text-indigo-400" />
-                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Atomic Analysis v5.0</span>
-                        </div>
+                <div className="smart-gpt-editor bg-white/[0.01]">
+                    <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-6 px-4 opacity-40">
+                         <div className="flex items-center gap-3">
+                             <FileText size={16} className="text-indigo-400" />
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] italic">Neural Audit Input</span>
+                         </div>
+                         <div className="flex items-center gap-3">
+                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Synchronized</span>
+                         </div>
                     </div>
-                    
+
                     <textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        placeholder="Paste content to initiate deep verification scan..."
-                        className="custom-scrollbar"
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="Paste text for claim verification and factual auditing..."
+                        className="custom-scrollbar h-[250px]"
                     />
 
-                    <div className="flex justify-center mt-6">
+                    <div className="flex justify-center mt-8">
                         <button
-                            onClick={handleAnalyze}
-                            disabled={loading || !text.trim()}
-                            className="premium-btn-primary flex items-center gap-4 py-4 px-12 rounded-2xl group transition-all"
+                            onClick={runAnalysis}
+                            disabled={loading || !content.trim()}
+                            className="premium-btn-primary flex items-center gap-4 py-5 px-12 rounded-3xl group shadow-2xl transition-all"
                         >
                             {loading ? (
-                                <><Loader2 className="animate-spin" size={18} /> Deep Neural Processing...</>
+                                <><Loader2 className="animate-spin" size={20} /> SYNCING LOGIC...</>
                             ) : (
-                                <><Search size={18} className="text-white group-hover:scale-125 transition-transform" /> START ANALYSIS</>
+                                <><Zap size={20} className="group-hover:rotate-45" /> INITIATE AUDIT</>
                             )}
                         </button>
                     </div>
                 </div>
 
-                {error && <div className="mt-4 text-center text-rose-400 text-[10px] font-black uppercase tracking-widest">{error}</div>}
-            </section>
-
-            {/* BOTTOM AREA: OUTPUT */}
-            <section className="output-bottom-area">
-                <AnimatePresence mode="wait">
-                    {!result && !loading ? (
-                        <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30">
-                             <Search size={64} className="text-slate-800 mb-6" />
-                             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Awaiting source material</p>
-                        </motion.div>
-                    ) : loading ? (
-                        <div className="flex flex-col gap-8 opacity-50">
-                             <div className="shimmer h-40 w-full rounded-3xl" />
-                             <div className="shimmer h-64 w-full rounded-3xl" />
-                        </div>
-                    ) : (
-                        <motion.div key="res" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12 max-w-5xl mx-auto pb-20">
-                             <div className="flex items-center justify-between border-b border-white/5 pb-6">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                                   <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Verification Report Active</h4>
-                                </div>
-                                <button onClick={() => generatePDF()} className="px-5 py-2.5 bg-indigo-600 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2">
-                                    <Printer size={14} /> Export Report
-                                </button>
-                             </div>
-
-                             {/* MAIN SCORE AREA */}
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  {plagiarismDisplay}
-                                  <div className="modern-card p-10 flex flex-col items-start bg-indigo-500/5 border-indigo-500/10">
-                                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Integrity Summary</span>
-                                       <p className="text-sm font-medium italic text-slate-300 leading-relaxed">"{result.analysis_text}"</p>
-                                  </div>
-                             </div>
-
-                             {/* FACTUAL BREAKDOWN */}
-                             <div className="space-y-6 pt-12">
-                                  <div className="flex items-center gap-4 px-2">
-                                      <h4 className="text-[11px] font-black text-white uppercase tracking-[0.5em] border-l-4 border-indigo-500 pl-4">Atomic Verification</h4>
-                                  </div>
-                                  <div className="grid gap-4">
-                                      {result.claims.map((claim, i) => (
-                                          <div key={i} className="modern-card bg-white/[0.01] hover:bg-white/[0.03] p-8 border-white/5 group relative overflow-hidden">
-                                              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
-                                                  <Cpu size={120} className="text-indigo-400" />
-                                              </div>
-                                              <div className="flex flex-col md:flex-row items-start justify-between gap-6 relative z-10">
-                                                  <div className="max-w-xl">
-                                                       <p className="text-base font-black text-white tracking-tight mb-4 italic leading-snug">"{claim.claim}"</p>
-                                                       <div className="flex items-center gap-6">
-                                                           <div className="flex items-center gap-2">
-                                                                <Activity size={12} className="text-indigo-400" />
-                                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Confidence: {claim.veracity}</span>
-                                                           </div>
-                                                           <div className="flex items-center gap-2">
-                                                                <Zap size={12} className="text-amber-500" />
-                                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Risk: {claim.risk}</span>
-                                                           </div>
-                                                       </div>
-                                                  </div>
-                                                  <div className={`px-4 py-2 rounded-full border text-[10px] font-black uppercase tracking-widest ${claim.veracity === 'True' || claim.veracity === 'Verified' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
-                                                      {claim.veracity}
-                                                  </div>
-                                              </div>
-                                              <div className="mt-8 pt-8 border-t border-white/5 text-[11px] font-medium text-slate-400 leading-relaxed italic flex gap-4">
-                                                  <Info size={14} className="shrink-0 text-indigo-400" />
-                                                  <p>{claim.explanation}</p>
-                                              </div>
-                                          </div>
-                                      ))}
-                                  </div>
-                             </div>
-
-                             {/* SUGGESTIONS CLUSTER */}
-                             <div className="pt-12">
-                                  <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.5em] mb-8 pl-2">Optimization Streams</h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                       {result.suggestions.map((s, i) => (
-                                           <div key={i} className="flex gap-4 p-6 bg-white/[0.02] border border-white/5 rounded-2xl hover:border-indigo-500/20 transition-all group">
-                                                <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
-                                                    <CheckCircle2 size={16} className="text-indigo-500" />
-                                                </div>
-                                                <span className="text-xs font-medium text-slate-400 leading-relaxed group-hover:text-slate-100 transition-colors">{s}</span>
-                                           </div>
-                                       ))}
-                                  </div>
-                             </div>
+                <AnimatePresence>
+                    {error && (
+                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 text-center text-rose-400 text-[10px] font-black uppercase tracking-widest">
+                            {error}
                         </motion.div>
                     )}
                 </AnimatePresence>
             </section>
 
-            {result && <IntelligenceReport data={{
-                ...result,
-                claims: result.claims.map(c => ({
-                    claim: c.claim,
-                    verdict: c.veracity,
-                    reasoning: c.explanation,
-                    confidence: c.veracity === 'True' ? 95 : 45
-                }))
-            }} type="analyze" content={text} />}
+            <section className="output-bottom-area" id="audit-results">
+                 <AnimatePresence mode="wait">
+                    {!result ? (
+                         !loading && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30 text-center">
+                                <ShieldAlert size={64} className="text-slate-800 mb-8 grayscale" />
+                                <p className="text-[11px] font-black text-slate-700 uppercase tracking-[0.5em]">No Data Points Detected</p>
+                            </motion.div>
+                         )
+                    ) : (
+                        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12">
+                             <div className="flex items-center justify-between border-b border-white/5 pb-8">
+                                <div className="flex items-center gap-4">
+                                     <Activity size={22} className="text-indigo-400" />
+                                     <h3 className="text-[14px] font-black text-white uppercase tracking-[0.2em] italic">Intelligence Assessment Manifested</h3>
+                                </div>
+                                <button onClick={() => generatePDF()} className="px-8 py-3 bg-indigo-600 border border-indigo-500/20 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/30">Print Manifest</button>
+                             </div>
+
+                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                  <div className="modern-card p-12 flex flex-col items-center justify-center bg-indigo-500/5 border-indigo-500/10 text-center relative overflow-hidden group">
+                                       <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform">
+                                            <ShieldAlert size={100} className="text-indigo-400" />
+                                       </div>
+                                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 block">Credibility baseline</span>
+                                       <div className="text-7xl font-black text-white italic tracking-tighter mb-4">{result.data.credibility_score}%</div>
+                                       <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.3em]">Protocol Authenticated</p>
+                                  </div>
+                                  <div className="modern-card md:col-span-3 p-12 bg-white/[0.01]">
+                                       <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-10 border-l-4 border-indigo-500 pl-6">Executive Abstract</h4>
+                                       <p className="text-2xl text-slate-200 font-serif italic leading-relaxed selection:bg-indigo-500/20">"{result.data.summary}"</p>
+                                  </div>
+                             </div>
+
+                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {result.data.claims.map((claim: any, idx: number) => (
+                                      <div key={idx} className="modern-card p-8 group border-white/5 hover:bg-white/[0.02] transition-colors">
+                                          <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+                                               <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${claim.verdict === 'True' || claim.verdict === 'Verified' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+                                                  {claim.verdict}
+                                               </span>
+                                               <div className="flex items-center gap-3">
+                                                  <CheckCircle2 size={14} className="text-indigo-400" />
+                                                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{claim.confidence}% Precision</span>
+                                               </div>
+                                          </div>
+                                          <h5 className="text-xl text-white font-serif italic mb-6 leading-snug tracking-tight">"{claim.claim}"</h5>
+                                          <p className="text-[11px] text-slate-400 font-medium italic leading-relaxed opacity-70 group-hover:opacity-100 transition-opacity">
+                                             {claim.reasoning}
+                                          </p>
+                                      </div>
+                                  ))}
+                             </div>
+
+                             <div className="modern-card border-white/5 p-10 bg-indigo-500/5">
+                                 <div className="flex items-start gap-6">
+                                     <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                                         <Info size={24} className="text-indigo-400" />
+                                     </div>
+                                     <div>
+                                         <h5 className="text-[11px] font-black text-white uppercase tracking-widest mb-3">Protocol Metadata</h5>
+                                         <p className="text-[11px] text-slate-500 leading-relaxed font-semibold italic">This manifest has been synthesized through the Truth Engine and represents a formal audit. Values above 90% indicate high-fidelity established logic.</p>
+                                     </div>
+                                 </div>
+                             </div>
+                        </motion.div>
+                    )}
+                 </AnimatePresence>
+            </section>
+
+            {result && <IntelligenceReport data={result.data} type="analyze" content={content} />}
         </div>
     );
 }

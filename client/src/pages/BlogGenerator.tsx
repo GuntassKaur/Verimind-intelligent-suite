@@ -2,203 +2,181 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     MessageSquare,
-    Sparkles,
-    Copy,
     Loader2,
     CheckCircle,
-    Layout,
     Target,
-    TrendingUp,
     Printer,
-    FileText,
     Cpu,
-    Globe
+    Activity
 } from 'lucide-react';
 import api from '../services/api';
 import { IntelligenceReport } from '../components/IntelligenceReport';
 import { generatePDF } from '../utils/pdfExport';
 
-const LENGTHS = ['Short', 'Medium', 'Long'];
-
 export default function BlogGenerator() {
     const [topic, setTopic] = useState('');
     const [keywords, setKeywords] = useState('');
-    const [length, setLength] = useState('Medium');
-    const [generatedBlog, setGeneratedBlog] = useState<{ title: string; content: string } | null>(null);
+    const [tone, setTone] = useState('Professional');
     const [loading, setLoading] = useState(false);
-    const [copied, setCopied] = useState(false);
+    const [generatedBlog, setGeneratedBlog] = useState<string | null>(null);
     const [error, setError] = useState('');
+    const [copied, setCopied] = useState(false);
 
-    // Update global assistant
     useEffect(() => {
         if (generatedBlog) {
             window.dispatchEvent(new CustomEvent('typing_update', { 
-              detail: { wpm: 0, suggestions: ["Check SEO density", "Optimize H1", "Add subheadings"] } 
+              detail: { 
+                 wpm: 0, 
+                 suggestions: ["Add high-intent CTA", "Optimize H2 headings", "Check keyword density"] 
+              } 
             }));
         }
     }, [generatedBlog]);
 
     const handleGenerate = useCallback(async () => {
         if (!topic.trim()) {
-            setError("Please provide a topic.");
+            setError('Studio topic required for synthesis.');
             return;
         }
-
         setLoading(true);
         setError('');
-        setGeneratedBlog(null);
-
         try {
-            const prompt = `Write a high-quality blog about "${topic}". Keywords: ${keywords}. Length: ${length}. JSON: {title, content}`;
-            const { data } = await api.post('/api/generate', { query: prompt, response_type: 'Blog' });
-
-            const source = data.success ? data.data?.answer || data.data?.text : data.answer;
-            if (source) {
-                try {
-                    const parsed = JSON.parse(source);
-                    setGeneratedBlog({ title: parsed.title || 'Untitled', content: parsed.content || source });
-                } catch {
-                    setGeneratedBlog({ title: 'Generated Article', content: source });
-                }
+            const { data } = await api.post('/api/ai/blog', { topic, keywords, tone });
+            if (data.success) {
+                setGeneratedBlog(data.blog);
             } else {
-                setError(data.error || "Generation failed.");
+                setError(data.error || 'Synthesis cycle failed.');
             }
-        } catch {
-            setError("Failed to generate article.");
+        } catch (err: unknown) {
+             const axiosError = err as { response?: { data?: { error?: string } } };
+             setError(axiosError.response?.data?.error || 'System interrupt in Synthesis module.');
         } finally {
             setLoading(false);
         }
-    }, [topic, keywords, length]);
+    }, [topic, keywords, tone]);
 
     return (
         <div className="workspace-center-content">
-            {/* TOP AREA: INPUT */}
             <section className="input-top-area no-print">
-                <div className="tool-grid-wrapper">
+                <div className="tool-grid-wrapper mb-10">
                       <button className="modern-tool-btn active">
                          <MessageSquare size={20} className="text-emerald-400" />
-                         <span>Blog</span>
-                      </button>
-                      <button className="modern-tool-btn" onClick={() => window.location.href='/generator'}>
-                         <Sparkles size={20} className="text-indigo-400" />
-                         <span>Generate</span>
+                         <span>Blog Synthesis</span>
                       </button>
                       <button className="modern-tool-btn" onClick={() => window.location.href='/workspace'}>
-                         <Globe size={20} className="text-blue-400" />
-                         <span>Audit</span>
+                         <Cpu size={20} className="text-indigo-400" />
+                         <span>Studio Main</span>
                       </button>
                 </div>
 
-                <div className="smart-gpt-editor py-10 px-8">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                          <div className="space-y-4">
-                               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Semantic Topic</label>
-                               <textarea 
-                                  value={topic} 
-                                  onChange={(e) => setTopic(e.target.value)}
-                                  placeholder="What should the article focus on?"
-                                  className="w-full h-32 bg-white/5 border border-white/5 rounded-2xl p-6 text-slate-200 text-sm focus:border-emerald-500/20 focus:outline-none transition-all custom-scrollbar"
-                               />
-                          </div>
-                          <div className="space-y-6">
-                               <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">SEO Keywords</label>
-                                    <input 
-                                       value={keywords} 
-                                       onChange={(e) => setKeywords(e.target.value)}
-                                       className="w-full bg-white/5 border border-white/5 rounded-xl px-6 py-4 text-xs text-white focus:outline-none focus:border-emerald-500/20"
-                                       placeholder="comma, separated, keywords..."
-                                    />
-                               </div>
-                               <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Article Length</label>
-                                    <div className="flex gap-2">
-                                        {LENGTHS.map(l => (
-                                            <button key={l} onClick={() => setLength(l)} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${length === l ? 'bg-emerald-500 text-white shadow-xl' : 'bg-white/5 text-slate-500'}`}>{l}</button>
-                                        ))}
-                                    </div>
-                               </div>
-                          </div>
-                     </div>
+                <div className="smart-gpt-editor bg-white/[0.01]">
+                    <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6 px-4 opacity-40">
+                         <div className="flex items-center gap-3">
+                             <Target size={16} className="text-indigo-400" />
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] italic">Optimization Parameters</span>
+                         </div>
+                         <div className="flex items-center gap-6">
+                              {['Professional', 'Creative', 'Technical'].map(t => (
+                                  <button key={t} onClick={() => setTone(t)} className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-all border ${tone === t ? 'bg-indigo-500/10 border-indigo-500/30 text-white' : 'border-transparent text-slate-600'}`}>
+                                      {t}
+                                  </button>
+                              ))}
+                         </div>
+                    </div>
 
-                    <div className="flex justify-center border-t border-white/5 pt-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                        <div className="space-y-4">
+                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Neural Topic</label>
+                             <input
+                                type="text"
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                                placeholder="Core concept for synthesis..."
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-lg font-serif italic text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
+                             />
+                        </div>
+                        <div className="space-y-4">
+                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Keyword Nodes (Comma Separated)</label>
+                             <input
+                                type="text"
+                                value={keywords}
+                                onChange={(e) => setKeywords(e.target.value)}
+                                placeholder="Sync secondary nodes..."
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-lg font-serif italic text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
+                             />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center">
                         <button
                             onClick={handleGenerate}
                             disabled={loading || !topic.trim()}
-                            className="premium-btn-primary flex items-center gap-4 py-4 px-12 bg-emerald-600 hover:bg-emerald-500 rounded-2xl transition-all shadow-xl shadow-emerald-500/20"
+                            className="premium-btn-primary flex items-center gap-4 py-6 px-16 rounded-3xl group shadow-2xl transition-all"
                         >
-                            {loading ? (
-                                <><Loader2 className="animate-spin" size={18} /> Architecting Article...</>
-                            ) : (
-                                <><MessageSquare size={18} /> INITIATE SEW DRAFT</>
-                            )}
+                            {loading ? <Loader2 className="animate-spin" size={20} /> : <Activity size={20} className="group-hover:rotate-45" />}
+                            <span className="text-xs font-black uppercase tracking-[0.3em]">{loading ? 'Synthesizing...' : 'Initiate Synthesis'}</span>
                         </button>
                     </div>
                 </div>
 
-                {error && <div className="mt-4 text-center text-rose-400 text-[10px] font-black uppercase tracking-widest">{error}</div>}
-            </section>
-
-            {/* BOTTOM AREA: OUTPUT */}
-            <section className="output-bottom-area">
-                <AnimatePresence mode="wait">
-                    {!generatedBlog && !loading ? (
-                        <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30">
-                             <FileText size={64} className="text-slate-800 mb-6" />
-                             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Awaiting topic design</p>
-                        </motion.div>
-                    ) : loading ? (
-                        <motion.div key="load" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20">
-                             <div className="w-16 h-16 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-6" />
-                             <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest animate-pulse">Scanning Semantic Indices...</span>
-                        </motion.div>
-                    ) : (
-                        <motion.div key="res" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-10 max-w-5xl mx-auto pb-20">
-                             <div className="flex items-center justify-between border-b border-white/5 pb-6">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                   <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Structural Output Ready</h4>
-                                </div>
-                                <div className="flex gap-4">
-                                     <button onClick={() => { navigator.clipboard.writeText(generatedBlog.content); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-5 py-2.5 bg-white/5 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
-                                         {copied ? <CheckCircle size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                         {copied ? 'Copied' : 'Copy'}
-                                     </button>
-                                     <button onClick={() => generatePDF()} className="px-5 py-2.5 bg-emerald-500 text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-colors flex items-center gap-2">
-                                         <Printer size={14} /> Export
-                                     </button>
-                                </div>
-                             </div>
-
-                             <div className="modern-card p-10 md:p-14 bg-[#0D1117] border-white/5 relative group overflow-hidden">
-                                 <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
-                                    <MessageSquare size={180} className="text-emerald-400" />
-                                 </div>
-                                 <div className="relative z-10 space-y-8">
-                                     <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic">{generatedBlog.title}</h2>
-                                     <p className="text-slate-300 font-serif text-xl leading-[2] whitespace-pre-wrap selection:bg-emerald-500/30">
-                                         {generatedBlog.content}
-                                     </p>
-                                 </div>
-                             </div>
-
-                             <div className="modern-card border-emerald-500/10 py-8 bg-emerald-500/5">
-                                 <div className="flex items-start gap-5 px-4">
-                                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                                         <Target size={20} className="text-emerald-400" />
-                                     </div>
-                                     <div className="flex-1">
-                                         <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">SEO Node Verification</h5>
-                                         <p className="text-[11px] text-slate-500 font-medium italic leading-relaxed">Content has been analyzed against current search patterns. Semantic density is within the optimal range for the specified keywords.</p>
-                                     </div>
-                                 </div>
-                             </div>
+                <AnimatePresence>
+                    {error && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 text-center text-rose-500 text-[10px] font-black uppercase tracking-widest">
+                            {error}
                         </motion.div>
                     )}
                 </AnimatePresence>
             </section>
 
-            {generatedBlog && <IntelligenceReport data={{ summary: generatedBlog.content }} type="generate" content={topic} />}
+            <section className="output-bottom-area pb-20">
+                 <AnimatePresence mode="wait">
+                    {!generatedBlog ? (
+                         !loading && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30 text-center">
+                                <MessageSquare size={64} className="text-slate-800 mb-8 grayscale" />
+                                <p className="text-[11px] font-black text-slate-700 uppercase tracking-[0.5em]">Studio Cache Empty</p>
+                            </motion.div>
+                         )
+                    ) : (
+                        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12">
+                             <div className="flex items-center justify-between border-b border-white/5 pb-8">
+                                <div className="flex items-center gap-4">
+                                     <CheckCircle size={22} className="text-emerald-400" />
+                                     <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em] italic">Synthesis manifested</h3>
+                                </div>
+                                <div className="flex gap-4">
+                                     <button onClick={() => { navigator.clipboard.writeText(generatedBlog); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-6 py-2.5 bg-white/5 border border-white/5 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
+                                         {copied ? 'SYNCHRONIZED' : 'Copy to Stream'}
+                                     </button>
+                                     <button onClick={() => generatePDF()} className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"><Printer size={14} className="inline mr-2" /> Capture Script</button>
+                                </div>
+                             </div>
+
+                             <div className="modern-card p-16 bg-white/[0.01] border-white/5">
+                                  <div className="prose prose-invert max-w-none prose-p:text-xl prose-p:font-serif prose-p:italic prose-p:leading-relaxed prose-p:text-slate-300">
+                                      {generatedBlog.split('\n').map((para, i) => (
+                                          <p key={i} className="mb-8">{para}</p>
+                                      ))}
+                                  </div>
+                             </div>
+
+                             <div className="modern-card border-white/5 p-10 bg-emerald-500/5">
+                                 <div className="flex items-start gap-6">
+                                     <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                                         <Activity size={24} className="text-emerald-400" />
+                                     </div>
+                                     <div>
+                                         <h5 className="text-[11px] font-black text-white uppercase tracking-widest mb-3">Neural Trace</h5>
+                                         <p className="text-[11px] text-slate-500 leading-relaxed font-semibold italic">Output synthesized through GPT-4o Spectrum with integrated readability anchors. Frequency synchronization achieved.</p>
+                                     </div>
+                                 </div>
+                             </div>
+                        </motion.div>
+                    )}
+                 </AnimatePresence>
+            </section>
+
+            {generatedBlog && <IntelligenceReport data={{ summary: generatedBlog }} type="general" content={topic} />}
         </div>
     );
 }
