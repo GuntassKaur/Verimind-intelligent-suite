@@ -6,7 +6,8 @@ import {
     RotateCcw, Copy,
     Activity,
     ShieldAlert, Network,
-    Upload, Cpu
+    Upload, Cpu,
+    Globe, Zap, Shield
 } from 'lucide-react';
 import { SmartProcessingToolbar } from '../components/SmartProcessingToolbar';
 import { VoiceInput } from '../components/VoiceInput';
@@ -35,7 +36,7 @@ interface VisualizeData {
 
 interface ResultState {
     type: string;
-    data: PlagiarismData | TruthData | VisualizeData;
+    data: PlagiarismData | TruthData | VisualizeData | any;
 }
 
 export default function Workspace() {
@@ -67,13 +68,13 @@ export default function Workspace() {
 
         try {
             let endpoint = '';
-            let payload: { text?: string; query?: string; response_type?: string; type?: string } = {};
+            let payload: { text?: string; query?: string; prompt?: string; response_type?: string; type?: string } = {};
 
             switch (type) {
-                case 'generate': endpoint = '/api/generate'; payload = { query: content, response_type: 'Full Article' }; break;
-                case 'analyze': endpoint = '/api/analyze'; payload = { text: content }; break;
-                case 'plagiarism': endpoint = '/api/plagiarism'; payload = { text: content }; break;
-                case 'humanize': endpoint = '/api/humanize'; payload = { text: content }; break;
+                case 'generate': endpoint = '/api/ai/generate'; payload = { prompt: content || 'Generate a high-fidelity intelligence abstract about neural networks.' }; break;
+                case 'analyze': endpoint = '/api/ai/analyze'; payload = { text: content }; break;
+                case 'plagiarism': endpoint = '/api/ai/plagiarism'; payload = { text: content }; break;
+                case 'humanize': endpoint = '/api/ai/humanize'; payload = { text: content }; break;
                 case 'visualize': endpoint = '/api/ai/visualize'; payload = { text: content, type: 'flowchart' }; break;
             }
 
@@ -88,7 +89,7 @@ export default function Workspace() {
             }
         } catch (err: unknown) {
             const axiosError = err as { response?: { data?: { error?: string } } };
-            setError(axiosError.response?.data?.error || `System failure in ${type} module.`);
+            setError(axiosError.response?.data?.error || `System failure in ${type} module. Verify backend operational status.`);
         } finally {
             setLoading(null);
         }
@@ -158,10 +159,14 @@ export default function Workspace() {
             <section className="output-bottom-area" id="ws-results">
                  <AnimatePresence mode="wait">
                     {!result && !loading ? (
-                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 text-center opacity-40">
-                            <Logo variant="icon" className="w-16 h-16 text-slate-800 mb-8 grayscale" />
-                            <p className="text-[10px] font-black text-slate-700 uppercase tracking-[0.4em]">Neural Studio Inactive</p>
-                        </motion.div>
+                         <div className="space-y-20 pt-10">
+                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-2 text-center opacity-40">
+                                <Logo variant="icon" className="w-16 h-16 text-slate-800 mb-8 grayscale" />
+                                <p className="text-[10px] font-black text-slate-700 uppercase tracking-[0.4em]">Neural Studio Inactive</p>
+                            </motion.div>
+                            
+                            <WorkspaceGraphics />
+                         </div>
                     ) : loading ? (
                         <motion.div key="load" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20">
                              <div className="w-20 h-20 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-10" />
@@ -172,7 +177,7 @@ export default function Workspace() {
                              <div className="flex items-center justify-between px-2 opacity-80 border-b border-white/5 pb-8">
                                 <div className="flex items-center gap-4">
                                      <Activity size={20} className="text-indigo-400" />
-                                     <h3 className="text-[11px] font-black text-white uppercase tracking-widest italic">{result?.type} Stream Manifested</h3>
+                                     <h3 className="text-[11px] font-black text-white uppercase tracking-widest italic">{result?.type?.toUpperCase()} Stream Manifested</h3>
                                 </div>
                                 <button onClick={() => generatePDF()} className="px-6 py-2.5 bg-indigo-600 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20">Print Manifest</button>
                              </div>
@@ -186,6 +191,58 @@ export default function Workspace() {
             </section>
 
             {result && <IntelligenceReport data={result.data} type={result.type as 'plagiarism' | 'analyze' | 'generate' | 'humanize' | 'visualize' | 'general'} content={content} />}
+        </div>
+    );
+}
+
+function WorkspaceGraphics() {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 opacity-70">
+            {[
+                { 
+                    src: '/assets/graphics/neural_intelligence_visual.png', 
+                    title: 'Neural Fabric', 
+                    desc: 'Deep-spectrum intelligence stream visualization.',
+                    icon: Globe,
+                    color: 'text-indigo-400'
+                },
+                { 
+                    src: '/assets/graphics/secure_ai_audit.png', 
+                    title: 'Trust Protocol', 
+                    desc: 'Integrity nodes and cryptographic verification locks.',
+                    icon: Shield,
+                    color: 'text-rose-400'
+                },
+                { 
+                    src: '/assets/graphics/data_stream_abstract.png', 
+                    title: 'Binary Cascade', 
+                    desc: 'Abstract motion of high-intent information nodes.',
+                    icon: Zap,
+                    color: 'text-emerald-400'
+                }
+            ].map((img, i) => (
+                <motion.div 
+                   key={i} 
+                   whileHover={{ scale: 1.02, y: -5 }} 
+                   className="modern-card p-0 overflow-hidden bg-black/40 border-white/5 group border hover:border-white/10 transition-all"
+                >
+                    <div className="h-48 overflow-hidden relative">
+                        <img 
+                            src={img.src} 
+                            alt={img.title} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                    </div>
+                    <div className="p-8">
+                        <div className="flex items-center gap-4 mb-4">
+                            <img.icon size={18} className={img.color} />
+                            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-sans italic">{img.title}</h4>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-black tracking-widest leading-relaxed uppercase">{img.desc}</p>
+                    </div>
+                </motion.div>
+            ))}
         </div>
     );
 }
