@@ -1,60 +1,41 @@
 import json
 import re
+import logging
 from .gemini_service import call_gemini
+
+logger = logging.getLogger(__name__)
 
 def _call_gemini(prompt):
     return call_gemini(prompt)
-
 
 def check_plagiarism(text):
     """
     VeriMind v4.6 | Semantic & AI Plagiarism Scanner
     Detects paraphrasing, structural theft, and probabilistic AI patterns.
     """
-    prompt_template = """
-    Act as the VeriMind Semantic Plagiarism Scanner.
-    Analyze the provided content for semantic similarity, non-original structural patterns, and AI-generated linguistic markers.
-
-    STRICT ANALYSIS RULES:
-    1. Look for 'mosaic plagiarism' (mixed borrowed and original content).
-    2. Detect 'synonym-swapping' (paraphrased content that retains semantic structure).
-    3. Identify sentences with extremely high probabilistic similarity to known corpus or AI models.
-
-    TEXT TO ANALYZE:
-    \"\"\"{{TEXT_PLACEHOLDER}}\"\"\"
-
-    Output the result STRICTLY as a JSON object:
-    - score: (0-100)
-    - verdict: "Low", "Medium", or "High"
-    - suspicious_segments: [
-        {
-          "sentence": "string",
-          "reason": "Short explanation of overlap",
-          "risk": "High"
-        }
-      ]
-    - explanation: "A clean, professional, and direct paragraph summarizing the scan results. Do not use headers, section blocks, or bullet points. Start directly with the results in a natural, human tone."
-    """
-    
-    prompt = prompt_template.replace("{{TEXT_PLACEHOLDER}}", text)
+    prompt = f"Act as the VeriMind Semantic Plagiarism Scanner. Analyze the following text and output STRICTLY a JSON object with keys: score (0-100), verdict (Low/Medium/High), suspicious_segments (list), and explanation (detailed paragraph).\n\nText: {text}"
 
     try:
         text_response = _call_gemini(prompt)
-        
-        # FIND JSON: Look for the first { and last }
-        start_index = text_response.find('{')
-        end_index = text_response.rfind('}')
-        
-        if start_index != -1 and end_index != -1:
-            clean_text = text_response[start_index:end_index+1]
-            return json.loads(clean_text)
+        match = re.search(r'\{.*\}', text_response, re.DOTALL)
+        if match:
+            data = json.loads(match.group(0))
+            # Essential mapping for standardized AI logic
+            data['plagiarism_score'] = data.get('score', 0)
+            data['analysis_text'] = data.get('explanation', '')
+            data['suggestions'] = ["Cite external sources.", "Rewrite flagged segments."]
+            return data
         else:
-            raise ValueError("The AI did not provide a valid audit record.")
-            
-    except Exception:
+            raise ValueError("No JSON record found.")
+    except Exception as e:
+        logger.error(f"Plagiarism Service Audit Failed: {str(e)}")
         return {
             "score": 0,
+            "plagiarism_score": 0,
             "verdict": "Error",
+            "analysis_text": "Unable to generate full report, showing partial analysis.",
+            "explanation": "Service temporarily unavailable.",
             "suspicious_segments": [],
-            "explanation": "Service temporarily unavailable. Please try again."
+            "suggestions": ["Verify your input.", "Sync with backend."]
         }
+

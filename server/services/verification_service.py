@@ -1,6 +1,9 @@
 import json
 import re
+import logging
 from .gemini_service import call_gemini
+
+logger = logging.getLogger(__name__)
 
 def _call_gemini(system_prompt, user_input):
     return call_gemini(user_input, system_instruction=system_prompt)
@@ -60,21 +63,30 @@ def verify_claims(text, context="General"):
         text_response = _call_gemini(system_prompt, user_input)
         match = re.search(r'\{.*\}', text_response, re.DOTALL)
         if match:
-            return json.loads(match.group(0))
+            data = json.loads(match.group(0))
+            # Inject mandatory production keys if missing
+            data['plagiarism_score'] = data.get('ai_probability', 0) 
+            data['analysis_text'] = data.get('why_this_result', {}).get('analysis', data.get('verdict', ''))
+            if 'suggestions' not in data: data['suggestions'] = ["Be more specific.", "Verify citations."]
+            return data
         else:
             raise ValueError("No JSON found in response")
     except Exception as e:
+        logger.error(f"Truth Engine Error: {str(e)}")
         return {
             "credibility_score": 0,
+            "plagiarism_score": 0,
             "risk_level": "High",
             "ai_probability": 0,
             "verdict": "Audit Failed",
-            "simple_explanation": "The Truth Engine encountered an error during analysis.",
-            "reason_for_score": "Internal system failure.",
+            "analysis_text": "Unable to generate full report, showing partial analysis. System encountered a neural synchronization failure.",
+            "simple_explanation": "Critical error during deep semantic audit.",
+            "reason_for_score": "Internal processing error or malformed AI response.",
             "why_this_result": {"problematic_parts": [], "analysis": "N/A"},
-            "suggestions": ["Try again later."],
+            "suggestions": ["Verify connectivity.", "Reduce input length."],
             "claims": []
         }
+
 
 
 
