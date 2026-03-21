@@ -5,6 +5,7 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
     withCredentials: true, // Essential for HTTP-only cookies
+    timeout: 60000, // 60 seconds timeout for deep neural synthesis
     headers: {
         'Content-Type': 'application/json'
     }
@@ -60,7 +61,7 @@ api.interceptors.response.use(
             } catch (refreshError) {
                 processQueue(refreshError, null);
                 isRefreshing = false;
-                // Session totally expired - allow guest logic to continue instead of forced redirect
+                // Session totally expired
                 return Promise.reject(refreshError);
             }
         }
@@ -70,7 +71,7 @@ api.interceptors.response.use(
 );
 
 // Guest Mode Tracking
-const GUEST_LIMIT = 3;
+const GUEST_LIMIT = 10; // Increased limit for demo
 const getGuestActions = () => parseInt(localStorage.getItem('guest_actions') || '0');
 const incrementGuestActions = () => {
     const current = getGuestActions();
@@ -82,7 +83,6 @@ api.interceptors.request.use(
     (config) => {
         const isUserLoggedIn = !!localStorage.getItem('user_name');
 
-        // Action tracking (Limit logic removed for unhindered guest access)
         if (!isUserLoggedIn && ['post', 'put', 'delete'].includes(config.method || '')) {
             incrementGuestActions();
         }
