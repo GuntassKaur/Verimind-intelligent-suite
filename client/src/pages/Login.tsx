@@ -31,7 +31,7 @@ export default function Login() {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 window.dispatchEvent(new Event('storage'));
-                navigate('/workspace');
+                navigate('/');
             } else {
                 setError(data.error || 'Identity recall failed.');
             }
