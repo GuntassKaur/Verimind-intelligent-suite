@@ -4,7 +4,7 @@ import {
     Wand2, ShieldCheck,
     Sparkles,
     RotateCcw, Copy,
-    BarChart3, Activity,
+    Activity,
     ShieldAlert, Network,
     Upload, Cpu
 } from 'lucide-react';
@@ -35,7 +35,7 @@ interface VisualizeData {
 
 interface ResultState {
     type: string;
-    data: PlagiarismData | TruthData | VisualizeData | any;
+    data: PlagiarismData | TruthData | VisualizeData;
 }
 
 export default function Workspace() {
@@ -84,10 +84,11 @@ export default function Workspace() {
                 setContent(newText);
                 setResult(null);
             } else {
-                setResult({ type, data: data.data || data });
+                setResult({ type, data: (data.data || data) as PlagiarismData | TruthData | VisualizeData });
             }
-        } catch (err: any) {
-            setError(err.response?.data?.error || `System failure in ${type} module.`);
+        } catch (err: unknown) {
+            const axiosError = err as { response?: { data?: { error?: string } } };
+            setError(axiosError.response?.data?.error || `System failure in ${type} module.`);
         } finally {
             setLoading(null);
         }
@@ -151,15 +152,7 @@ export default function Workspace() {
                     </div>
                 </div>
 
-                <AnimatePresence>
-                    {error && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 flex justify-center">
-                            <span className="px-5 py-2.5 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
-                                <BarChart3 size={14} /> {error}
-                            </span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {error && <div className="mt-4 text-center text-rose-400 text-[10px] font-black uppercase tracking-widest">{error}</div>}
             </section>
 
             <section className="output-bottom-area" id="ws-results">
@@ -179,14 +172,14 @@ export default function Workspace() {
                              <div className="flex items-center justify-between px-2 opacity-80 border-b border-white/5 pb-8">
                                 <div className="flex items-center gap-4">
                                      <Activity size={20} className="text-indigo-400" />
-                                     <h3 className="text-[11px] font-black text-white uppercase tracking-widest italic">{result.type} Stream Manifested</h3>
+                                     <h3 className="text-[11px] font-black text-white uppercase tracking-widest italic">{result?.type} Stream Manifested</h3>
                                 </div>
-                                <button onClick={() => generatePDF()} className="px-6 py-2.5 bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20">Print Manifest</button>
+                                <button onClick={() => generatePDF()} className="px-6 py-2.5 bg-indigo-600 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20">Print Manifest</button>
                              </div>
 
-                             {result.type === 'plagiarism' && <PlagiarismNode data={result.data as PlagiarismData} />}
-                             {result.type === 'analyze' && <TruthNode data={result.data as TruthData} />}
-                             {result.type === 'visualize' && <VisualizeNode data={result.data as VisualizeData} />}
+                             {result?.type === 'plagiarism' && <PlagiarismNode data={result.data as PlagiarismData} />}
+                             {result?.type === 'analyze' && <TruthNode data={result.data as TruthData} />}
+                             {result?.type === 'visualize' && <VisualizeNode data={result.data as VisualizeData} />}
                         </motion.div>
                     )}
                  </AnimatePresence>

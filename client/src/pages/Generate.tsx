@@ -1,9 +1,7 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Copy, Loader2, CheckCircle, Info, Zap, Printer, Cpu, FileText, Globe } from 'lucide-react';
-import { Logo } from '../components/Logo';
+import { Sparkles, Copy, Loader2, CheckCircle, Info, Zap, Printer, Cpu, Globe } from 'lucide-react';
 import api from '../services/api';
-import { VoiceInput } from '../components/VoiceInput';
 import { SmartProcessingToolbar } from '../components/SmartProcessingToolbar';
 import { IntelligenceReport } from '../components/IntelligenceReport';
 import { generatePDF } from '../utils/pdfExport';
@@ -60,7 +58,6 @@ export default function Generate() {
 
     return (
         <div className="workspace-center-content">
-            {/* TOP INPUT AREA */}
             <section className="input-top-area no-print">
                 <div className="tool-grid-wrapper">
                       <button className="modern-tool-btn active">
@@ -71,9 +68,9 @@ export default function Generate() {
                          <Cpu size={20} className="text-blue-400" />
                          <span>Audit</span>
                       </button>
-                      <button className="modern-tool-btn" onClick={() => window.location.href='/research'}>
+                      <button className="modern-tool-btn" onClick={() => window.location.href='/workspace'}>
                          <Globe size={20} className="text-emerald-400" />
-                         <span>Verify</span>
+                         <span>Studio</span>
                       </button>
                 </div>
 
@@ -119,16 +116,9 @@ export default function Generate() {
                     </div>
                 </div>
 
-                <AnimatePresence>
-                    {error && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 flex justify-center text-rose-400 text-[10px] font-black uppercase tracking-widest">
-                            {error}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {error && <div className="mt-4 text-center text-rose-400 text-[10px] font-black uppercase tracking-widest">{error}</div>}
             </section>
 
-            {/* BOTTOM OUTPUT AREA */}
             <section className="output-bottom-area">
                 <AnimatePresence mode="wait">
                     {!answer && !loading ? (
@@ -142,18 +132,18 @@ export default function Generate() {
                              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest animate-pulse">Establishing Neural Link...</span>
                         </motion.div>
                     ) : (
-                        <motion.div key="res" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 max-w-5xl mx-auto">
+                        <motion.div key="res" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 max-w-5xl mx-auto pb-20">
                              <div className="flex items-center justify-between border-b border-white/5 pb-6">
                                 <div className="flex items-center gap-3">
                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                    <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Extracted Intelligence Cluster</h4>
                                 </div>
                                 <div className="flex gap-4">
-                                     <button onClick={() => { navigator.clipboard.writeText(answer); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-5 py-2.5 bg-white/5 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center gap-2">
+                                     <button onClick={() => { navigator.clipboard.writeText(answer); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-5 py-2.5 bg-white/5 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center gap-2 text-slate-400">
                                          {copied ? <CheckCircle size={14} className="text-emerald-400" /> : <Copy size={14} />}
                                          {copied ? 'Copied' : 'Copy'}
                                      </button>
-                                     <button onClick={() => generatePDF()} className="px-5 py-2.5 bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-colors flex items-center gap-2">
+                                     <button onClick={() => generatePDF()} className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2">
                                          <Printer size={14} /> Export
                                      </button>
                                 </div>

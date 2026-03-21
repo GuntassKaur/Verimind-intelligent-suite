@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, Target, Zap, X, Loader2, Activity, Trophy } from 'lucide-react';
 import api from '../services/api';
@@ -27,8 +27,8 @@ export default function TypingLab() {
     const [activeSeconds, setActiveSeconds] = useState(0);
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const stopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Sync with Assistant Panel
     useEffect(() => {
@@ -40,12 +40,12 @@ export default function TypingLab() {
         window.dispatchEvent(new CustomEvent('typing_update', { detail }));
     }, [wpm, accuracy, status, errors]);
 
-    const endTest = () => {
+    const endTest = useCallback(() => {
         setIsActive(false);
         setStatus('FINISHED');
         if (timerRef.current) clearInterval(timerRef.current);
         if (stopTimeoutRef.current) clearTimeout(stopTimeoutRef.current);
-    };
+    }, []);
 
     const startTest = async () => {
         setStatus('LOADING');
@@ -80,7 +80,7 @@ export default function TypingLab() {
         }
 
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }, [status, isActive, timeLeft]);
+    }, [status, isActive, timeLeft, endTest]);
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -197,7 +197,7 @@ export default function TypingLab() {
                 </div>
 
                 {status === 'FINISHED' && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto mt-12 space-y-6">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto mt-12 space-y-6 pb-20">
                          <div className="modern-card grid grid-cols-1 md:grid-cols-2 gap-10 p-12 bg-white/[0.02]">
                              <div className="flex flex-col justify-center">
                                  <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-tight flex items-center gap-3">
