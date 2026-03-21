@@ -87,6 +87,9 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         token = request.cookies.get('access_token')
         
+        if f.__name__ in ['login', 'register', 'send_otp', 'verify_otp_login', 'health_check']:
+            return f(*args, **kwargs)
+
         if not token:
             request.user = {"user_id": f"guest_{request.remote_addr[:12]}", "is_guest": True}
             return f(*args, **kwargs)
@@ -96,11 +99,14 @@ def login_required(f):
             request.user = payload
             request.user['is_guest'] = False
         except jwt.ExpiredSignatureError:
-            return create_response(success=False, error="Token expired", status=401)
+            request.user = {"user_id": f"guest_{request.remote_addr[:12]}", "is_guest": True}
+            return f(*args, **kwargs)
         except jwt.InvalidTokenError:
-            return create_response(success=False, error="Invalid token", status=401)
-        except Exception as e:
-            return create_response(success=False, error="Session authentication failure", status=401)
+            request.user = {"user_id": f"guest_{request.remote_addr[:12]}", "is_guest": True}
+            return f(*args, **kwargs)
+        except Exception:
+            request.user = {"user_id": f"guest_{request.remote_addr[:12]}", "is_guest": True}
+            return f(*args, **kwargs)
         return f(*args, **kwargs)
     return decorated_function
 
@@ -113,7 +119,7 @@ def health_check():
 # --- Auth Endpoints ---
 
 @app.route("/api/auth/register", methods=["POST"])
-@limiter.limit("5 per hour")
+@limiter.limit("10 per hour")
 def register():
     try:
         req_json = request.get_json()
@@ -125,15 +131,15 @@ def register():
         if result.get('success'):
             response = create_response(data={"user": result['user']}, status=201)
             is_prod = not app.debug
-            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=15*60)
-            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*60*60)
+            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
+            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
             return response
         return create_response(success=False, error=result.get('error', 'Registration failed'), status=result.get('status', 400))
-    except ValidationError as e:
+    except ValidationError:
         return create_response(success=False, error="Input validation failed. Please check your data.", status=400)
 
 @app.route("/api/auth/login", methods=["POST"])
-@limiter.limit("20 per hour")
+@limiter.limit("30 per hour")
 def login():
     try:
         req_json = request.get_json() or {}
@@ -142,8 +148,8 @@ def login():
         if result.get('success'):
             response = create_response(data={"user": result['user']})
             is_prod = not app.debug
-            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=15*60)
-            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*60*60)
+            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
+            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
             return response
         return create_response(success=False, error=result.get('error', 'Invalid login credentials'), status=401)
     except ValidationError:
@@ -163,7 +169,7 @@ def send_otp():
         return create_response(success=False, error="Invalid email format", status=400)
 
 @app.route("/api/auth/verify-otp", methods=["POST"])
-@limiter.limit("10 per hour")
+@limiter.limit("15 per hour")
 def verify_otp_login():
     try:
         req_json = request.get_json() or {}
@@ -173,7 +179,7 @@ def verify_otp_login():
         if result.get('success'):
             response = create_response(data={"user": result['user']})
             is_prod = not app.debug
-            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=3600)
+            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
             response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
             return response
         return create_response(success=False, error=result.get('error', 'Verification failed'), status=401)
@@ -184,6 +190,8 @@ def verify_otp_login():
 @login_required
 def get_me():
     user_id = request.user['user_id']
+    if request.user.get('is_guest'):
+        return create_response(data={"name": "Guest Analyst", "id": user_id, "is_guest": True})
     user_data = auth.get_user_by_id(user_id)
     if user_data:
         return create_response(data=user_data)
@@ -198,21 +206,19 @@ def get_history():
 
 # --- AI & Knowledge Endpoints (Sanitized) ---
 
-def validate_text_input(text, min_len=1, max_len=10000):
+def validate_text_input(text, min_len=1, max_len=20000):
     if not text or not isinstance(text, str):
-        return False, "Input must be a valid text string."
+        return False, "Input must list a valid prompt."
     if len(text.strip()) < min_len:
-        return False, "Input is too short."
+        return False, "Input complexity too low for neural analysis."
     if len(text) > max_len:
-        return False, f"Input exceeds maximum allowed length ({max_len} chars)."
-    if "<script" in text.lower():
-        return False, "Harmful code patterns detected."
+        return False, f"Neural spectrum limit reached ({max_len} chars)."
     return True, None
 
 @app.route("/api/generate", methods=["POST"])
 @app.route("/api/ai/generate", methods=["POST"])
 @login_required
-@limiter.limit("30 per hour")
+@limiter.limit("60 per hour")
 def generate():
     data = request.json or {}
     prompt = data.get("prompt") or data.get("query")
@@ -220,12 +226,13 @@ def generate():
     ok, msg = validate_text_input(prompt)
     if not ok: return create_response(success=False, error=msg, status=400)
     
-    result = generate_answer(prompt, data.get("domain", "General"), data.get("response_type", "Brief"))
+    result = generate_answer(prompt, data.get("domain", "General"), data.get("response_type", "Research"))
     auth.save_history(request.user['user_id'], "generation", prompt[:100], result)
     return create_response(data={"answer": result})
 
 @app.route("/api/plagiarism", methods=["POST"])
 @app.route("/api/plagiarism/check", methods=["POST"])
+@app.route("/api/ai/plagiarism/check", methods=["POST"])
 @app.route("/api/ai/plagiarism", methods=["POST"])
 @login_required
 def plagiarism():
@@ -264,55 +271,8 @@ def analyze():
     if not ok: return create_response(success=False, error=msg, status=400)
     
     result = verify_claims(text, data.get("context", "General"))
-    auth.save_history(request.user['user_id'], "analysis", text[:50], { "summary": result, "status": "verified" })
-    return create_response(data={ "summary": result, "status": "verified" })
-
-@app.route("/api/ai/research", methods=["POST"])
-@login_required
-def research():
-    data = request.json or {}
-    query = data.get("query")
-    
-    ok, msg = validate_text_input(query)
-    if not ok: return create_response(success=False, error=msg, status=400)
-    
-    # Mock research flow for stability
-    result = {
-        "summary": f"Deep spectrum scan completed for '{query}'. Neural analysis suggests high credibility across 4 cross-nodes.",
-        "sources": [
-            {"title": "Global Digital Nexus", "url": "https://gdn.ai/verify", "credibility": 98},
-            {"title": "Open Truth Protocol", "url": "https://otp.verify.org", "credibility": 94}
-        ],
-        "insights": ["Linguistic markers indicate factual consistence.", "Temporal resonance within +/- 0.3% error margin."]
-    }
-    auth.save_history(request.user['user_id'], "research", query[:100], result)
+    auth.save_history(request.user['user_id'], "analysis", text[:50], result)
     return create_response(data=result)
-
-@app.route("/api/ai/blog", methods=["POST"])
-@login_required
-def blog_gen():
-    data = request.json or {}
-    topic = data.get("topic")
-    
-    ok, msg = validate_text_input(topic)
-    if not ok: return create_response(success=False, error=msg, status=400)
-    
-    result = f"Synthesized analysis of {topic} through the lens of VeriMind. Our neural protocols suggest a high probability of structural alignment in the current ecosystem."
-    auth.save_history(request.user['user_id'], "blog", topic[:100], result)
-    return create_response(data={"blog": result})
-
-@app.route("/api/ai/email", methods=["POST"])
-@login_required
-def email_gen():
-    data = request.json or {}
-    purpose = data.get("purpose")
-    
-    ok, msg = validate_text_input(purpose)
-    if not ok: return create_response(success=False, error=msg, status=400)
-    
-    result = f"Subject: Neural Protocol Transmission\n\nRecipient: Sync established.\n\nPurpose Recall: {purpose}\n\nManifest: Transmission synchronized through VeriMind-7 spectrum nodes."
-    auth.save_history(request.user['user_id'], "email", purpose[:100], result)
-    return create_response(data={"email": result})
 
 @app.route("/api/ai/visualize", methods=["POST"])
 @login_required
@@ -320,7 +280,7 @@ def visualize():
     data = request.json or {}
     text = data.get("text")
     
-    ok, msg = validate_text_input(text, max_len=5000)
+    ok, msg = validate_text_input(text, max_len=10000)
     if not ok: return create_response(success=False, error=msg, status=400)
     
     result = generate_visual_intelligence(text, data.get("type"))
@@ -336,21 +296,17 @@ def process_url():
     try:
         text = extract_text_from_url(url)
         return create_response(data={"text": text})
-    except Exception as e:
-        return create_response(success=False, error="Feature processing failed for this URL.", status=500)
+    except Exception:
+        return create_response(success=False, error="URL synthesis interrupted.", status=500)
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
-    return create_response(success=False, error="Too many requests. Please wait a moment.", status=429)
-
-@app.errorhandler(401)
-def unauthorized_handler(e):
-    return create_response(success=False, error="Access denied. Authentication required.", status=401)
+    return create_response(success=False, error="Rate limit exceeded. Manual sync required.", status=429)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    logger.error(f"VERIMIND SHIELD: Caught Unhandled Exception -> {str(e)}", exc_info=True)
-    return create_response(success=False, error="An internal server error occurred. Our team has been notified.", status=500)
+    logger.error(f"VERIMIND PROTOCOL ERROR: {str(e)}", exc_info=True)
+    return create_response(success=False, error="Neural sync failure. Rebooting request spectrum.", status=500)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
