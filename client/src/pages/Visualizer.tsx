@@ -1,12 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    Network, Share2, 
+    Network,
     Loader2, 
-    Layers, Cpu,
-    History,
-    Activity,
-    Info
+    Zap,
+    ArrowRight,
+    FileText,
+    GitBranch,
+    BarChart3,
+    BookOpen
 } from 'lucide-react';
 import api from '../services/api';
 import { IntelligenceReport } from '../components/IntelligenceReport';
@@ -23,6 +25,13 @@ interface ResultState {
     data: VisualizeData;
 }
 
+const DIAGRAM_TYPES = [
+    { key: 'flowchart', label: 'Flowchart', icon: GitBranch },
+    { key: 'mindmap',   label: 'Mind Map',  icon: Network },
+    { key: 'timeline',  label: 'Timeline',  icon: BarChart3 },
+    { key: 'summary',   label: 'Summary',   icon: BookOpen },
+];
+
 export default function Visualizer() {
     const [content, setContent] = useState('');
     const [type, setType] = useState('flowchart');
@@ -30,21 +39,9 @@ export default function Visualizer() {
     const [result, setResult] = useState<ResultState | null>(null);
     const [error, setError] = useState('');
 
-    // Right side Assistant bridge
-    useEffect(() => {
-        if (result) {
-            window.dispatchEvent(new CustomEvent('typing_update', { 
-              detail: { 
-                 wpm: 0, 
-                 suggestions: ["Refine visualization", "Export as SVG", "Alter logic structure"] 
-              } 
-            }));
-        }
-    }, [result]);
-
     const runVisualize = useCallback(async () => {
         if (!content.trim()) {
-            setError('Please provide studio input to visualize.');
+            setError('Please provide text to visualize.');
             return;
         }
         setLoading(true);
@@ -58,132 +55,130 @@ export default function Visualizer() {
                 setError(data.error || 'Visualization failed.');
             }
         } catch (err: unknown) {
-             const axiosError = err as { response?: { data?: { error?: string } } };
-             setError(axiosError.response?.data?.error || 'System interrupt in visualization module.');
+            const axiosError = err as { response?: { data?: { error?: string } } };
+            setError(axiosError.response?.data?.error || 'Visualizer module offline. Check backend connection.');
         } finally {
             setLoading(false);
         }
     }, [content, type]);
 
     return (
-        <div className="workspace-center-content">
-            <section className="input-top-area no-print">
-                <div className="tool-grid-wrapper mb-10">
-                      <button className="modern-tool-btn active">
-                         <Network size={20} className="text-cyan-400" />
-                         <span>Structure Engine</span>
-                      </button>
-                      <button className="modern-tool-btn" onClick={() => window.location.href='/workspace'}>
-                         <Cpu size={20} className="text-indigo-400" />
-                         <span>Studio Main</span>
-                      </button>
+        <div className="max-w-5xl mx-auto py-16 px-6 lg:px-12 space-y-12">
+            {/* Header */}
+            <div className="text-center">
+                <div className="inline-flex items-center gap-3 bg-purple-50 border border-purple-100 px-6 py-2.5 rounded-full mb-6">
+                    <Network size={16} className="text-purple-500" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.4em] text-purple-600">Brain Map · Knowledge Visualizer</span>
+                </div>
+                <h1 className="text-5xl font-black text-slate-800 tracking-tighter mb-4">Visual <span className="text-gradient">Intelligence</span>.</h1>
+                <p className="text-slate-500 font-medium max-w-xl mx-auto">Transform complex text into beautiful, structured knowledge maps—flowcharts, mind maps, and timelines in seconds.</p>
+            </div>
+
+            {/* Input Card */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_20px_50px_-12px_rgba(168,85,247,0.08)] p-10">
+                {/* Diagram Type Selector */}
+                <div className="flex flex-wrap gap-3 mb-8">
+                    {DIAGRAM_TYPES.map((d) => (
+                        <button
+                            key={d.key}
+                            onClick={() => setType(d.key)}
+                            className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl border font-bold text-sm transition-all ${
+                                type === d.key
+                                    ? 'bg-purple-50 border-purple-200 text-purple-700 shadow-sm'
+                                    : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-white hover:border-slate-200'
+                            }`}
+                        >
+                            <d.icon size={16} />
+                            {d.label}
+                        </button>
+                    ))}
                 </div>
 
-                <div className="smart-gpt-editor bg-white/[0.01]">
-                    <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-6 px-4 opacity-40">
-                         <div className="flex items-center gap-3">
-                             <Layers size={16} className="text-indigo-400" />
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] italic">Structural Core Input</span>
-                         </div>
-                         <div className="flex gap-4">
-                              {['flowchart', 'sequence', 'mindmap'].map((t) => (
-                                  <button key={t} onClick={() => setType(t)} className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ${type === t ? 'bg-indigo-500 border-indigo-500 text-white shadow-xl shadow-indigo-500/30' : 'bg-white/5 border-white/5 text-slate-500 hover:text-slate-300'}`}>{t}</button>
-                              ))}
-                         </div>
+                <div className="flex items-center gap-3 mb-5 pb-4 border-b border-slate-50">
+                    <FileText size={16} className="text-slate-300" />
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Input Text · Paste any content to visualize</span>
+                    <div className="ml-auto flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Ready</span>
                     </div>
+                </div>
 
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Enter complex text to be visually structured into logic flows..."
-                        className="custom-scrollbar h-[250px]"
-                    />
+                <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Paste your text here — VeriMind will generate a structured visual diagram..."
+                    className="w-full h-56 bg-slate-50 border border-slate-100 rounded-2xl p-6 text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-purple-300 focus:shadow-[0_0_0_4px_rgba(168,85,247,0.06)] transition-all placeholder:text-slate-300 resize-none"
+                />
 
-                    <div className="flex justify-center mt-8 gap-4">
-                        <button
-                            onClick={runVisualize}
-                            disabled={loading || !content.trim()}
-                            className="premium-btn-primary flex items-center gap-4 py-5 px-12 rounded-3xl group shadow-2xl transition-all"
-                        >
-                            {loading ? (
-                                <><Loader2 className="animate-spin" size={20} /> SYNCHRONIZING...</>
-                            ) : (
-                                <><Share2 size={20} className="group-hover:rotate-45" /> GENERATE STRUCTURE</>
-                            )}
-                        </button>
-                    </div>
+                <div className="flex items-center justify-between mt-6">
+                    <span className="text-[11px] text-slate-400 font-medium">{content.trim().split(/\s+/).filter(Boolean).length} words</span>
+                    <button
+                        onClick={runVisualize}
+                        disabled={loading || !content.trim()}
+                        className="flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-purple-200 hover:shadow-purple-300 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                    >
+                        {loading ? <Loader2 className="animate-spin" size={18} /> : <Zap size={18} className="group-hover:scale-110 transition-transform" />}
+                        <span>{loading ? 'Generating...' : 'Generate Visual'}</span>
+                        {!loading && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
+                    </button>
                 </div>
 
                 <AnimatePresence>
                     {error && (
-                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 text-center text-rose-400 text-[10px] font-black tracking-widest uppercase">
-                            {error}
+                        <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                            className="mt-4 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3">
+                            <span className="text-[12px] font-semibold text-rose-600">{error}</span>
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </section>
+            </div>
 
-            <section className="output-bottom-area" id="visual-results">
-                 <AnimatePresence mode="wait">
-                    {!result ? (
-                         !loading && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 opacity-30 text-center">
-                                <Activity size={64} className="text-slate-800 mb-8 grayscale" />
-                                <p className="text-[11px] font-black text-slate-700 uppercase tracking-[0.5em]">No Structure Rendered</p>
-                            </motion.div>
-                         )
-                    ) : (
-                        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12">
-                             <div className="flex items-center justify-between border-b border-white/5 pb-8 opacity-80">
-                                <div className="flex items-center gap-4">
-                                     <Activity size={22} className="text-indigo-400" />
-                                     <h3 className="text-[14px] font-black text-white uppercase tracking-[0.2em] italic">Structural Manifest Manifested</h3>
+            {/* Results */}
+            <AnimatePresence mode="wait">
+                {loading && (
+                    <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-[2.5rem] border border-slate-100 p-20 flex flex-col items-center gap-8">
+                        <div className="w-20 h-20 border-4 border-purple-100 border-t-purple-500 rounded-full animate-spin" />
+                        <div className="text-center">
+                            <p className="text-sm font-black text-slate-800 uppercase tracking-widest mb-2">Mapping Knowledge</p>
+                            <p className="text-xs text-slate-400 font-medium">Structuring logical connections...</p>
+                        </div>
+                    </motion.div>
+                )}
+
+                {result && !loading && (
+                    <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 25 }} className="space-y-8">
+                        {/* Summary */}
+                        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-soft p-10">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <Network size={20} className="text-purple-500" />
+                                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Knowledge Summary</h3>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                     <button onClick={() => generatePDF()} className="px-8 py-3 bg-indigo-600 border border-indigo-500/20 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/30">Capture Diagram</button>
+                                <button onClick={() => generatePDF()} className="px-6 py-3 bg-purple-50 border border-purple-100 text-purple-600 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-purple-100 transition-all">Export PDF</button>
+                            </div>
+                            <p className="text-2xl font-serif font-light text-slate-600 italic leading-relaxed">"{result.data.summary}"</p>
+                        </div>
+
+                        {/* Diagrams */}
+                        {result.data.mermaid_diagrams?.map((d, i) => (
+                            <div key={i} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-soft overflow-hidden">
+                                <div className="flex items-center justify-between px-10 py-6 border-b border-slate-50">
+                                    <div className="flex items-center gap-3">
+                                        <GitBranch size={18} className="text-purple-500" />
+                                        <span className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400">{d.type} Diagram</span>
+                                    </div>
+                                    <div className="px-4 py-1.5 bg-purple-50 border border-purple-100 rounded-full">
+                                        <span className="text-[10px] font-black text-purple-500 uppercase tracking-widest">VeriMind Brain Map</span>
+                                    </div>
                                 </div>
-                             </div>
-
-                             <div className="modern-card p-12 bg-white/[0.01] border-white/5">
-                                  <div className="flex items-start gap-8">
-                                       <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
-                                            <History size={24} className="text-indigo-400" />
-                                       </div>
-                                       <div>
-                                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Core Interpretation Abstract</h4>
-                                            <p className="text-2xl text-slate-200 font-serif italic leading-relaxed selection:bg-indigo-500/20">"{result.data.summary}"</p>
-                                       </div>
-                                  </div>
-                             </div>
-
-                             <div className="space-y-10">
-                                  {result.data.mermaid_diagrams?.map((diagram, idx) => (
-                                      <div key={idx} className="modern-card bg-black/40 border-white/5 p-12 overflow-x-auto custom-scrollbar group relative transition-all hover:bg-black/60 shadow-2xl">
-                                           <div className="absolute top-6 right-6 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                               {diagram.type || 'Structure Node'}
-                                           </div>
-                                           <div className="p-10">
-                                               <Mermaid code={diagram.code} />
-                                           </div>
-                                      </div>
-                                  ))}
-                             </div>
-
-                             <div className="modern-card border-white/5 p-10 bg-indigo-500/5">
-                                 <div className="flex items-start gap-6">
-                                     <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
-                                         <Info size={24} className="text-indigo-400" />
-                                     </div>
-                                     <div>
-                                         <h5 className="text-[11px] font-black text-white uppercase tracking-widest mb-3">Structural Protocol</h5>
-                                         <p className="text-[11px] text-slate-500 leading-relaxed font-semibold italic">The visual architecture has been synthesized using Mermaid logic. If the diagram is complex, use the Capture feature for a high-fidelity snapshot.</p>
-                                     </div>
-                                 </div>
-                             </div>
-                        </motion.div>
-                    )}
-                 </AnimatePresence>
-            </section>
+                                <div className="p-8 overflow-x-auto">
+                                    <Mermaid code={d.code} />
+                                </div>
+                            </div>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {result && <IntelligenceReport data={result.data} type="visualize" content={content} />}
         </div>

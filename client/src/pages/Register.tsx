@@ -14,6 +14,7 @@ import {
     XCircle
 } from 'lucide-react';
 import api from '../services/api';
+import { Logo } from '../components/Logo';
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -54,79 +55,78 @@ export default function Register() {
     }, [name, email, password, navigate]);
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center py-20">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full mx-auto">
-                <div className="modern-card p-12 bg-black/40 border-white/5 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
-                    
-                    <div className="text-center mb-12">
-                        <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <ShieldCheck size={32} className="text-indigo-400" />
+        <div className="min-h-screen flex items-center justify-center py-20 px-6 bg-mesh relative">
+             <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                 <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-indigo-200/20 blur-[150px] rounded-full animate-pulse" />
+            </div>
+
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full mx-auto relative z-10">
+                <div className="modern-card p-14 bg-white border-none shadow-lux flex flex-col items-center">
+                    <div className="text-center mb-14">
+                        <div className="w-20 h-20 bg-indigo-50 border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-100">
+                            <Logo variant="icon" className="w-10 h-10 text-indigo-600" />
                         </div>
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-3">Identity Synthesis</h2>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Establish Neural Credentials</p>
+                        <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-4 leading-none">Identity Synthesis</h2>
+                        <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.5em] italic">Establish Neural Credentials</p>
                     </div>
 
-                    <form onSubmit={handleRegister} className="space-y-6">
-                         <div className="space-y-2">
+                    <form onSubmit={handleRegister} className="w-full space-y-8">
+                         <div className="space-y-4">
                              <div className="relative group">
-                                 <User className="absolute left-4 top-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+                                 <User className="absolute left-5 top-5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={20} />
                                  <input 
                                     type="text" 
                                     value={name} 
                                     onChange={(e) => setName(e.target.value)} 
                                     placeholder="Entity Real-Name" 
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-4 text-xs font-black text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-700" 
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-5 text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-400/50 transition-all placeholder:text-slate-300 shadow-sm"
                                     required
                                  />
                              </div>
-                         </div>
 
-                         <div className="space-y-2">
                              <div className="relative group">
-                                 <Mail className="absolute left-4 top-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+                                 <Mail className="absolute left-5 top-5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={20} />
                                  <input 
                                     type="email" 
                                     value={email} 
                                     onChange={(e) => setEmail(e.target.value)} 
                                     placeholder="Neural Comm-Link (Email)" 
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-4 text-xs font-black text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-700" 
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-5 text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-400/50 transition-all placeholder:text-slate-300 shadow-sm"
                                     required
                                  />
                              </div>
-                         </div>
 
-                         <div className="space-y-2">
                              <div className="relative group">
-                                 <Lock className="absolute left-4 top-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+                                 <Lock className="absolute left-5 top-5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={20} />
                                  <input 
                                     type="password" 
                                     value={password} 
                                     onChange={(e) => setPassword(e.target.value)} 
                                     placeholder="Cryptographic Key (Password)" 
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-4 text-xs font-black text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-700" 
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-5 text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-400/50 transition-all placeholder:text-slate-300 shadow-sm"
                                     required
                                  />
                              </div>
-                             <div className="flex gap-2 mt-3 px-2">
-                                 <div className={`h-1 flex-1 rounded-full ${password.length >= 8 ? 'bg-indigo-500' : 'bg-white/5'}`} />
-                                 <div className={`h-1 flex-1 rounded-full ${/[A-Z]/.test(password) ? 'bg-indigo-500' : 'bg-white/5'}`} />
-                                 <div className={`h-1 flex-1 rounded-full ${/[0-9]/.test(password) ? 'bg-indigo-500' : 'bg-white/5'}`} />
+                             
+                             <div className="flex gap-2 mt-4 px-2">
+                                 <div className={`h-1.5 flex-1 rounded-full ${password.length >= 8 ? 'bg-indigo-500' : 'bg-slate-100'}`} />
+                                 <div className={`h-1.5 flex-1 rounded-full ${/[A-Z]/.test(password) ? 'bg-indigo-500' : 'bg-slate-100'}`} />
+                                 <div className={`h-1.5 flex-1 rounded-full ${/[0-9]/.test(password) ? 'bg-indigo-500' : 'bg-slate-100'}`} />
                              </div>
-                             <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest text-center mt-2">Entropy Requirement: 8+ chars, Uppercase, Numeric Nodes</p>
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center italic mt-2">Requirement: 8+ chars, Uppercase, Numeric Nodes</p>
                          </div>
 
                          <AnimatePresence>
                              {error && (
-                                 <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3">
-                                     <XCircle size={16} className="text-rose-400 shrink-0" />
-                                     <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest">{error}</span>
+                                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-5 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-4 shadow-lg shadow-rose-100/50">
+                                     <XCircle size={20} className="text-rose-500 shrink-0" />
+                                     <span className="text-[11px] font-black text-rose-500 uppercase tracking-widest italic">{error}</span>
                                  </motion.div>
                              )}
                              {success && (
-                                 <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
-                                     <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-                                     <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Identity Synthesized. Redirecting...</span>
+                                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-4 shadow-lg shadow-emerald-100/50">
+                                     <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
+                                     <span className="text-[11px] font-black text-emerald-500 uppercase tracking-widest italic">Identity Synthesized. Redirecting...</span>
                                  </motion.div>
                              )}
                          </AnimatePresence>
@@ -134,23 +134,23 @@ export default function Register() {
                          <button 
                             type="submit" 
                             disabled={loading || success} 
-                            className="w-full premium-btn-primary py-5 rounded-xl flex items-center justify-center gap-4 group transition-all"
+                            className="w-full premium-btn-primary flex items-center justify-center gap-5 group py-6"
                          >
-                             {loading ? <Loader2 className="animate-spin" size={18} /> : success ? <CheckCircle2 size={18} /> : <Zap size={18} className="group-hover:rotate-45" />}
-                             <span className="text-xs font-black uppercase tracking-[0.2em]">{loading ? 'Synthesizing...' : 'Establish Identity'}</span>
-                             <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
+                             {loading ? <Loader2 className="animate-spin" size={20} /> : success ? <CheckCircle2 size={20} /> : <Zap size={20} className="group-hover:rotate-45" />}
+                             <span className="uppercase tracking-[0.2em]">{loading ? 'Synthesizing...' : 'Establish Identity'}</span>
+                             <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
                          </button>
 
-                         <div className="text-center mt-8">
-                             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                                 Already in neural stream? <Link to="/login" className="text-indigo-400 hover:text-indigo-300 transition-colors ml-2 underline decoration-indigo-500/30">Recall Session</Link>
+                         <div className="text-center mt-12">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                                 Already in neural stream? <Link to="/login" className="text-indigo-600 hover:text-indigo-500 transition-colors ml-2 underline decoration-indigo-200">Recall Session</Link>
                              </p>
                          </div>
                     </form>
 
-                    <div className="mt-12 pt-8 border-t border-white/5 flex items-center justify-center gap-6 opacity-30">
-                         <Activity size={14} className="text-indigo-500" />
-                         <span className="text-[9px] font-black uppercase tracking-[0.3em]">Neural Protocol Established</span>
+                    <div className="mt-16 pt-10 border-t border-slate-50 flex items-center justify-center gap-6 opacity-40">
+                         <Activity size={16} className="text-indigo-400" />
+                         <span className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-300 italic">Neural Protocol Established</span>
                     </div>
                 </div>
             </motion.div>
