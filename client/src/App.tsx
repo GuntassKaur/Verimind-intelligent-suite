@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { DashboardLayout } from './components/DashboardLayout';
+import DashboardLayout from './components/DashboardLayout';
 
 // Lazy load pages for performance
 const Landing = lazy(() => import('./pages/Landing'));
