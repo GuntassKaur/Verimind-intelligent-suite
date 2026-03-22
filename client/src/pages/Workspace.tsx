@@ -1,102 +1,39 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useRef } from 'react';
 import {
     Wand2, ShieldCheck,
-    Sparkles,
-    RotateCcw, Copy,
-    ShieldAlert, Network,
-    Upload, Cpu,
-    Zap, Shield, Search,
-    ArrowRight,
-    Loader2,
-    CheckCircle2,
-    FileSearch,
-    Fingerprint,
-    Info,
-    Layout,
-    Brain,
-    Bot,
-    PenTool
+    Search, Brain, Network,
+    Loader2, Inbox, Upload, Trash2, Check,
 } from 'lucide-react';
-import { SmartProcessingToolbar } from '../components/SmartProcessingToolbar';
-import { VoiceInput } from '../components/VoiceInput';
-import { Mermaid } from '../components/Mermaid';
 import api from '../services/api';
-import { IntelligenceReport } from '../components/IntelligenceReport';
-import { generatePDF } from '../utils/pdfExport';
-import { Logo } from '../components/Logo';
+import { Mermaid } from '../components/Mermaid';
 
-/* ─── Types ─────────────────────────────────────────── */
-interface PlagiarismData {
-    score: number;
-    verdict: string;
-    explanation: string;
-    suspicious_segments?: { sentence: string; reason: string }[];
-}
-interface TruthData {
-    credibility_score: number;
-    summary?: string;
-    simple_explanation?: string;
-    verdict?: string;
-    claims: { verdict: string; confidence: number; claim: string; reasoning: string }[];
-}
-interface VisualizeData {
-    summary: string;
-    mermaid_diagrams?: { type: string; code: string }[];
-}
-interface GeneralData {
-    answer?: string;
-    humanized_text?: string;
-    text?: string;
-}
-
-interface ResultState {
-    type: string;
-    data: PlagiarismData | TruthData | VisualizeData | GeneralData;
-}
-
-const PIPELINE_STEPS = [
-    { label: "Initializing Neural Flux", icon: Sparkles, color: "text-indigo-400" },
-    { label: "Scanning Knowledge Base", icon: Search, color: "text-blue-400" },
-    { label: "Auditing Logical Nodes", icon: Brain, color: "text-purple-400" },
-    { label: "Synthesizing Manifest", icon: Network, color: "text-rose-400" }
+const TOOLS = [
+    { key: 'generate', label: 'Write Context', desc: 'AI content generator', icon: Wand2 },
+    { key: 'analyze', label: 'Truth Audit', desc: 'Verify fact & claims', icon: ShieldCheck },
+    { key: 'plagiarism', label: 'Plagiarism', desc: 'Check original text', icon: Search },
+    { key: 'humanize', label: 'Writing DNA', desc: 'Detect AI origins', icon: Brain },
+    { key: 'visualize', label: 'Knowledge Map', desc: 'Generate visual charts', icon: Network },
 ];
 
 export default function Workspace() {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState<string | null>(null);
-    const [loadStep, setLoadStep] = useState(0);
-    const [result, setResult] = useState<ResultState | null>(null);
+    const [result, setResult] = useState<any>(null);
     const [error, setError] = useState('');
-    const [copied, setCopied] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-
-    useEffect(() => {
-        let interval: ReturnType<typeof setInterval> | undefined;
-        if (loading) {
-            setLoadStep(0);
-            interval = setInterval(() => {
-                setLoadStep(prev => (prev < PIPELINE_STEPS.length - 1 ? prev + 1 : prev));
-            }, 2500);
-        } else {
-            setLoadStep(0);
-        }
-        return () => clearInterval(interval);
-    }, [loading]);
 
     const runAction = useCallback(async (type: string) => {
         if (!content.trim() && type !== 'generate') {
-            setError(`Synthesis Error: Please provide source text for the ${type.toUpperCase()} module.`);
+            setError(`Please provide text to run ${type.toUpperCase()}.`);
             return;
         }
         setLoading(type);
         setError('');
+        setResult(null);
 
         try {
             let endpoint = '';
-            let payload: Record<string, unknown> = {};
+            let payload: any = {};
 
             switch (type) {
                 case 'generate': endpoint = '/api/ai/generate'; payload = { prompt: content || 'Generate a high-fidelity research paper outline.' }; break;
@@ -111,330 +48,198 @@ export default function Workspace() {
             if (data.success) {
                 setResult({ type, data: (data.data || data) });
             } else {
-                setError(data.error || "Neural Protocol Sync Loss. Please calibrate input.");
+                setError(data.error || "Action failed.");
             }
 
-        } catch (err: unknown) {
-             const axiosError = err as { response?: { data?: { error?: string } } };
-             setError(axiosError.response?.data?.error || `Sync Lost: ${type.toUpperCase()} node offline. (Ensure backend is linked)`);
+        } catch (err: any) {
+             setError(err.response?.data?.error || `Server disconnected. Ensure backend is running.`);
         } finally {
             setLoading(null);
         }
     }, [content]);
 
     return (
-        <div className="workspace-main relative bg-mesh min-h-full">
-            <main className="workspace-center-content relative z-10 w-full max-w-5xl mx-auto py-16 px-6 lg:px-12">
-                
-                {/* ═══════════════════════════════════════════════
-                   CANVA-STYLE TOOL SELECTOR
-                   ═══════════════════════════════════════════════ */}
-                <header className="mb-14 text-center">
-                    <motion.div animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: -20 }} className="inline-flex items-center gap-4 bg-white/60 backdrop-blur-xl border border-white px-8 py-3 rounded-full mb-8 shadow-sm">
-                         <Sparkles size={18} className="text-indigo-500" />
-                         <span className="text-[11px] font-black uppercase tracking-[0.4em] text-indigo-700 italic">Prism Neural Workspace</span>
-                    </motion.div>
-                    <h1 className="text-6xl font-black text-slate-800 tracking-tighter mb-6 leading-tight">
-                        Transform Your <span className="text-gradient">Intelligence</span>.
-                    </h1>
-                    <p className="max-w-xl mx-auto text-lg text-slate-500 font-medium leading-relaxed mb-12">
-                        VeriMind Prism combines high-fidelity AI generation with forensic truth audits to build premium, trusted content structures.
-                    </p>
+        <div className="w-full max-w-6xl mx-auto py-12 px-4 md:px-8">
+            {/* Header */}
+            <header className="text-center mb-10">
+                <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3">All-in-one AI Writing & Analysis Tool</h1>
+                <p className="text-slate-400 text-sm max-w-2xl mx-auto">Generate content, verify facts, detect plagiarism, and visualize knowledge cleanly.</p>
+            </header>
 
-                    <div className="flex flex-wrap items-center justify-center gap-5">
-                       {[
-                           { key: 'generate', label: 'Produce', icon: Wand2, color: 'indigo' },
-                           { key: 'analyze', label: 'Audit', icon: ShieldCheck, color: 'blue' },
-                           { key: 'plagiarism', label: 'Verify', icon: ShieldAlert, color: 'rose' },
-                           { key: 'humanize', label: 'Writing DNA', icon: Fingerprint, color: 'purple' },
-                           { key: 'visualize', label: 'Brain Map', icon: Network, color: 'cyan' },
-                       ].map((tool) => (
-                           <button 
-                                key={tool.key}
-                                onClick={() => runAction(tool.key)}
-                                className={`modern-tool-btn px-10 py-5 rounded-[2rem] gap-4 ${loading === tool.key ? 'active scale-95' : ''}`}
-                           >
-                               <tool.icon size={22} className={`text-${tool.color}-500`} />
-                               <span className="text-sm font-black uppercase tracking-widest">{tool.label}</span>
-                           </button>
-                       ))}
-                    </div>
-                </header>
+            {/* Error Area */}
+            {error && (
+                <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm flex items-center gap-3">
+                    <ShieldCheck size={18} /> {error}
+                </div>
+            )}
 
-                {/* ═══════════════════════════════════════════════
-                   GAMMA-INSPIRED SMART CANVAS
-                   ═══════════════════════════════════════════════ */}
-                <section className="input-top-area w-full no-print">
-                    <motion.div 
-                        animate={{ minHeight: result ? 400 : 350 }}
-                        className="smart-gpt-editor group transition-all duration-700"
+            {/* Tools Grid - One clean row/grid */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                {TOOLS.map(tool => (
+                    <button 
+                        key={tool.key}
+                        onClick={() => runAction(tool.key)}
+                        disabled={loading !== null}
+                        className={`clean-card p-4 text-left flex flex-col items-start gap-4 transition-colors disabled:opacity-50 ${loading === tool.key ? 'border-primary bg-primary/10' : 'hover:border-slate-500'}`}
                     >
-                        <div className="flex items-center justify-between mb-10 px-4 border-b border-indigo-50/50 pb-8">
-                             <div className="flex items-center gap-8">
-                                  <div onClick={() => fileInputRef.current?.click()} className="flex items-center gap-4 cursor-pointer hover:bg-slate-50 p-3 rounded-2xl transition-all">
-                                       <Upload size={20} className="text-slate-400" />
-                                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Manifest Base</span>
-                                  </div>
-                                  <input type="file" ref={fileInputRef} className="hidden" onChange={(e)=>{
-                                       const f=e.target.files?.[0]; if(!f)return;
-                                       const r=new FileReader(); r.onload=(ev)=>setContent((ev.target?.result as string)||''); r.readAsText(f);
-                                  }} />
-                                  <div className="h-6 w-[1px] bg-slate-100" />
-                                  <SmartProcessingToolbar onTextExtracted={setContent} />
-                             </div>
-                             <div className="flex items-center gap-6">
-                                  <VoiceInput onTranscription={(t)=>setContent(p=>p+' '+t)} />
-                                  <div className="px-5 py-2.5 bg-indigo-50/50 border border-indigo-100 rounded-full">
-                                       <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">{wordCount} Nuclei Detected</span>
-                                  </div>
-                             </div>
+                        <div className={`p-2 rounded-lg ${loading === tool.key ? 'bg-primary text-white' : 'bg-slate-800 text-slate-300'}`}>
+                            {loading === tool.key ? <Loader2 className="animate-spin" size={20} /> : <tool.icon size={20} />}
                         </div>
-
-                        <textarea 
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            placeholder="Begin your neural synthesis or paste a manifest for truth audit..."
-                            className="custom-scrollbar h-full w-full placeholder:text-slate-300"
-                        />
-
-                        <div className="flex items-center justify-between mt-10 px-4 border-t border-indigo-50/50 pt-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <div className="flex gap-10">
-                                  <div className="hover:text-indigo-600 transition-colors flex items-center gap-3 cursor-pointer" onClick={()=>{navigator.clipboard.writeText(content); setCopied(true); setTimeout(()=>setCopied(false), 2000);}}>
-                                        {copied ? <CheckCircle2 size={18} className="text-emerald-500" /> : <Copy size={18} />}
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{copied ? 'Manifest Copied' : 'Copy'}</span>
-                                  </div>
-                                  <div className="hover:text-rose-500 transition-colors flex items-center gap-3 cursor-pointer" onClick={()=>{setContent(''); setResult(null);}}>
-                                        <RotateCcw size={18} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Reset Studio</span>
-                                  </div>
-                             </div>
-                             <button 
-                                onClick={() => runAction('generate')}
-                                disabled={loading !== null}
-                                className="premium-btn-primary flex items-center gap-5 px-10"
-                             >
-                                 <Zap size={18} />
-                                 <span className="uppercase tracking-[0.2em] text-[11px]">Initiate Synthesis</span>
-                                 <ArrowRight size={16} />
-                             </button>
+                        <div>
+                            <span className={`block text-sm font-semibold ${loading === tool.key ? 'text-primary' : 'text-slate-200'}`}>{tool.label}</span>
+                            <span className="block text-[11px] text-slate-500 mt-1">{tool.desc}</span>
                         </div>
-                    </motion.div>
+                    </button>
+                ))}
+            </div>
 
-                    {error && (
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 p-6 bg-rose-50 border border-rose-100 rounded-3xl text-rose-500 text-[11px] font-black uppercase tracking-widest flex items-center gap-4 justify-center shadow-lg shadow-rose-100/50">
-                             <ShieldAlert size={18} /> Interrupt: {error}
-                        </motion.div>
-                    )}
-                </section>
+            {/* Editor Area */}
+            <div className="clean-card mb-10 overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 bg-slate-800/50 border-b border-slate-700/50">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Text Editor</span>
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-slate-700 rounded-md text-slate-400 transition-colors" title="Upload File">
+                            <Upload size={16} />
+                        </button>
+                        <input type="file" ref={fileInputRef} className="hidden" accept=".txt" onChange={(e)=>{
+                            const f=e.target.files?.[0]; if(!f)return;
+                            const r=new FileReader(); r.onload=(ev)=>setContent((ev.target?.result as string)||''); r.readAsText(f);
+                        }} />
+                        <button onClick={() => setContent('')} className="p-2 hover:bg-slate-700 rounded-md text-slate-400 transition-colors" title="Clear">
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                </div>
+                <textarea 
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Provide text here..."
+                    className="w-full bg-transparent text-slate-200 placeholder:text-slate-600 outline-none resize-none px-6 py-6 font-medium leading-relaxed min-h-[250px] max-h-[300px] overflow-y-auto"
+                />
+            </div>
 
-                {/* ═══════════════════════════════════════════════
-                   OUTPUT MANIFEST AREA
-                   ═══════════════════════════════════════════════ */}
-                <section className="output-bottom-area pb-40" id="ws-results">
-                    <AnimatePresence mode="wait">
-                        {!result && !loading ? (
-                             <div className="pt-24 space-y-32">
-                                  <div className="flex flex-col items-center">
-                                       <div className="relative mb-12">
-                                            <div className="absolute inset-0 bg-indigo-500 blur-[80px] opacity-10 animate-pulse" />
-                                            <div className="w-32 h-32 bg-white rounded-[40px] flex items-center justify-center border border-indigo-50 shadow-2xl relative z-10">
-                                                 <Logo variant="icon" className="w-16 h-16 text-slate-100 grayscale opacity-20" />
-                                            </div>
-                                       </div>
-                                       <p className="text-[12px] font-black text-slate-300 uppercase tracking-[0.8em] italic">Neural Nexus Standby</p>
-                                  </div>
+            {/* Results Header */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold text-white">Results</h3>
+            </div>
 
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                                       <FeatureInsightCard 
-                                            title="Smart Produce"
-                                            desc="High-fidelity AI synthesis based on deep research nodes."
-                                            icon={PenTool}
-                                            color="indigo"
-                                       />
-                                       <FeatureInsightCard 
-                                            title="Spectra Audit"
-                                            desc="Forensic claim verification & logical sync scan."
-                                            icon={ShieldCheck}
-                                            color="blue"
-                                       />
-                                       <FeatureInsightCard 
-                                            title="Writing DNA"
-                                            desc="Linguistic fingerprinting & probabilistic AI detection."
-                                            icon={Fingerprint}
-                                            color="purple"
-                                       />
-                                  </div>
-                             </div>
-                        ) : loading ? (
-                             <motion.div key="load" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-40 modern-card border-none bg-white">
-                                  <div className="relative mb-24 scale-150">
-                                       <div className="w-48 h-48 border-[6px] border-indigo-50 border-t-indigo-500 rounded-full animate-spin" />
-                                       <div className="absolute inset-0 flex items-center justify-center">
-                                            <Logo variant="icon" className="w-16 h-16 text-indigo-500 animate-pulse" />
-                                       </div>
-                                  </div>
-                                  <div className="space-y-6 w-full max-w-sm">
-                                       {PIPELINE_STEPS.map((step, i) => (
-                                           <div key={i} className={`pipeline-step px-10 py-5 rounded-[2rem] border transition-all duration-700 ${i <= loadStep ? 'active bg-white shadow-xl border-indigo-100 scale-105' : 'border-transparent'}`}>
-                                                <step.icon size={22} className={i <= loadStep ? step.color : 'text-slate-200'} />
-                                                <span className="text-sm font-black uppercase tracking-widest">{step.label}</span>
-                                                {i < loadStep && <CheckCircle2 size={18} className="ml-auto text-emerald-500" />}
-                                                {i === loadStep && <Loader2 size={18} className="ml-auto animate-spin text-indigo-400" />}
-                                           </div>
-                                       ))}
-                                  </div>
-                             </motion.div>
-                        ) : (
-                             <motion.div key="res" initial={{ opacity: 0, scale: 0.98, y: 40 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: 'spring', damping: 25 }} className="space-y-16">
-                                  {/* Result Node Header */}
-                                  <div className="flex items-center justify-between px-10 py-12 modern-card border-none bg-indigo-600 shadow-indigo-200">
-                                       <div className="flex items-center gap-8">
-                                            <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-[2rem] flex items-center justify-center border border-white/20">
-                                                  <Bot size={40} className="text-white" />
-                                            </div>
-                                            <div>
-                                                 <h3 className="text-[14px] font-black text-white uppercase tracking-[0.5em] italic">{result?.type?.toUpperCase()} MANIFEST READY</h3>
-                                                 <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Neural Stability: 100 percent Accurate</span>
-                                            </div>
-                                       </div>
-                                       <div className="flex gap-5">
-                                            <button onClick={() => { setContent((result?.data as any)?.answer || (result?.data as any)?.humanized_text || (result?.data as any)?.text || ''); setResult(null); }} className="px-10 py-4 bg-black/10 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-black/20 transition-all border border-white/10">Import Manifest</button>
-                                            <button onClick={() => generatePDF()} className="px-10 py-4 bg-white text-indigo-600 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl font-sans">Extract PDF Record</button>
-                                       </div>
-                                  </div>
+            {/* Loading State */}
+            {loading && (
+                <div className="clean-card p-16 text-center bg-primary/5 border-primary/20">
+                    <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
+                    <p className="text-primary font-medium">Processing request...</p>
+                </div>
+            )}
 
-                                  {/* ─── Dynamically Render Manifest Type ─── */}
-                                  {result?.type === 'plagiarism' && <PlagiarismNode data={result.data as PlagiarismData} />}
-                                  {result?.type === 'analyze' && <TruthNode data={result.data as TruthData} />}
-                                  {result?.type === 'visualize' && <VisualizeNode data={result.data as VisualizeData} />}
-                                  {(result?.type === 'generate' || result?.type === 'humanize') && (
-                                      <div className="modern-card p-24 bg-white border-none shadow-lux relative group">
-                                           <div className="absolute top-0 right-0 p-16 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none">
-                                                 <Layout size={350} />
-                                           </div>
-                                           <div className="prose prose-indigo max-w-none relative z-10 px-8 py-10">
-                                                <p className="text-4xl font-serif font-light text-slate-700 leading-relaxed italic selection:bg-indigo-100">
-                                                    "{(result.data as any)?.answer || (result.data as any)?.humanized_text || (result.data as any)?.text}"
-                                                </p>
-                                           </div>
-                                           <div className="mt-16 flex items-center gap-6 border-t border-slate-50 pt-12 text-slate-400">
-                                                 <PenTool size={22} className="text-indigo-400" />
-                                                 <span className="text-[11px] font-black uppercase tracking-[0.5em] italic">VeriMind Synthesis Output-Node Alpha-12</span>
-                                           </div>
-                                      </div>
-                                  )}
-                             </motion.div>
+            {/* Empty State */}
+            {!result && !loading && (
+                <div className="clean-card border-dashed border-slate-700 p-16 text-center">
+                    <Inbox className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-400 font-medium">Your result will appear here</p>
+                </div>
+            )}
+
+            {/* Populated Result */}
+            {result && !loading && (
+                <ResultBoxes result={result} />
+            )}
+        </div>
+    );
+}
+
+// Sub-component rendering the separate boxes cleanly
+function ResultBoxes({ result }: { result: any }) {
+    const { type, data } = result;
+
+    if (type === 'analyze') {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="clean-card p-6 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Score</span>
+                    <span className="text-6xl font-bold text-primary">{data.credibility_score}%</span>
+                    <span className="text-xs text-slate-500 mt-2">Credibility</span>
+                </div>
+                <div className="clean-card p-6">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4 block">Analysis</span>
+                    <p className="text-slate-300 text-sm leading-relaxed">{data.simple_explanation || "Detailed analysis completed."}</p>
+                </div>
+                <div className="clean-card p-6">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4 block">Suggestions & Claims</span>
+                    <ul className="text-sm text-slate-300 space-y-4">
+                        {data.suggestions?.length > 0 ? data.suggestions.slice(0,3).map((s: string, i: number) => (
+                            <li key={i} className="flex gap-3"><Check size={16} className="text-emerald-400 shrink-0"/> {s}</li>
+                        )) : (
+                            data.claims?.slice(0, 3).map((c: any, i: number) => (
+                                <li key={i} className="border-b border-white/5 pb-3">
+                                    <span className={`font-semibold block mb-1 ${c.verdict === 'True' || c.verdict === 'Verified' ? 'text-emerald-400' : 'text-rose-400'}`}>{c.verdict}</span> 
+                                    <span className="text-slate-400 text-xs">{c.claim}</span>
+                                </li>
+                            ))
                         )}
-                    </AnimatePresence>
-                </section>
-            </main>
-
-            <IntelligenceReport data={result?.data as any} type={result?.type as any} content={content} />
-        </div>
-    );
-}
-
-function FeatureInsightCard({ title, desc, icon: Icon, color }: { title: string, desc: string, icon: React.ElementType, color: 'indigo' | 'blue' | 'purple' | 'rose' }) {
-    const colors: Record<string, string> = {
-        indigo: 'bg-indigo-50 border-indigo-100 text-indigo-500',
-        blue: 'bg-blue-50 border-blue-100 text-blue-500',
-        purple: 'bg-purple-50 border-purple-100 text-purple-500',
-        rose: 'bg-rose-50 border-rose-100 text-rose-500',
-    };
-    return (
-        <div className="modern-card p-12 bg-white border-none shadow-lux flex flex-col items-center text-center group cursor-default">
-             <div className={`w-24 h-24 rounded-[2.5rem] border ${colors[color]} flex items-center justify-center mb-10 group-hover:scale-110 transition-transform`}>
-                   <Icon size={40} />
-             </div>
-             <h4 className="text-2xl font-black text-slate-800 tracking-tight italic mb-5">{title}</h4>
-             <p className="text-sm text-slate-500 leading-relaxed font-medium px-4">{desc}</p>
-        </div>
-    );
-}
-
-function PlagiarismNode({ data }: { data: PlagiarismData }) {
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="modern-card p-20 flex flex-col items-center text-center bg-white border-none shadow-lux">
-                 <span className="text-[12px] font-black text-slate-400 uppercase tracking-[0.6em] mb-12">Originality Index</span>
-                 <div className="text-[140px] font-black text-rose-500 leading-none mb-10 tracking-tighter italic">{data.score}%</div>
-                 <div className="px-10 py-3 bg-rose-50 rounded-full border border-rose-100">
-                     <p className="text-[11px] text-rose-600 font-black uppercase tracking-widest">{data.verdict} BREACH LEVEL</p>
-                 </div>
+                    </ul>
+                </div>
             </div>
-            <div className="modern-card md:col-span-2 p-24 bg-white border-none shadow-lux">
-                 <h4 className="text-[12px] font-black text-slate-300 uppercase tracking-[0.8em] mb-16 italic border-b border-slate-50 pb-8 flex items-center gap-4">
-                      <FileSearch size={18} className="text-rose-400" />
-                      Neural Audit Summative Manifest
-                 </h4>
-                 <p className="text-4xl text-slate-600 font-serif italic font-light leading-relaxed px-4">"{data.explanation}"</p>
-                 <div className="mt-16 flex flex-wrap gap-4 px-4">
-                      {(data.suspicious_segments || []).slice(0, 3).map((seg, i) => (
-                          <div key={i} className="px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100 text-[11px] font-bold text-slate-500 flex items-center gap-3">
-                               <Info size={14} className="text-rose-400" />
-                               {seg.sentence.substring(0, 40)}...
-                          </div>
-                      ))}
-                 </div>
+        );
+    }
+
+    if (type === 'plagiarism') {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="clean-card p-6 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Score</span>
+                    <span className="text-6xl font-bold text-emerald-400">{data.score}%</span>
+                    <span className="text-xs text-slate-500 mt-2">{data.verdict}</span>
+                </div>
+                <div className="clean-card p-6">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4 block">Analysis</span>
+                    <p className="text-slate-300 text-sm leading-relaxed">{data.explanation}</p>
+                </div>
+                <div className="clean-card p-6">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4 block">Suggestions & Alerts</span>
+                    <div className="space-y-3">
+                        {(data.suspicious_segments || []).length > 0 ? data.suspicious_segments.slice(0, 3).map((seg: any, i: number) => (
+                            <div key={i} className="p-3 bg-slate-800/50 rounded border border-slate-700/50 text-xs text-slate-300">
+                                "{seg.sentence}"
+                            </div>
+                        )) : (
+                            <div className="text-slate-400 text-sm">No suspicious sentences found. Great job!</div>
+                        )}
+                    </div>
+                </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
 
-function TruthNode({ data }: { data: TruthData }) {
-    return (
-        <div className="space-y-16">
-             <div className="modern-card bg-indigo-600 border-none text-center py-24 px-10 relative overflow-hidden group shadow-3xl">
-                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-400/20 via-transparent to-transparent opacity-50" />
-                 <span className="text-[14px] font-black text-indigo-200 uppercase tracking-[1em] mb-12 block relative z-10 italic">Credibility Scalar Baseline</span>
-                 <div className="text-[180px] font-black text-white italic tracking-tighter relative z-10 leading-none">{data.credibility_score}%</div>
-                 <div className="mt-16 relative z-10 text-white/40 flex items-center justify-center gap-8 uppercase tracking-[0.4em] font-black text-[10px]">
-                      <div className="flex items-center gap-3"><Shield size={16} /> Data Indexed: 100%</div>
-                      <div className="flex items-center gap-3"><Cpu size={16} /> Sync Rate: Optimal</div>
-                 </div>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                 {data.claims?.map((c, i) => (
-                      <div key={i} className="modern-card p-16 bg-white border-none shadow-lux group hover:bg-slate-50 transition-all">
-                          <div className="flex justify-between items-center mb-10">
-                               <div className="flex items-center gap-5">
-                                   <div className={`w-4 h-4 rounded-full ${c.verdict === 'True' || c.verdict === 'Verified' ? 'bg-emerald-400' : 'bg-rose-400'} shadow-lg`} />
-                                   <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em] italic">{c.verdict} NODE</span>
-                               </div>
-                               <div className="px-6 py-2 bg-indigo-50 border border-indigo-100 rounded-2xl">
-                                    <span className="text-[11px] font-black text-indigo-500 uppercase italic">{c.confidence}% Confidence</span>
-                               </div>
-                          </div>
-                          <p className="text-3xl text-slate-800 font-serif font-light leading-tight mb-8 group-hover:text-indigo-900 transition-colors">"{c.claim}"</p>
-                          <p className="text-sm text-slate-500 font-medium italic border-l-4 border-slate-100 pl-8 leading-relaxed">{c.reasoning}</p>
-                      </div>
-                 ))}
-             </div>
-        </div>
-    );
-}
-
-function VisualizeNode({ data }: { data: VisualizeData }) {
-    return (
-        <div className="space-y-16">
-             <div className="modern-card p-24 bg-white border-none shadow-lux">
-                 <h4 className="text-[12px] font-black text-slate-300 uppercase tracking-[0.8em] mb-12 italic text-center">Spectral Knowledge Analysis</h4>
-                 <p className="text-4xl text-slate-600 font-serif font-light italic leading-relaxed text-center px-10">"{data.summary}"</p>
-             </div>
-             {data.mermaid_diagrams?.map((d, i) => (
-                 <div key={i} className="modern-card bg-white p-24 shadow-lux border-none overflow-x-auto custom-scrollbar">
-                     <div className="flex items-center justify-between mb-20 px-4">
-                        <span className="text-[12px] font-black uppercase tracking-[0.8em] text-slate-300 italic">LOGIC FLOW: {d.type.toUpperCase()}</span>
-                        <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center">
-                            <Network size={22} className="text-indigo-500" />
+    if (type === 'visualize') {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="clean-card p-6 flex flex-col justify-center">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4 block">Analysis Summary</span>
+                    <p className="text-slate-300 text-sm leading-relaxed">{data.summary}</p>
+                </div>
+                <div className="clean-card p-6 md:col-span-2 overflow-x-auto">
+                    {data.mermaid_diagrams?.map((d: any, i: number) => (
+                        <div key={i}>
+                             <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4 block">{d.type} Chart</span>
+                             <div className="min-h-[250px] flex items-center justify-center bg-white p-4 rounded-xl text-black overflow-x-auto">
+                                  <Mermaid code={d.code} />
+                             </div>
                         </div>
-                     </div>
-                     <div className="min-h-[500px] flex items-center justify-center scale-110">
-                        <Mermaid code={d.code} />
-                     </div>
-                 </div>
-             ))}
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Default for Generate / Humanize
+    return (
+        <div className="grid grid-cols-1 gap-6">
+            <div className="clean-card p-6 col-span-1">
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4 block">Analysis / Output</span>
+                <div className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+                    {data.answer || data.humanized_text || data.text}
+                </div>
+            </div>
         </div>
     );
 }
