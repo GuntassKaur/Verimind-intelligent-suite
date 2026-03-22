@@ -13,7 +13,7 @@ interface MermaidProps {
     isPrint?: boolean;
 }
 
-export const Mermaid: React.FC<MermaidProps> = ({ code, isPrint }) => {
+export const Mermaid: React.FC<MermaidProps> = ({ code }) => {
     const ref = useRef<HTMLDivElement>(null);
     const [svg, setSvg] = useState<string>('');
 
