@@ -146,10 +146,10 @@ export default function DashboardLayout() {
                         
                         <div className="flex items-center gap-4 cursor-pointer group">
                             <div className="text-right hidden md:block">
-                                <p className="text-sm font-extrabold text-slate-900 leading-tight">{userData?.name || 'Neural Entity'}</p>
-                                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-0.5">Prime Operator</p>
+                                <p className="text-sm font-extrabold text-slate-900 leading-tight">{userData?.name || 'Guest User'}</p>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Member</p>
                             </div>
-                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center p-0.5 shadow-md group-hover:shadow-lg transition-all group-hover:-translate-y-0.5">
+                            <div className="w-12 h-12 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all group-hover:-translate-y-0.5">
                                 <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden">
                                     <User size={20} className="text-indigo-600" />
                                 </div>
