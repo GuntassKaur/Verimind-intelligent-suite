@@ -52,7 +52,7 @@ interface GeneralData {
 
 interface ResultState {
     type: string;
-    data: PlagiarismData | TruthData | VisualizeData | GeneralData | any;
+    data: PlagiarismData | TruthData | VisualizeData | GeneralData;
 }
 
 const PIPELINE_STEPS = [
@@ -74,7 +74,7 @@ export default function Workspace() {
     const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
 
     useEffect(() => {
-        let interval: any;
+        let interval: ReturnType<typeof setInterval> | undefined;
         if (loading) {
             setLoadStep(0);
             interval = setInterval(() => {
@@ -96,7 +96,7 @@ export default function Workspace() {
 
         try {
             let endpoint = '';
-            let payload: any = {};
+            let payload: Record<string, unknown> = {};
 
             switch (type) {
                 case 'generate': endpoint = '/api/ai/generate'; payload = { prompt: content || 'Generate a high-fidelity research paper outline.' }; break;
@@ -114,8 +114,9 @@ export default function Workspace() {
                 setError(data.error || "Neural Protocol Sync Loss. Please calibrate input.");
             }
 
-        } catch (err: any) {
-             setError(err.response?.data?.error || `Sync Lost: ${type.toUpperCase()} node offline. (Ensure backend is linked)`);
+        } catch (err: unknown) {
+             const axiosError = err as { response?: { data?: { error?: string } } };
+             setError(axiosError.response?.data?.error || `Sync Lost: ${type.toUpperCase()} node offline. (Ensure backend is linked)`);
         } finally {
             setLoading(null);
         }
@@ -297,7 +298,7 @@ export default function Workspace() {
                                             </div>
                                        </div>
                                        <div className="flex gap-5">
-                                            <button onClick={() => { setContent(result?.data?.answer || result?.data?.humanized_text || result?.data?.text || ''); setResult(null); }} className="px-10 py-4 bg-black/10 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-black/20 transition-all border border-white/10">Import Manifest</button>
+                                            <button onClick={() => { setContent((result?.data as any)?.answer || (result?.data as any)?.humanized_text || (result?.data as any)?.text || ''); setResult(null); }} className="px-10 py-4 bg-black/10 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-black/20 transition-all border border-white/10">Import Manifest</button>
                                             <button onClick={() => generatePDF()} className="px-10 py-4 bg-white text-indigo-600 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl font-sans">Extract PDF Record</button>
                                        </div>
                                   </div>
@@ -313,7 +314,7 @@ export default function Workspace() {
                                            </div>
                                            <div className="prose prose-indigo max-w-none relative z-10 px-8 py-10">
                                                 <p className="text-4xl font-serif font-light text-slate-700 leading-relaxed italic selection:bg-indigo-100">
-                                                    "{result.data?.answer || result.data?.humanized_text || result.data?.text}"
+                                                    "{(result.data as any)?.answer || (result.data as any)?.humanized_text || (result.data as any)?.text}"
                                                 </p>
                                            </div>
                                            <div className="mt-16 flex items-center gap-6 border-t border-slate-50 pt-12 text-slate-400">
@@ -328,13 +329,13 @@ export default function Workspace() {
                 </section>
             </main>
 
-            <IntelligenceReport data={result?.data} type={result?.type as any} content={content} />
+            <IntelligenceReport data={result?.data as any} type={result?.type as any} content={content} />
         </div>
     );
 }
 
-function FeatureInsightCard({ title, desc, icon: Icon, color }: any) {
-    const colors: any = {
+function FeatureInsightCard({ title, desc, icon: Icon, color }: { title: string, desc: string, icon: React.ElementType, color: 'indigo' | 'blue' | 'purple' | 'rose' }) {
+    const colors: Record<string, string> = {
         indigo: 'bg-indigo-50 border-indigo-100 text-indigo-500',
         blue: 'bg-blue-50 border-blue-100 text-blue-500',
         purple: 'bg-purple-50 border-purple-100 text-purple-500',

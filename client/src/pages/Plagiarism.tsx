@@ -159,7 +159,7 @@ export default function Plagiarism() {
                                   <div className="modern-card p-10 bg-black/40 border-white/5">
                                       <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-10 flex items-center gap-4"><ShieldAlert size={18} className="text-rose-400" /> Duplicate Spectrum Nodes</h4>
                                       <div className="space-y-4">
-                                          {result.suspicious_segments.map((seg: any, i: number) => (
+                                          {result.suspicious_segments.map((seg: string, i: number) => (
                                               <div key={i} className="p-6 bg-white/5 border border-white/10 rounded-2xl">
                                                   <p className="text-[11px] text-slate-400 font-medium italic leading-relaxed">"{seg}"</p>
                                               </div>

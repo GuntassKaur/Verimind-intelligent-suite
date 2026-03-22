@@ -41,6 +41,11 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
     // Normalize data for display
     const resultText = data.humanized_text || data.answer || data.summary || data.explanation || '';
 
+    const [verificationId, setVerificationId] = React.useState('');
+    React.useEffect(() => {
+        setVerificationId('VM-' + Math.random().toString(36).substring(2, 10).toUpperCase());
+    }, []);
+
     // Derived Metrics
     const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
     const aiProbability = data.ai_probability !== undefined 
@@ -67,7 +72,7 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                 <div className="text-right flex flex-col items-end">
                     <div className="bg-slate-100 px-4 py-2 rounded-xl mb-4 border border-slate-200">
                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Verification ID</p>
-                        <p className="text-sm font-black italic tracking-tighter">VM-{Math.random().toString(36).substring(2, 10).toUpperCase()}</p>
+                        <p className="text-sm font-black italic tracking-tighter">{verificationId || 'VM-PENDING'}</p>
                     </div>
                     <p className="text-[10px] font-bold text-slate-400">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{new Date().toLocaleTimeString()}</p>

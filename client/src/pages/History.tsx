@@ -18,7 +18,7 @@ interface HistoryItem {
     _id: string;
     type: string;
     content: string;
-    result: any;
+    result: unknown;
     createdAt: string;
 }
 

@@ -22,7 +22,7 @@ export default function TypingLab() {
     const [activeSeconds, setActiveSeconds] = useState(0);
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const timerRef = useRef<any>(null);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Sync with Assistant Panel
     useEffect(() => {
@@ -38,7 +38,7 @@ export default function TypingLab() {
         try {
             const { data } = await api.get('/api/typing/quote');
             if (data.success) setText(data.quote);
-        } catch (err) {
+        } catch {
             setText("The neural network is initializing. Prepare for high-fidelity linguistic synchronization.");
         }
     }, []);

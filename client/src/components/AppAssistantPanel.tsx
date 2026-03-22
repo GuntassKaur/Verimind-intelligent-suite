@@ -17,6 +17,11 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
   suggestions = ["Refine structural tone", "Enhance factual density", "Sync logic across nodes"], 
   tips = ["Active voice resonates faster", "Verification IDs ensure protocol trust", "Keep paragraphs under 350 characters"] 
 }) => {
+  const [tipIndex, setTipIndex] = React.useState(0);
+  React.useEffect(() => {
+    setTipIndex(Math.floor(Math.random() * tips.length));
+  }, [tips.length]);
+
   return (
     <aside className="insights-side-panel no-print hidden xl:flex flex-col gap-10">
       {/* ─── Header ─── */}
@@ -114,7 +119,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
              <Info size={14} className="text-indigo-400" /> Strategic Protocol
            </h5>
            <p className="text-[11px] text-slate-400 leading-relaxed font-semibold italic relative z-10 selection:bg-indigo-500/30">
-             "{tips[Math.floor(Math.random() * tips.length)]}"
+             "{tips[tipIndex]}"
            </p>
            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-indigo-500/30" />
         </div>

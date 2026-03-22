@@ -31,6 +31,7 @@ export const FloatingParticles = () => {
             pathX: [0, (Math.random() - 0.5) * 400, 0],
             pathY: [0, (Math.random() - 0.5) * 400, 0]
         }));
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setParticles(newParticles);
     }, []);
 

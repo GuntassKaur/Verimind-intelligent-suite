@@ -1,0 +1,53 @@
+﻿python : WARNING:services.gemini_
+service:Gemini Service: Could 
+not initialize new google-genai 
+SDK: cannot import name 'genai' 
+from 'google' (unknown location)
+At line:1 char:1
++ python app.py > server.log 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : No 
+   tSpecified: (WARNING:service  
+  ...known location):String) [   
+ ], RemoteException
+    + FullyQualifiedErrorId : Na 
+   tiveCommandError
+ 
+C:\Users\Guntass Kaur\Downloads\a
+iproject\server\services\gemini_s
+ervice.py:31: FutureWarning: 
+
+All support for the 
+`google.generativeai` package 
+has ended. It will no longer be 
+receiving 
+updates or bug fixes. Please 
+switch to the `google.genai` 
+package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/
+deprecated-generative-ai-python/b
+lob/main/README.md
+
+  import google.generativeai as 
+legacy_genai
+INFO:services.gemini_service:Gemi
+ni Service: google-generativeai 
+SDK (models/gemini-flash-latest) 
+initialized (Fallback).
+ * Serving Flask app 'app'
+ * Debug mode: off
+INFO:werkzeug:[31m[1mWARNING: 
+This is a development server. Do 
+not use it in a production 
+deployment. Use a production 
+WSGI server instead.[0m
+ * Running on all addresses 
+(0.0.0.0)
+ * Running on 
+http://127.0.0.1:5000
+ * Running on 
+http://192.168.29.11:5000
+INFO:werkzeug:[33mPress CTRL+C 
+to quit[0m

@@ -19,11 +19,12 @@ import { Logo } from './Logo';
 
 export default function DashboardLayout() {
     const [collapsed, setCollapsed] = useState(false);
-    const [userData, setUserData] = useState<any>(null);
+    const [userData, setUserData] = useState<{name?: string} | null>(null);
     const location = useLocation();
 
     useEffect(() => {
         const stored = localStorage.getItem('user');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (stored) setUserData(JSON.parse(stored));
     }, []);
 

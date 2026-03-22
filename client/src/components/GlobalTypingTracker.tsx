@@ -16,6 +16,7 @@ export const GlobalTypingTracker: React.FC = () => {
 
     useEffect(() => {
         if (isExcludedPage) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setWpm(0);
             return;
         }

@@ -5,7 +5,6 @@ import {
     User, 
     Mail, 
     Lock, 
-    ShieldCheck, 
     ArrowRight, 
     Loader2, 
     Zap,
