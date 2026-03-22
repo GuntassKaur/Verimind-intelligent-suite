@@ -5,34 +5,36 @@
 @tailwind utilities;
 
 :root {
-  /* Light Theme - Soft Porcelain / Beige */
-  --bg-app:        #FDFBF7; 
+  /* Light Theme - Modern SaaS Slate */
+  --bg-app:        #F8FAFC; /* Slate 50 */
   --bg-card:       #FFFFFF;
-  --bg-side:       #F9F7F2;
-  --bg-header:     rgba(255, 255, 255, 0.8);
+  --bg-side:       #F1F5F9; /* Slate 100 */
+  --bg-header:     rgba(248, 250, 252, 0.8);
   --primary:       #6366F1; /* Indigo 500 */
   --primary-hover: #4F46E5; /* Indigo 600 */
-  --text-main:     #1E293B; /* Slate 800 */
+  --accent-soft:   #EEF2FF; /* Indigo 50 */
+  --text-main:     #0F172A; /* Slate 900 */
   --text-muted:    #64748B; /* Slate 500 */
   --border-soft:   #E2E8F0; /* Slate 200 */
-  --shadow-clean:  0 4px 20px -5px rgba(0, 0, 0, 0.05);
-  --shadow-hover:  0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  --shadow-clean:  0 10px 30px -10px rgba(0, 0, 0, 0.04);
+  --shadow-hover:  0 20px 40px -15px rgba(0, 0, 0, 0.08);
   --font-main:     'Inter', sans-serif;
 }
 
 .dark {
-  /* Dark Theme - Deep midnight / Black */
-  --bg-app:        #05070A;
-  --bg-card:       #0C0F17;
-  --bg-side:       #080B12;
-  --bg-header:     rgba(12, 15, 23, 0.8);
+  /* Dark Theme - Deep Midnight Navy */
+  --bg-app:        #0F172A; /* Spec: #0f172a */
+  --bg-card:       #1E293B; /* Spec: #1e293b */
+  --bg-side:       #111827; /* Gray 900 */
+  --bg-header:     rgba(15, 23, 42, 0.8);
   --primary:       #818CF8; /* Indigo 400 */
   --primary-hover: #A5B4FC; /* Indigo 300 */
-  --text-main:     #F1F5F9; /* Slate 100 */
+  --accent-soft:   #1E1B4B; /* Indigo 950 */
+  --text-main:     #E2E8F0; /* Spec: #e2e8f0 (Soft White) */
   --text-muted:    #94A3B8; /* Slate 400 */
-  --border-soft:   #1E293B; /* Slate 800 */
-  --shadow-clean:  0 4px 20px -5px rgba(0, 0, 0, 0.4);
-  --shadow-hover:  0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  --border-soft:   #334155; /* Slate 700 */
+  --shadow-clean:  0 10px 40px -10px rgba(0, 0, 0, 0.4);
+  --shadow-hover:  0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
 
 *, *::before, *::after { box-sizing: border-box; }

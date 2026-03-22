@@ -5,6 +5,7 @@ import DashboardLayout from './components/DashboardLayout';
 // Lazy load pages for performance
 const Landing = lazy(() => import('./pages/Landing'));
 const History = lazy(() => import('./pages/History'));
+const Settings = lazy(() => import('./pages/Settings'));
 const Login = lazy(() => import('./pages/Login'));
 const Workspace = lazy(() => import('./pages/Workspace'));
 const Visualizer = lazy(() => import('./pages/Visualizer'));
@@ -108,6 +109,7 @@ function AppContent() {
                     <Route path="research" element={<Research />} />
                     <Route path="typing" element={<TypingLab />} />
                     <Route path="history" element={user ? <History /> : <Navigate to="/login" replace />} />
+                    <Route path="settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
                 </Route>
                 <Route path="/overview" element={<Landing />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

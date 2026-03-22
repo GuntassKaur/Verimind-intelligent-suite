@@ -238,6 +238,41 @@ def get_typing_quote():
     quote = get_typing_text(difficulty, category)
     return create_response(data={"quote": quote})
 
+@app.route("/api/process/url", methods=["POST"])
+@login_required
+def process_url():
+    data = request.json or {}
+    url = data.get("url")
+    if not url: return create_response(success=False, error="URL missing from manifest.", status=400)
+    text = extract_text_from_url(url)
+    return create_response(data={"text": text})
+
+@app.route("/api/process/pdf", methods=["POST"])
+@login_required
+def process_pdf():
+    if 'file' not in request.files: return create_response(success=False, error="PDF substrate missing.", status=400)
+    file = request.files['file']
+    text = extract_text_from_pdf(file)
+    return create_response(data={"text": text})
+
+@app.route("/api/process/image", methods=["POST"])
+@login_required
+def process_image():
+    if 'file' not in request.files: return create_response(success=False, error="Visual substrate missing.", status=400)
+    file = request.files['file']
+    is_screenshot = request.form.get('is_screenshot') == 'true'
+    
+    # Extract text (OCR)
+    text = "Extracted text placeholder (OCR engine initializing)" 
+    # In a real app, you'd use Tesseract or similar.
+    # For now, let's assume analyze_screenshot handles everything if it's a screenshot.
+    
+    if is_screenshot:
+        result = analyze_screenshot(file)
+        return create_response(data={"text": result.get('text', text), "audit": result})
+    
+    return create_response(data={"text": text})
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     logger.error(f"VERIMIND SPECTRAL ERROR: {str(e)}", exc_info=True)
