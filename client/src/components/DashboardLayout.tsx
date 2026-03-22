@@ -40,7 +40,7 @@ export default function DashboardLayout() {
             {/* Sidebar */}
             <motion.aside
                 animate={{ width: collapsed ? 100 : 280 }}
-                className="bg-white border-r border-slate-200 relative flex flex-col z-30 shadow-sm"
+                className="hidden md:flex bg-white border-r border-slate-200 relative flex-col z-30 shadow-sm"
             >
                 <div className="p-8 pb-10 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-4 group">
@@ -128,10 +128,10 @@ export default function DashboardLayout() {
             </motion.aside>
 
             {/* Main Area */}
-            <div className="flex-1 flex flex-col overflow-hidden relative">
+            <div className="flex-1 flex flex-col overflow-hidden relative pb-20 md:pb-0">
                 {/* Modern Floating Header */}
-                <header className="h-24 px-10 border-b border-slate-200 bg-white/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
-                    <div className="flex items-center gap-6 w-1/3">
+                <header className="h-20 md:h-24 px-4 md:px-10 border-b border-slate-200 bg-white/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
+                    <div className="flex items-center gap-6 w-1/2 md:w-1/3">
                          <form 
                             onSubmit={(e) => {
                                 e.preventDefault();
@@ -144,52 +144,85 @@ export default function DashboardLayout() {
                             }}
                             className="relative group w-full max-w-[400px]"
                          >
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 md:text-slate-400" size={16} />
                             <input 
                                 type="text"
                                 name="search"
-                                placeholder="Search apps (e.g., 'typing game', 'visualizer')..."
-                                className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-12 pr-6 py-3.5 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400"
+                                placeholder="Search apps..."
+                                className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-10 md:pl-12 pr-4 md:pr-6 py-2.5 md:py-3.5 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all md:placeholder:text-slate-400 placeholder:text-transparent"
                             />
                          </form>
                     </div>
                     
-                    <div className="flex items-center gap-8">
-                        <div className="flex gap-4">
+                    <div className="flex items-center gap-4 md:gap-8">
+                        <div className="flex gap-2 md:gap-4">
                             <button 
                                 onClick={() => alert("Notifications:\nWelcome to VeriMind Beta! You have successfully signed in. New intelligence models will be dropping soon.")}
-                                className="p-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative"
+                                className="p-2 md:p-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative"
                             >
-                                <Bell size={20} />
-                                <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white" />
+                                <Bell size={18} className="md:w-5 md:h-5" />
+                                <div className="absolute top-2 right-2 md:top-2.5 md:right-2.5 w-2 h-2 md:w-2.5 md:h-2.5 bg-rose-500 rounded-full border-2 border-white" />
                             </button>
                             <button 
                                 onClick={() => alert("Favorites is a Pro feature! Star your favorite generations to save them forever. Coming soon.")}
-                                className="p-3 text-slate-500 hover:text-amber-500 hover:bg-amber-50 rounded-xl transition-all"
+                                className="p-2 md:p-3 text-slate-500 hover:text-amber-500 hover:bg-amber-50 rounded-xl transition-all hidden sm:block"
                             >
-                                <Star size={20} />
+                                <Star size={18} className="md:w-5 md:h-5" />
                             </button>
                         </div>
                         
-                        <div className="h-10 w-[1px] bg-slate-200" />
+                        <div className="h-8 md:h-10 w-[1px] bg-slate-200" />
                         
                         <div className="flex items-center gap-4 cursor-pointer group">
                             <div className="text-right hidden md:block">
                                 <p className="text-sm font-extrabold text-slate-900 leading-tight">{userData?.name || 'Guest User'}</p>
                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Member</p>
                             </div>
-                            <div className="w-12 h-12 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all group-hover:-translate-y-0.5">
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all group-hover:-translate-y-0.5">
                                 <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden">
-                                    <User size={20} className="text-indigo-600" />
+                                    <User size={18} className="text-indigo-600 md:w-5 md:h-5" />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto custom-scrollbar">
+                <main className="flex-1 overflow-y-auto custom-scrollbar p-0">
                     <Outlet />
                 </main>
+            </div>
+
+            {/* Mobile Bottom Navigation */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200 z-50 px-4 py-2 pb-safe flex justify-between items-center shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+                {navItems.map((item) => {
+                    const active = location.pathname === item.path;
+                    return (
+                        <Link 
+                            key={item.path} 
+                            to={item.path}
+                            className={`flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all ${active ? 'text-indigo-600' : 'text-slate-400 hover:bg-slate-50'}`}
+                        >
+                            <div className={`p-1.5 rounded-xl transition-colors ${active ? 'bg-indigo-50 mb-1' : ''}`}>
+                                <item.icon size={20} strokeWidth={active ? 2.5 : 2} />
+                            </div>
+                            {active && <span className="text-[9px] font-black uppercase tracking-widest">{item.label.split(' ')[0]}</span>}
+                        </Link>
+                    );
+                })}
+                <button 
+                    onClick={async () => { 
+                        try {
+                            await fetch('/api/auth/logout', { method: 'POST' });
+                        } catch (e) { console.error('Logout error', e); }
+                        localStorage.clear(); 
+                        window.location.href = '/login'; 
+                    }}
+                    className="flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                >
+                    <div className="p-1.5 rounded-xl">
+                        <LogOut size={20} />
+                    </div>
+                </button>
             </div>
         </div>
     );
