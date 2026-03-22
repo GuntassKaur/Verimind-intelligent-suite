@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Timer, Target, Zap, X, Activity, Trophy } from 'lucide-react';
+import { Timer, Target, Zap, X, Activity, Trophy, Play, RotateCcw } from 'lucide-react';
 import api from '../services/api';
 
 interface TypingUpdateDetail {
@@ -24,12 +24,12 @@ export default function TypingLab() {
     const inputRef = useRef<HTMLInputElement>(null);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    // Sync with Assistant Panel
+    // Sync with Assistant Panel (if any)
     useEffect(() => {
         const detail: TypingUpdateDetail = { wpm, accuracy };
         if (status === 'FINISHED' || wpm > 0) {
-            detail.suggestions = wpm < 30 ? ["Focus on accuracy", "Establish rhythm"] : wpm < 60 ? ["Minimize hand movement", "Touch typing drills"] : ["Advanced speed bursts", "Zero-error challenge"];
-            detail.tips = [`Current Precision: ${accuracy}%`, `Total Errors: ${errors}`];
+            detail.suggestions = wpm < 30 ? ["Focus on accuracy first!", "Don't look at the keyboard."] : wpm < 60 ? ["You're doing great, keep a steady rhythm.", "Try to read ahead as you type."] : ["Amazing speed!", "You are a typing master."];
+            detail.tips = [`High Score precision: ${accuracy}%`, `Errors made: ${errors}`];
         }
         window.dispatchEvent(new CustomEvent('typing_update', { detail }));
     }, [wpm, accuracy, status, errors]);
@@ -39,7 +39,7 @@ export default function TypingLab() {
             const { data } = await api.get('/api/typing/quote');
             if (data.success) setText(data.quote);
         } catch {
-            setText("The neural network is initializing. Prepare for high-fidelity linguistic synchronization.");
+            setText("The quick brown fox jumps over the lazy dog. Typing fast requires practice, focus, and good posture. Keep your fingers on the home row!");
         }
     }, []);
 
@@ -65,7 +65,6 @@ export default function TypingLab() {
 
         setUserInput(val);
         
-        // Calculate Errors
         let errs = 0;
         const targetArr = text.split('');
         val.split('').forEach((char, i) => {
@@ -73,11 +72,9 @@ export default function TypingLab() {
         });
         setErrors(errs);
 
-        // Accuracy
         const acc = Math.max(0, Math.round(((val.length - errs) / Math.max(1, val.length)) * 100));
         setAccuracy(acc);
 
-        // Finish condition
         if (val.length >= text.length) {
             finishTest();
         }
@@ -107,7 +104,6 @@ export default function TypingLab() {
         };
     }, [isActive, finishTest, timeLeft]);
 
-    // Live WPM calculation
     useEffect(() => {
         if (isActive && activeSeconds > 0) {
             const words = userInput.length / 5;
@@ -117,108 +113,140 @@ export default function TypingLab() {
     }, [activeSeconds, userInput, isActive]);
 
     return (
-        <div className="workspace-center-content">
-            <section className="input-top-area no-print">
-                <div className="tool-grid-wrapper mb-10">
-                      <button className="modern-tool-btn active">
-                         <Timer size={20} className="text-amber-400" />
-                         <span>Neural Cadence</span>
-                      </button>
+        <div className="w-full max-w-5xl mx-auto py-12 px-4 md:px-8">
+            <header className="text-center mb-12">
+                <div className="inline-flex items-center justify-center p-3 bg-amber-100 rounded-2xl mb-4 shadow-sm">
+                    <Trophy className="text-amber-500 w-8 h-8" />
                 </div>
+                <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">Speed Typing Game</h1>
+                <p className="text-slate-500 text-sm max-w-lg mx-auto font-medium">Test your typing speed and accuracy. Beat the clock and set a new high score!</p>
+            </header>
 
-                <div className="smart-gpt-editor bg-white/[0.01]">
-                    <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6 px-4 opacity-40">
+            <section className="mb-10">
+                <div className="clean-card bg-white p-8 overflow-hidden relative">
+                    {/* Game Stats Bar */}
+                    <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
                          <div className="flex items-center gap-3">
-                             <Activity size={16} className="text-indigo-400" />
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] italic">Frequency Synchronization</span>
+                             <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                                 <Timer size={20} />
+                             </div>
+                             <div className="flex flex-col">
+                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time Left</span>
+                                 <span className={`text-2xl font-black ${timeLeft < 10 && status === 'TYPING' ? 'text-rose-500 animate-pulse' : 'text-slate-800'}`}>{timeLeft}s</span>
+                             </div>
                          </div>
-                         <div className="flex items-center gap-6">
-                              <div className="flex flex-col items-center">
-                                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Time Remaining</span>
-                                  <span className={`text-xl font-black italic ${timeLeft < 10 ? 'text-rose-500 animate-pulse' : 'text-white'}`}>{timeLeft}s</span>
+                         <div className="flex gap-8">
+                              <div className="flex flex-col items-end">
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Speed</span>
+                                  <span className="text-2xl font-black text-indigo-600">{wpm} <span className="text-sm font-bold text-indigo-300">WPM</span></span>
                               </div>
-                              <div className="h-8 w-px bg-white/5" />
-                              <div className="flex flex-col items-center">
-                                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Live Cadence</span>
-                                  <span className="text-xl font-black italic text-indigo-400">{wpm} WPM</span>
+                              <div className="h-10 w-px bg-slate-100" />
+                              <div className="flex flex-col items-end">
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Accuracy</span>
+                                  <span className="text-2xl font-black text-emerald-500">{accuracy}%</span>
                               </div>
                          </div>
                     </div>
 
-                    <div className="relative p-10 bg-black/20 rounded-2xl border border-white/5 mb-8">
-                         <p className="text-2xl font-serif italic leading-relaxed text-slate-500 select-none">
+                    {/* Text Display Area */}
+                    <div className="relative p-8 bg-slate-50 rounded-2xl border border-slate-200 mb-8 shadow-inner">
+                         <p className="text-2xl md:text-3xl font-medium leading-relaxed text-slate-400 tracking-wide break-words select-none">
                             {text.split('').map((char, i) => {
-                                let color = 'text-slate-600';
+                                let color = 'text-slate-400';
+                                let bg = '';
                                 if (i < userInput.length) {
-                                    color = userInput[i] === char ? 'text-indigo-400' : 'text-rose-500 underline decoration-2';
+                                    if (userInput[i] === char) {
+                                        color = 'text-slate-900';
+                                    } else {
+                                        color = 'text-rose-600';
+                                        bg = 'bg-rose-100 rounded-sm';
+                                    }
+                                } else if (i === userInput.length && status === 'TYPING') {
+                                    bg = 'bg-indigo-100 border-b-2 border-indigo-500 rounded-sm animate-pulse';
                                 }
-                                return <span key={i} className={`${color} transition-colors`}>{char}</span>;
+                                return <span key={i} className={`${color} ${bg} transition-colors duration-75`}>{char}</span>;
                             })}
                          </p>
                     </div>
 
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={userInput}
-                        onChange={handleInput}
-                        disabled={status === 'IDLE' || status === 'FINISHED'}
-                        placeholder={status === 'IDLE' ? "Initialize sequence to start..." : "Synchronize your input..."}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-6 text-xl font-serif italic text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
-                    />
+                    {/* Interactive Input */}
+                    <div className="relative">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={userInput}
+                            onChange={handleInput}
+                            disabled={status === 'IDLE' || status === 'FINISHED'}
+                            placeholder={status === 'IDLE' ? "Click 'Start Game' to begin typing..." : "Type here as fast as you can..."}
+                            className="w-full bg-white border-2 border-slate-200 rounded-2xl px-8 py-5 text-xl font-bold text-slate-800 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all placeholder:text-slate-300 shadow-sm"
+                        />
+                    </div>
 
-                    <div className="flex justify-center mt-12">
+                    {/* Game Controls */}
+                    <div className="flex justify-center mt-10">
                         {status !== 'TYPING' ? (
                             <button
                                 onClick={startTest}
-                                className="premium-btn-primary flex items-center gap-4 py-6 px-16 rounded-3xl group shadow-2xl transition-all"
+                                className="flex items-center gap-3 py-4 px-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-lg shadow-indigo-200 hover:-translate-y-1 hover:shadow-xl transition-all"
                             >
-                                <Zap size={20} className="group-hover:rotate-45" />
-                                <span className="text-xs font-black uppercase tracking-[0.3em]">{status === 'IDLE' ? 'Enter Stream' : 'Recall Sequence'}</span>
+                                {status === 'IDLE' ? <Play className="fill-white" size={20} /> : <RotateCcw size={20} />}
+                                <span className="text-sm uppercase tracking-widest">{status === 'IDLE' ? 'Start Game' : 'Play Again'}</span>
                             </button>
                         ) : (
                             <button
                                 onClick={finishTest}
-                                className="px-12 py-5 bg-white/5 border border-white/10 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-rose-400 hover:border-rose-500/20 transition-all flex items-center gap-3"
+                                className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 rounded-full text-xs font-bold uppercase tracking-widest transition-all"
                             >
-                                <X size={16} /> Terminate Session
+                                <X size={16} /> End Game Early
                             </button>
                         )}
                     </div>
                 </div>
             </section>
 
+            {/* Game Over Screen */}
             <AnimatePresence>
                 {status === 'FINISHED' && (
-                    <motion.section initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="output-bottom-area">
-                         <div className="flex flex-col items-center">
-                             <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/20 rounded-3xl flex items-center justify-center mb-10 shadow-3xl shadow-amber-500/20">
+                    <motion.section 
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+                        animate={{ opacity: 1, scale: 1, y: 0 }} 
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="mb-12"
+                    >
+                         <div className="clean-card bg-white p-10 text-center border-2 border-indigo-100 flex flex-col items-center">
+                             <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6 shadow-inner ring-4 ring-white">
                                  <Trophy size={40} className="text-amber-500" />
                              </div>
-                             <h3 className="text-3xl font-black text-white italic tracking-tighter mb-12 uppercase">Synchronization Manifested</h3>
+                             <h3 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Time's Up!</h3>
+                             <p className="text-slate-500 font-medium mb-10">Here is your final performance report.</p>
                              
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
-                                  <div className="modern-card p-12 text-center bg-indigo-500/5 border-indigo-500/10">
-                                       <Activity size={24} className="text-indigo-400 mx-auto mb-6" />
-                                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 block">Final Cadence</span>
-                                       <div className="text-6xl font-black text-white italic">{wpm}</div>
-                                       <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mt-2 block">Words / Min</span>
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
+                                  <div className="p-8 rounded-2xl bg-indigo-50 border border-indigo-100">
+                                       <Activity size={24} className="text-indigo-500 mx-auto mb-4" />
+                                       <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2 block">Typing Speed</span>
+                                       <div className="text-5xl font-black text-indigo-600">{wpm}</div>
+                                       <span className="text-xs font-bold text-indigo-400 mt-1 block">WPM</span>
                                   </div>
-                                  <div className="modern-card p-12 text-center bg-emerald-500/5 border-emerald-500/10">
-                                       <Target size={24} className="text-emerald-400 mx-auto mb-6" />
-                                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 block">Neural Precision</span>
-                                       <div className="text-6xl font-black text-white italic">{accuracy}%</div>
-                                       <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mt-2 block">Synchronized</span>
+                                  <div className="p-8 rounded-2xl bg-emerald-50 border border-emerald-100">
+                                       <Target size={24} className="text-emerald-500 mx-auto mb-4" />
+                                       <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-2 block">Accuracy</span>
+                                       <div className="text-5xl font-black text-emerald-600">{accuracy}%</div>
+                                       <span className="text-xs font-bold text-emerald-400 mt-1 block">Correct</span>
                                   </div>
-                                  <div className="modern-card p-12 text-center bg-rose-500/5 border-rose-500/10">
-                                       <X size={24} className="text-rose-400 mx-auto mb-6" />
-                                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 block">Entropy Nodes</span>
-                                       <div className="text-6xl font-black text-white italic">{errors}</div>
-                                       <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mt-2 block">Logic Faults</span>
+                                  <div className="p-8 rounded-2xl bg-rose-50 border border-rose-100">
+                                       <Zap size={24} className="text-rose-500 mx-auto mb-4" />
+                                       <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2 block">Mistakes</span>
+                                       <div className="text-5xl font-black text-rose-600">{errors}</div>
+                                       <span className="text-xs font-bold text-rose-400 mt-1 block">Typos</span>
                                   </div>
                              </div>
 
-                             <button onClick={startTest} className="mt-16 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-[0.5em] transition-all underline underline-offset-8 decoration-white/10">Initiate Fresh Cycle</button>
+                             <button 
+                                onClick={startTest} 
+                                className="mt-12 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-widest flex items-center gap-2"
+                             >
+                                <RotateCcw size={18} /> Play Again
+                             </button>
                          </div>
                     </motion.section>
                 )}

@@ -93,13 +93,24 @@ export default function DashboardLayout() {
                               </div>
                               <span className="text-xs font-black text-indigo-900 mb-1 tracking-tight">PRO UPGRADE</span>
                               <p className="text-[11px] text-indigo-700 leading-relaxed font-semibold">Get unlimited words, advanced reports, and fast analysis.</p>
-                              <button className="mt-4 px-6 py-2.5 bg-indigo-600 text-white text-[11px] font-black rounded-xl uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 hover:-translate-y-0.5">Upgrade for Free</button>
+                              <button 
+                                onClick={() => alert('Premium features are currently free during the early-access beta! Enjoy unlimited usage.')}
+                                className="mt-4 px-6 py-2.5 bg-indigo-600 text-white text-[11px] font-black rounded-xl uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 hover:-translate-y-0.5"
+                              >
+                                  Upgrade for Free
+                              </button>
                          </div>
                      )}
 
                     <div className="border-t border-slate-200 pt-4">
                         <button 
-                            onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+                            onClick={async () => { 
+                                try {
+                                    await fetch('/api/auth/logout', { method: 'POST' });
+                                } catch (e) { console.error('Logout error', e); }
+                                localStorage.clear(); 
+                                window.location.href = '/login'; 
+                            }}
                             className="w-full flex items-center gap-4 px-5 py-4 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all group font-bold"
                         >
                             <LogOut size={22} className="group-hover:text-rose-500" />

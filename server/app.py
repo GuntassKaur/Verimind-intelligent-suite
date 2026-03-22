@@ -133,6 +133,13 @@ def login():
     except ValidationError:
         return create_response(success=False, error="Invalid credentials format.", status=400)
 
+@app.route("/api/auth/logout", methods=["POST", "GET"])
+def logout():
+    response = create_response(data={"message": "Logged out successfully."})
+    response.set_cookie('access_token', '', expires=0, path='/')
+    response.set_cookie('refresh_token', '', expires=0, path='/')
+    return response
+
 @app.route("/api/auth/me", methods=["GET"])
 @login_required
 def get_me():
