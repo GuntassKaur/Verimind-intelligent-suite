@@ -1,5 +1,21 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
+
+mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+        primaryColor: '#EEF2FF',
+        primaryTextColor: '#4F46E5',
+        primaryBorderColor: '#C7D2FE',
+        lineColor: '#CBD5E1',
+        secondaryColor: '#FDF2F8',
+        tertiaryColor: '#F5F3FF',
+        fontSize: '16px',
+        fontFamily: 'Inter, sans-serif',
+    },
+    securityLevel: 'loose'
+});
 
 interface MermaidProps {
     code: string;
@@ -8,60 +24,44 @@ interface MermaidProps {
 
 export const Mermaid: React.FC<MermaidProps> = ({ code, isPrint }) => {
     const ref = useRef<HTMLDivElement>(null);
+    const [svg, setSvg] = useState<string>('');
 
     useEffect(() => {
-        // --- CANVA/GAMMA STYLE THEME CONFIG ---
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: 'base',
-            themeVariables: {
-                primaryColor: '#EEF2FF',     // Soft Indigo
-                primaryTextColor: '#4F46E5', // Slate/Indigo
-                primaryBorderColor: '#C7D2FE',
-                lineColor: '#CBD5E1',        // Slate-300
-                secondaryColor: '#FDF2F8',   // Soft Pink
-                tertiaryColor: '#F5F3FF',   // Soft Purple
-                fontSize: '24px',
-                fontFamily: 'Outfit, Inter, sans-serif',
-                nodeBorder: '2px',
-                clusterBkg: '#F8FAFC',
-                clusterBorder: '#E2E8F0',
-                edgeLabelBackground: '#FFFFFF',
-            },
-            flowchart: {
-                htmlLabels: true,
-                curve: 'basis',
-                padding: 40,
-                nodeSpacing: 80,
-                rankSpacing: 100,
-                useMaxWidth: !isPrint,
-            },
-            securityLevel: 'loose'
-        });
+        let isMounted = true;
+        const renderDiagram = async () => {
+            if (!code) return;
+            try {
+                // Strip out markdown formatting if API returned it
+                let cleanCode = code.replace(/```mermaid\n?/g, '').replace(/```\n?/g, '').trim();
+                
+                // If the code doesn't start with flowchart/graph keywords, prepend simple flowchart
+                if (!/^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitGraph)/.test(cleanCode)) {
+                    cleanCode = `flowchart TD\n` + cleanCode;
+                }
 
-        if (ref.current) {
-            ref.current.removeAttribute('data-processed');
-            mermaid.contentLoaded();
-        }
-    }, [code, isPrint]);
-
-    // Enhance Mermaid code with modern geometric styles if not present
-    const enhancedCode = code.includes('classDef') ? code : `
-        flowchart TD
-        classDef default fill:#FFFFFF,stroke:#E2E8F0,stroke-width:2px,color:#64748B,rx:20,ry:20;
-        classDef primary fill:#EEF2FF,stroke:#C7D2FE,stroke-width:3px,color:#4F46E5,rx:24,ry:24;
-        classDef search fill:#F0F9FF,stroke:#BAE6FD,stroke-width:3px,color:#0369A1,rx:24,ry:24;
-        classDef audit fill:#F5F3FF,stroke:#DDD6FE,stroke-width:3px,color:#6D28D9,rx:24,ry:24;
-        classDef breach fill:#FFF1F2,stroke:#FECDD3,stroke-width:3px,color:#E11D48,rx:24,ry:24;
-        ${code.replace(/flowchart (TD|LR|BT|RL)/, '')}
-    `;
+                const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+                const { svg } = await mermaid.render(id, cleanCode);
+                
+                if (isMounted) {
+                    setSvg(svg);
+                }
+            } catch (error) {
+                console.error('Mermaid rendering error:', error);
+                if (isMounted) {
+                    setSvg(`<div class="text-rose-500 font-bold p-4 bg-rose-50 border border-rose-200 rounded-xl">Error rendering visual map from AI output.</div>`);
+                }
+            }
+        };
+        renderDiagram();
+        
+        return () => { isMounted = false; };
+    }, [code]);
 
     return (
         <div 
             ref={ref} 
-            className={`mermaid flex justify-center py-20 px-10 bg-white/20 rounded-[3rem] ${isPrint ? 'w-full scale-100' : 'w-full max-w-full overflow-hidden'}`}
-        >
-            {enhancedCode}
-        </div>
+            className={`w-full overflow-x-auto flex justify-center items-center py-6 ${isPrint ? '' : 'max-h-[600px]'}`}
+            dangerouslySetInnerHTML={{ __html: svg }}
+        />
     );
 };
