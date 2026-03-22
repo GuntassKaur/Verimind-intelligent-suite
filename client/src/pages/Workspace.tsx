@@ -8,11 +8,11 @@ import api from '../services/api';
 import { Mermaid } from '../components/Mermaid';
 
 const TOOLS = [
-    { key: 'generate', label: 'Write Context', desc: 'AI content generator', icon: Wand2, color: 'text-indigo-600', bg: 'bg-indigo-100' },
-    { key: 'analyze', label: 'Truth Audit', desc: 'Verify fact & claims', icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-100' },
-    { key: 'plagiarism', label: 'Plagiarism', desc: 'Check original text', icon: Search, color: 'text-amber-600', bg: 'bg-amber-100' },
-    { key: 'humanize', label: 'Writing DNA', desc: 'Detect AI origins', icon: Brain, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { key: 'visualize', label: 'Knowledge Map', desc: 'Generate visual charts', icon: Network, color: 'text-rose-600', bg: 'bg-rose-100' },
+    { key: 'generate', label: 'AI Writer', desc: 'Create content easily', icon: Wand2, color: 'text-indigo-600', bg: 'bg-indigo-100' },
+    { key: 'analyze', label: 'Fact Checker', desc: 'Verify facts & claims', icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+    { key: 'plagiarism', label: 'Plagiarism', desc: 'Find copied text', icon: Search, color: 'text-amber-600', bg: 'bg-amber-100' },
+    { key: 'humanize', label: 'AI Detector', desc: 'Check if AI wrote it', icon: Brain, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { key: 'visualize', label: 'Flowchart Maker', desc: 'Generate visual maps', icon: Network, color: 'text-rose-600', bg: 'bg-rose-100' },
 ];
 
 export default function Workspace() {

@@ -29,10 +29,10 @@ export default function DashboardLayout() {
     }, []);
 
     const navItems = [
-        { path: '/', label: 'Neural Studio', icon: Wand2 },
-        { path: '/audit', label: 'Truth Engine', icon: ShieldCheck },
-        { path: '/visualize', label: 'Brain Map', icon: Network },
-        { path: '/typing', label: 'Linguistic Lab', icon: FileText },
+        { path: '/', label: 'AI Workspace', icon: Wand2 },
+        { path: '/audit', label: 'Fact Checker', icon: ShieldCheck },
+        { path: '/visualize', label: 'Visualizer', icon: Network },
+        { path: '/typing', label: 'Typing Lab', icon: FileText },
     ];
 
     return (
@@ -50,7 +50,7 @@ export default function DashboardLayout() {
                         {!collapsed && (
                              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col">
                                 <span className="text-xl font-extrabold text-slate-900 tracking-tight leading-none">VeriMind</span>
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Prism Node v6.0</span>
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Workspace</span>
                              </motion.div>
                         )}
                     </Link>
@@ -92,8 +92,8 @@ export default function DashboardLayout() {
                                    <Zap size={20} className="fill-amber-500/20" />
                               </div>
                               <span className="text-xs font-black text-indigo-900 mb-1 tracking-tight">PRO UPGRADE</span>
-                              <p className="text-[11px] text-indigo-700 leading-relaxed font-semibold">Access 100k Neural Nodes and Deep Analytics.</p>
-                              <button className="mt-4 px-6 py-2.5 bg-indigo-600 text-white text-[11px] font-black rounded-xl uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 hover:-translate-y-0.5">Unlock Prism</button>
+                              <p className="text-[11px] text-indigo-700 leading-relaxed font-semibold">Get unlimited words, advanced reports, and fast analysis.</p>
+                              <button className="mt-4 px-6 py-2.5 bg-indigo-600 text-white text-[11px] font-black rounded-xl uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 hover:-translate-y-0.5">Upgrade for Free</button>
                          </div>
                      )}
 
@@ -103,7 +103,7 @@ export default function DashboardLayout() {
                             className="w-full flex items-center gap-4 px-5 py-4 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all group font-bold"
                         >
                             <LogOut size={22} className="group-hover:text-rose-500" />
-                            {!collapsed && <span className="text-sm">Archive Session</span>}
+                            {!collapsed && <span className="text-sm">Log Out</span>}
                         </button>
                     </div>
                 </div>
@@ -125,7 +125,7 @@ export default function DashboardLayout() {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input 
                                 type="text"
-                                placeholder="Search manifests, files or neural nodes..."
+                                placeholder="Search files, tools, or documents..."
                                 className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-12 pr-6 py-3.5 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400"
                             />
                          </div>
