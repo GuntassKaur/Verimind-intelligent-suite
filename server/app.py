@@ -181,13 +181,13 @@ def generate():
 @login_required
 def plagiarism():
     data = request.json or {}
-    text = data.get("text")
+    text = str(data.get("text", ""))
     
     ok, msg = validate_text_input(text)
     if not ok: return create_response(success=False, error=msg, status=400)
     
     result = check_plagiarism(text)
-    auth.save_history(request.user['user_id'], "plagiarism", text[:50], result)
+    auth.save_history(request.user['user_id'], "plagiarism", text, result)
     return create_response(data=result)
 
 @app.route("/api/humanize", methods=["POST"])
@@ -195,13 +195,13 @@ def plagiarism():
 @login_required
 def humanize():
     data = request.json or {}
-    text = data.get("text")
+    text = str(data.get("text", ""))
     
     ok, msg = validate_text_input(text)
     if not ok: return create_response(success=False, error=msg, status=400)
     
     result = humanize_text(text, data.get("tone", "Professional"))
-    auth.save_history(request.user['user_id'], "humanization", text[:50], result)
+    auth.save_history(request.user['user_id'], "humanization", text, result)
     return create_response(data=result)
 
 @app.route("/api/analyze", methods=["POST"])
@@ -209,32 +209,36 @@ def humanize():
 @login_required
 def analyze():
     data = request.json or {}
-    text = data.get("text") or data.get("answer")
+    text = str(data.get("text", "") or data.get("answer", ""))
     
     ok, msg = validate_text_input(text)
     if not ok: return create_response(success=False, error=msg, status=400)
     
     result = verify_claims(text, data.get("context", "General"))
-    auth.save_history(request.user['user_id'], "analysis", text[:50], result)
+    auth.save_history(request.user['user_id'], "analysis", text, result)
     return create_response(data=result)
 
 @app.route("/api/ai/visualize", methods=["POST"])
 @login_required
 def visualize():
     data = request.json or {}
-    text = data.get("text")
+    text = str(data.get("text", ""))
     
     ok, msg = validate_text_input(text, max_len=10000)
     if not ok: return create_response(success=False, error=msg, status=400)
     
     result = generate_visual_intelligence(text, data.get("type"))
-    auth.save_history(request.user['user_id'], "visualization", text[:50], result)
+    auth.save_history(request.user['user_id'], "visualization", text, result)
     return create_response(data=result)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     logger.error(f"VERIMIND SPECTRAL ERROR: {str(e)}", exc_info=True)
-    return create_response(success=False, error=f"Neural sync failure. ({str(e)[:50]})", status=500)
+    error_msg = str(e)
+    # limit length for client without syntax errors during typing
+    if len(error_msg) > 50:
+        error_msg = "%.50s" % error_msg + "..."
+    return create_response(success=False, error=f"Neural sync failure. ({error_msg})", status=500)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
