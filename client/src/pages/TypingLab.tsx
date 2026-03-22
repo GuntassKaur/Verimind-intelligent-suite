@@ -347,6 +347,13 @@ function MemoryGame() {
 
     return (
         <section className="mb-10 animate-fade-in flex flex-col items-center">
+            <div className="text-center mb-6 max-w-md">
+                <h2 className="text-2xl font-black text-slate-800 mb-2">Memory Match</h2>
+                <p className="text-sm font-medium text-slate-500">
+                    Flip the cards to reveal the AI symbols. Your goal is to find all the matching pairs with the fewest number of moves. Click on any two cards to see if they match!
+                </p>
+            </div>
+
             <div className="flex justify-between w-full max-w-lg mb-8 px-4">
                 <div className="text-center bg-indigo-50 px-6 py-3 rounded-xl">
                     <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Moves</span>

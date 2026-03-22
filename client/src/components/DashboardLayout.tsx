@@ -156,11 +156,17 @@ export default function DashboardLayout() {
                     
                     <div className="flex items-center gap-8">
                         <div className="flex gap-4">
-                            <button className="p-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative">
+                            <button 
+                                onClick={() => alert("Notifications:\nWelcome to VeriMind Beta! You have successfully signed in. New intelligence models will be dropping soon.")}
+                                className="p-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative"
+                            >
                                 <Bell size={20} />
                                 <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white" />
                             </button>
-                            <button className="p-3 text-slate-500 hover:text-amber-500 hover:bg-amber-50 rounded-xl transition-all">
+                            <button 
+                                onClick={() => alert("Favorites is a Pro feature! Star your favorite generations to save them forever. Coming soon.")}
+                                className="p-3 text-slate-500 hover:text-amber-500 hover:bg-amber-50 rounded-xl transition-all"
+                            >
                                 <Star size={20} />
                             </button>
                         </div>
