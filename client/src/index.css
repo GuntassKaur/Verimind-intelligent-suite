@@ -1,20 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-app:        #0F172A; /* Slate 900 */
-  --bg-card:       #1E293B; /* Slate 800 */
-  --bg-card-hover: #334155; /* Slate 700 */
-  --primary:       #6366F1;
-  --primary-hover: #4F46E5;
-  --text-main:     #F8FAFC;
-  --text-muted:    #94A3B8;
-  --border-soft:   rgba(255, 255, 255, 0.08);
-  --shadow-clean:  0 4px 20px -2px rgba(0, 0, 0, 0.3);
-  --shadow-hover:  0 8px 30px -4px rgba(0, 0, 0, 0.4);
+  --bg-app:        #F8FAFC; /* Slate 50 */
+  --bg-card:       #FFFFFF; /* White */
+  --bg-card-hover: #F1F5F9; /* Slate 100 */
+  --primary:       #4F46E5; /* Indigo 600 */
+  --primary-hover: #4338CA; /* Indigo 700 */
+  --text-main:     #0F172A; /* Slate 900 */
+  --text-muted:    #475569; /* Slate 600 */
+  --border-soft:   #E2E8F0; /* Slate 200 */
+  --shadow-clean:  0 4px 15px -3px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-hover:  0 12px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
   --font-main:     'Inter', sans-serif;
 }
 
@@ -40,6 +40,7 @@ body {
 
 .clean-card:hover {
   box-shadow: var(--shadow-hover);
+  border-color: #CBD5E1; /* Slate 300 */
 }
 
 .clean-button {
@@ -54,7 +55,7 @@ body {
 .clean-button:hover {
   background: var(--bg-card-hover);
   color: var(--text-main);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: #CBD5E1;
 }
 
 .clean-button.active {
@@ -64,7 +65,7 @@ body {
 }
 
 .clean-input {
-  background: rgba(15, 23, 42, 0.5);
+  background: #FFFFFF;
   border: 1px solid var(--border-soft);
   color: var(--text-main);
 }
@@ -72,17 +73,17 @@ body {
 .clean-input:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: #CBD5E1;
   border-radius: 10px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
 @media print {
   .no-print { display: none !important; }
