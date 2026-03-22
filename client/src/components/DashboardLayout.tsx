@@ -132,14 +132,26 @@ export default function DashboardLayout() {
                 {/* Modern Floating Header */}
                 <header className="h-24 px-10 border-b border-slate-200 bg-white/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
                     <div className="flex items-center gap-6 w-1/3">
-                         <div className="relative group w-full max-w-[400px]">
+                         <form 
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                const val = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value.toLowerCase();
+                                if (val.includes('type') || val.includes('game')) window.location.href = '/typing';
+                                else if (val.includes('visual') || val.includes('map')) window.location.href = '/visualize';
+                                else if (val.includes('fact') || val.includes('check')) window.location.href = '/audit';
+                                else if (val.includes('write') || val.includes('ai')) window.location.href = '/';
+                                else alert('No matching tools found for: ' + val);
+                            }}
+                            className="relative group w-full max-w-[400px]"
+                         >
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input 
                                 type="text"
-                                placeholder="Search files, tools, or documents..."
+                                name="search"
+                                placeholder="Search apps (e.g., 'typing game', 'visualizer')..."
                                 className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-12 pr-6 py-3.5 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400"
                             />
-                         </div>
+                         </form>
                     </div>
                     
                     <div className="flex items-center gap-8">

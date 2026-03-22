@@ -231,6 +231,13 @@ def visualize():
     auth.save_history(request.user['user_id'], "visualization", text, result)
     return create_response(data=result)
 
+@app.route("/api/typing/quote", methods=["GET"])
+def get_typing_quote():
+    difficulty = request.args.get("difficulty", "Medium")
+    category = request.args.get("category", "General Knowledge")
+    quote = get_typing_text(difficulty, category)
+    return create_response(data={"quote": quote})
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     logger.error(f"VERIMIND SPECTRAL ERROR: {str(e)}", exc_info=True)
