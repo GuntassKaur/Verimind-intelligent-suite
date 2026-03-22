@@ -1,19 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
 
+// Initialize with a cleaner default theme for maximum readability
 mermaid.initialize({
     startOnLoad: false,
-    theme: 'base',
-    themeVariables: {
-        primaryColor: '#EEF2FF',
-        primaryTextColor: '#4F46E5',
-        primaryBorderColor: '#C7D2FE',
-        lineColor: '#CBD5E1',
-        secondaryColor: '#FDF2F8',
-        tertiaryColor: '#F5F3FF',
-        fontSize: '16px',
-        fontFamily: 'Inter, sans-serif',
-    },
+    theme: 'default',
     securityLevel: 'loose'
 });
 
@@ -34,8 +25,8 @@ export const Mermaid: React.FC<MermaidProps> = ({ code, isPrint }) => {
                 // Strip out markdown formatting if API returned it
                 let cleanCode = code.replace(/```mermaid\n?/g, '').replace(/```\n?/g, '').trim();
                 
-                // If the code doesn't start with flowchart/graph keywords, prepend simple flowchart
-                if (!/^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitGraph)/.test(cleanCode)) {
+                // Ensure flowchart is added only if it clearly lacks any standard Mermaid starting keyword
+                if (!/^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitGraph|mindmap|journey)/i.test(cleanCode)) {
                     cleanCode = `flowchart TD\n` + cleanCode;
                 }
 
@@ -48,7 +39,7 @@ export const Mermaid: React.FC<MermaidProps> = ({ code, isPrint }) => {
             } catch (error) {
                 console.error('Mermaid rendering error:', error);
                 if (isMounted) {
-                    setSvg(`<div class="text-rose-500 font-bold p-4 bg-rose-50 border border-rose-200 rounded-xl">Error rendering visual map from AI output.</div>`);
+                     setSvg(`<div class="text-rose-500 font-bold p-4 bg-rose-50 border border-rose-200 rounded-xl">Error rendering visual map. Invalid flowchart syntax from AI.</div>`);
                 }
             }
         };
@@ -60,7 +51,7 @@ export const Mermaid: React.FC<MermaidProps> = ({ code, isPrint }) => {
     return (
         <div 
             ref={ref} 
-            className={`w-full overflow-x-auto flex justify-center items-center py-6 ${isPrint ? '' : 'max-h-[600px]'}`}
+            className={`w-full overflow-auto flex justify-center py-6 [&_svg]:min-w-[600px] [&_svg]:h-auto`}
             dangerouslySetInnerHTML={{ __html: svg }}
         />
     );
