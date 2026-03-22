@@ -161,26 +161,26 @@ function TypingGame() {
                 </select>
             </div>
 
-            <div className="clean-card bg-white p-8 overflow-hidden relative shadow-sm">
-                <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
-                     <div className="flex items-center gap-3">
+            <div className="clean-card bg-white p-5 md:p-8 overflow-hidden relative shadow-sm rounded-2xl md:rounded-3xl border border-slate-100">
+                <div className="flex flex-col md:flex-row items-center justify-between mb-6 md:mb-8 pb-5 md:pb-6 border-b border-slate-100 gap-6 md:gap-0">
+                     <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
                          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
                              <Timer size={20} />
                          </div>
                          <div className="flex flex-col">
                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time Left</span>
-                             <span className={`text-2xl font-black ${timeLeft < 10 && status === 'TYPING' ? 'text-rose-500 animate-pulse' : 'text-slate-800'}`}>{timeLeft}s</span>
+                             <span className={`text-xl md:text-2xl font-black ${timeLeft < 10 && status === 'TYPING' ? 'text-rose-500 animate-pulse' : 'text-slate-800'}`}>{timeLeft}s</span>
                          </div>
                      </div>
-                     <div className="flex gap-8">
-                          <div className="flex flex-col items-end">
+                     <div className="flex gap-6 md:gap-8 w-full md:w-auto justify-center">
+                          <div className="flex flex-col items-center md:items-end">
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Speed</span>
-                              <span className="text-2xl font-black text-indigo-600">{wpm} <span className="text-sm font-bold text-indigo-300">WPM</span></span>
+                              <span className="text-xl md:text-2xl font-black text-indigo-600">{wpm} <span className="text-sm font-bold text-indigo-300">WPM</span></span>
                           </div>
-                          <div className="h-10 w-px bg-slate-100" />
-                          <div className="flex flex-col items-end">
+                          <div className="h-10 w-px bg-slate-100 hidden md:block" />
+                          <div className="flex flex-col items-center md:items-end">
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Accuracy</span>
-                              <span className="text-2xl font-black text-emerald-500">{accuracy}%</span>
+                              <span className="text-xl md:text-2xl font-black text-emerald-500">{accuracy}%</span>
                           </div>
                      </div>
                 </div>
@@ -365,14 +365,14 @@ function MemoryGame() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 md:gap-4 max-w-lg w-full">
+            <div className="grid grid-cols-4 gap-2 md:gap-4 max-w-lg w-full px-2 md:px-0">
                 {cards.map((card, idx) => (
                     <button
                         key={card.id}
                         onClick={() => handleCardClick(idx)}
-                        className={`aspect-square flex items-center justify-center text-4xl rounded-2xl transition-all duration-300 transform shadow-sm ${card.isFlipped || card.isMatched ? 'bg-white border-2 border-indigo-100 rotate-y-180' : 'bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-1'}`}
+                        className={`aspect-square flex items-center justify-center text-2xl md:text-4xl rounded-xl md:rounded-2xl transition-all duration-300 transform shadow-sm ${card.isFlipped || card.isMatched ? 'bg-white border-2 border-indigo-100 rotate-y-180' : 'bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-1'}`}
                     >
-                        {(card.isFlipped || card.isMatched) ? card.emoji : <BrainCircuit className="text-indigo-400/50" size={32} />}
+                        {(card.isFlipped || card.isMatched) ? card.emoji : <BrainCircuit className="text-indigo-400/50" size={28} />}
                     </button>
                 ))}
             </div>

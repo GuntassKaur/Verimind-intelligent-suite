@@ -51,13 +51,13 @@ export default function Login() {
             </div>
 
             <motion.div initial={{ opacity: 0, scale: 0.98, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: 'spring', damping: 25 }} className="max-w-md w-full mx-auto relative z-10">
-                <div className="bg-white border border-slate-100/80 rounded-[2.5rem] p-14 shadow-[0_40px_80px_-20px_rgba(99,102,241,0.12)] flex flex-col items-center">
-                    <div className="text-center mb-14">
-                        <div className="w-20 h-20 bg-indigo-50 border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-100">
-                            <Logo variant="icon" className="w-10 h-10 text-indigo-600" />
+                <div className="bg-white border border-slate-100/80 rounded-[2.5rem] p-8 md:p-14 shadow-[0_40px_80px_-20px_rgba(99,102,241,0.12)] flex flex-col items-center">
+                    <div className="text-center mb-10 md:mb-14">
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 border border-indigo-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-xl shadow-indigo-100">
+                            <Logo variant="icon" className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
                         </div>
-                        <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-4 leading-none">Welcome Back</h2>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.4em]">Sign in to your workspace</p>
+                        <h2 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4 leading-none">Welcome Back</h2>
+                        <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.4em]">Sign in to your workspace</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="w-full space-y-6">

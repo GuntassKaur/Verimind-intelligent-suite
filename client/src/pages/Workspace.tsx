@@ -59,54 +59,54 @@ export default function Workspace() {
     }, [content]);
 
     return (
-        <div className="w-full max-w-6xl mx-auto py-12 px-4 md:px-8">
+        <div className="w-full max-w-6xl mx-auto py-8 md:py-12 px-4 md:px-8">
             {/* Header */}
-            <header className="text-center mb-12">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">All-in-one AI Writing & Analysis Tool</h1>
-                <p className="text-slate-500 text-sm max-w-2xl mx-auto font-medium">Generate content, verify facts, detect plagiarism, and visualize knowledge cleanly.</p>
+            <header className="text-center mb-10 md:mb-12">
+                <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight">All-in-one AI Writing & Analysis Tool</h1>
+                <p className="text-slate-500 text-xs md:text-sm max-w-2xl mx-auto font-medium leading-relaxed">Generate content, verify facts, detect plagiarism, and visualize knowledge cleanly.</p>
             </header>
 
             {/* Error Area */}
             {error && (
-                <div className="mb-8 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm flex items-center gap-3 font-semibold shadow-sm">
+                <div className="mb-6 md:mb-8 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-xs md:text-sm flex items-center gap-3 font-semibold shadow-sm">
                     <ShieldCheck size={18} /> {error}
                 </div>
             )}
 
             {/* Tools Grid - Colorful but clean */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-5 mb-10">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5 mb-8 md:mb-10">
                 {TOOLS.map(tool => (
                     <button 
                         key={tool.key}
                         onClick={() => runAction(tool.key)}
                         disabled={loading !== null}
-                        className={`clean-card p-5 text-left flex flex-col items-start gap-4 transition-all disabled:opacity-50 hover:-translate-y-1 ${loading === tool.key ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'hover:border-slate-300'}`}
+                        className={`clean-card p-4 md:p-5 text-left flex flex-col items-start gap-3 md:gap-4 transition-all disabled:opacity-50 hover:-translate-y-1 ${loading === tool.key ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'hover:border-slate-300'} rounded-2xl`}
                     >
-                        <div className={`p-2.5 rounded-xl ${loading === tool.key ? 'bg-indigo-600 text-white shadow-md' : `${tool.bg} ${tool.color}`}`}>
-                            {loading === tool.key ? <Loader2 className="animate-spin" size={22} /> : <tool.icon size={22} />}
+                        <div className={`p-2 md:p-2.5 rounded-xl ${loading === tool.key ? 'bg-indigo-600 text-white shadow-md' : `${tool.bg} ${tool.color}`}`}>
+                            {loading === tool.key ? <Loader2 className="animate-spin" size={20} /> : <tool.icon size={20} />}
                         </div>
                         <div>
-                            <span className={`block text-sm font-bold ${loading === tool.key ? 'text-indigo-600' : 'text-slate-800'}`}>{tool.label}</span>
-                            <span className="block text-[11.5px] font-medium text-slate-500 mt-1">{tool.desc}</span>
+                            <span className={`block text-xs md:text-sm font-bold ${loading === tool.key ? 'text-indigo-600' : 'text-slate-800'}`}>{tool.label}</span>
+                            <span className="block text-[10px] md:text-[11.5px] font-medium text-slate-500 mt-1">{tool.desc}</span>
                         </div>
                     </button>
                 ))}
             </div>
 
             {/* Editor Area */}
-            <div className="clean-card mb-12 flex flex-col overflow-hidden bg-white">
-                <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">Text Editor</span>
-                    <div className="flex items-center gap-3">
+            <div className="clean-card mb-10 md:mb-12 flex flex-col overflow-hidden bg-white rounded-2xl md:rounded-3xl border border-slate-200">
+                <div className="flex items-center justify-between px-5 md:px-6 py-3 md:py-4 bg-slate-50 border-b border-slate-200">
+                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Text Editor</span>
+                    <div className="flex items-center gap-2 md:gap-3">
                         <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-slate-200 rounded-md text-slate-500 transition-colors" title="Upload File">
-                            <Upload size={16} />
+                            <Upload size={14} />
                         </button>
                         <input type="file" ref={fileInputRef} className="hidden" accept=".txt" onChange={(e)=>{
                             const f=e.target.files?.[0]; if(!f)return;
                             const r=new FileReader(); r.onload=(ev)=>setContent((ev.target?.result as string)||''); r.readAsText(f);
                         }} />
                         <button onClick={() => setContent('')} className="p-2 hover:bg-rose-100 hover:text-rose-600 rounded-md text-slate-500 transition-colors" title="Clear">
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                         </button>
                     </div>
                 </div>
@@ -114,34 +114,36 @@ export default function Workspace() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Provide your text here..."
-                    className="w-full bg-white text-slate-800 placeholder:text-slate-400 outline-none resize-y px-6 py-6 font-medium leading-relaxed min-h-[200px] max-h-[300px]"
+                    className="w-full bg-white text-slate-800 placeholder:text-slate-400 outline-none resize-y px-5 md:px-6 py-5 md:py-6 text-sm md:text-base font-medium leading-relaxed min-h-[150px] md:min-h-[200px] max-h-[400px]"
                 />
             </div>
 
             {/* Results Header */}
-            <div className="mb-6">
-                <h3 className="text-xl font-bold text-slate-800 tracking-tight">Results</h3>
+            <div className="mb-4 md:mb-6 px-1">
+                <h3 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Results</h3>
             </div>
 
             {/* Loading State */}
             {loading && (
-                <div className="clean-card p-16 text-center bg-indigo-50 border-indigo-100 shadow-inner">
-                    <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto mb-4" />
-                    <p className="text-indigo-700 font-bold">Processing request...</p>
+                <div className="clean-card p-12 md:p-16 text-center bg-indigo-50 border-indigo-100 shadow-inner rounded-3xl">
+                    <Loader2 className="w-8 h-8 md:w-10 md:h-10 text-indigo-600 animate-spin mx-auto mb-4" />
+                    <p className="text-indigo-700 font-bold text-sm md:text-base">Processing request...</p>
                 </div>
             )}
 
             {/* Empty State */}
             {!result && !loading && (
-                <div className="clean-card border-dashed border-2 border-slate-200 p-16 text-center bg-slate-50/50">
-                    <Inbox className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                    <p className="text-slate-500 font-bold">Your result will appear here</p>
+                <div className="clean-card border-dashed border-2 border-slate-200 p-12 md:p-16 text-center bg-slate-50/50 rounded-3xl">
+                    <Inbox className="w-10 h-10 md:w-12 md:h-12 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-500 font-bold text-sm md:text-base">Your result will appear here</p>
                 </div>
             )}
 
             {/* Populated Result */}
             {result && !loading && (
-                <ResultBoxes result={result} />
+                <div className="pb-10 md:pb-0">
+                    <ResultBoxes result={result} />
+                </div>
             )}
         </div>
     );

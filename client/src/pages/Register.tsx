@@ -60,13 +60,13 @@ export default function Register() {
             </div>
 
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full mx-auto relative z-10">
-                <div className="modern-card p-14 bg-white border-none shadow-lux flex flex-col items-center">
-                    <div className="text-center mb-14">
-                        <div className="w-20 h-20 bg-indigo-50 border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-100">
-                            <Logo variant="icon" className="w-10 h-10 text-indigo-600" />
+                <div className="modern-card p-8 md:p-14 bg-white border-none shadow-lux flex flex-col items-center rounded-[2.5rem]">
+                    <div className="text-center mb-10 md:mb-14">
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 border border-indigo-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-xl shadow-indigo-100">
+                            <Logo variant="icon" className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
                         </div>
-                        <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-4 leading-none">Identity Synthesis</h2>
-                        <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.5em] italic">Establish Neural Credentials</p>
+                        <h2 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4 leading-none text-center">Create Account</h2>
+                        <p className="text-[10px] md:text-[11px] font-black text-slate-300 uppercase tracking-[0.3em] md:tracking-[0.5em] italic">Establish Your Credentials</p>
                     </div>
 
                     <form onSubmit={handleRegister} className="w-full space-y-8">
@@ -77,7 +77,7 @@ export default function Register() {
                                     type="text" 
                                     value={name} 
                                     onChange={(e) => setName(e.target.value)} 
-                                    placeholder="Entity Real-Name" 
+                                    placeholder="Full Name" 
                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-5 text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-400/50 transition-all placeholder:text-slate-300 shadow-sm"
                                     required
                                  />
@@ -89,7 +89,7 @@ export default function Register() {
                                     type="email" 
                                     value={email} 
                                     onChange={(e) => setEmail(e.target.value)} 
-                                    placeholder="Neural Comm-Link (Email)" 
+                                    placeholder="Email Address" 
                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-5 text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-400/50 transition-all placeholder:text-slate-300 shadow-sm"
                                     required
                                  />
@@ -101,7 +101,7 @@ export default function Register() {
                                     type="password" 
                                     value={password} 
                                     onChange={(e) => setPassword(e.target.value)} 
-                                    placeholder="Cryptographic Key (Password)" 
+                                    placeholder="Password" 
                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-5 text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-400/50 transition-all placeholder:text-slate-300 shadow-sm"
                                     required
                                  />
@@ -112,7 +112,7 @@ export default function Register() {
                                  <div className={`h-1.5 flex-1 rounded-full ${/[A-Z]/.test(password) ? 'bg-indigo-500' : 'bg-slate-100'}`} />
                                  <div className={`h-1.5 flex-1 rounded-full ${/[0-9]/.test(password) ? 'bg-indigo-500' : 'bg-slate-100'}`} />
                              </div>
-                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center italic mt-2">Requirement: 8+ chars, Uppercase, Numeric Nodes</p>
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center italic mt-2">Requirement: 8+ chars, Uppercase, Numbers</p>
                          </div>
 
                          <AnimatePresence>
