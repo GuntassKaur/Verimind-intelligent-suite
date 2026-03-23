@@ -19,6 +19,8 @@ const UserDashboard = lazy(() => import('./pages/Dashboard'));
 const RewriteModes = lazy(() => import('./pages/RewriteModes'));
 const TypingLab = lazy(() => import('./pages/TypingLab'));
 const Comparison = lazy(() => import('./pages/Comparison'));
+const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
+
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { GlobalTypingTracker } from './components/GlobalTypingTracker';
 import { Logo } from './components/Logo';
@@ -72,7 +74,7 @@ function AppContent() {
                 <Loader2 className="animate-spin text-indigo-400" size={18} />
                 Establishing Secure Session
               </div>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Initializing Truth Protocols v5.0</p>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Initializing Truth Protocols v6.0</p>
             </div>
         </div>
       </div>
@@ -98,17 +100,15 @@ function AppContent() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/" element={<DashboardLayout />}>
                     <Route index element={<UserDashboard />} />
-                    <Route path="workspace" element={<Workspace />} />
                     <Route path="generator" element={<Generate />} />
-                    <Route path="analyzer" element={<TruthAudit />} />
                     <Route path="audit" element={<TruthAudit />} />
-                    <Route path="rewrite" element={<RewriteModes />} />
                     <Route path="plagiarism" element={<Plagiarism />} />
-                    <Route path="humanizer" element={<Humanizer />} />
+                    <Route path="ppt" element={<PPTGenerator />} />
                     <Route path="visualizer" element={<Visualizer />} />
-                    <Route path="flowchart" element={<Visualizer />} />
-                    <Route path="research" element={<Research />} />
-                    <Route path="typing" element={<TypingLab />} />
+                    
+                    {/* Secondary Routes */}
+                    <Route path="workspace" element={<Workspace />} />
+                    <Route path="humanizer" element={<Humanizer />} />
                     <Route path="comparison" element={<Comparison />} />
                     <Route path="history" element={user ? <History /> : <Navigate to="/login" replace />} />
                     <Route path="settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
