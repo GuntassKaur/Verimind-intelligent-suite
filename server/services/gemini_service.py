@@ -95,6 +95,46 @@ def call_gemini(prompt, system_instruction=None, image_bytes=None, mime_type=Non
     
     return _cached_gemini_call(prompt, system_instruction)
 
+def stream_gemini(prompt, system_instruction=None):
+    """
+    Generator for real-time streaming from Gemini.
+    """
+    if not _client:
+        yield "Neural nexus not initialized. Contact Admin."
+        return
+
+    security_prompt = f"[VERIMIND SAFETY OVERRIDE: Neutral Analysis Mode Only]\n\n{prompt}"
+
+    try:
+        if _use_new_sdk:
+            from google.genai import types
+            clean_model_name = MODEL_NAME.replace("models/", "")
+            
+            config = types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                http_options={'timeout': 60000}
+            )
+            
+            # Use generate_content_stream for the new SDK
+            for chunk in _client.models.generate_content_stream(
+                model=clean_model_name,
+                contents=[security_prompt],
+                config=config
+            ):
+                if chunk and chunk.text:
+                    yield chunk.text
+        else:
+            # Fallback for Legacy SDK
+            # The legacy generate_content has a stream=True parameter
+            response = _client.generate_content(security_prompt, stream=True)
+            for chunk in response:
+                if chunk and chunk.text:
+                    yield chunk.text
+            
+    except Exception as e:
+        logger.error(f"Gemini Stream Error: {str(e)}")
+        yield f"[Neural Error: {str(e)[:40]}]"
+
 def _direct_gemini_call(prompt, system_instruction, image_bytes, mime_type):
     """
     Direct call for non-cacheable requests (images).

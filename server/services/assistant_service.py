@@ -32,3 +32,17 @@ def process_assistant_query(message, context="", wpm=0):
         return reply
     except Exception as e:
         return f"Neural link unstable: {str(e)}"
+
+def process_assistant_query_stream(message, context="", wpm=0):
+    """
+    Generator for real-time assistant responses.
+    """
+    from .gemini_service import stream_gemini
+    
+    system_prompt = f"You are the VeriMind Synaptic Assistant. Context: {context[:1000]}. Analyst Velocity: {wpm} WPM. Provide concise, strategic advice in professional tone. No model names."
+
+    try:
+        return stream_gemini(message, system_instruction=system_prompt)
+    except Exception:
+        def error_gen(): yield "Neural interrupt detected. Please re-synchronize."
+        return error_gen()

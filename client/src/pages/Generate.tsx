@@ -44,14 +44,43 @@ export default function Generate() {
         }
         setLoading(true);
         setError('');
-        setResult(null);
+        setResult(''); // Initialize as empty string for streaming
 
         try {
-            const { data } = await api.post('/api/ai/generate', { prompt });
-            if (data.success) {
-                setResult(data.answer);
-            } else {
-                setError(data.error || 'Synthesis cycle failed.');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/generate-stream`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt }),
+            });
+
+            if (!response.ok) throw new Error('Neural link failed.');
+            
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder();
+            
+            if (!reader) throw new Error('Stream logic failed.');
+
+            let currentText = '';
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.replace('data: ', '');
+                        if (dataStr === '[DONE]') break;
+                        try {
+                            const data = JSON.parse(dataStr);
+                            if (data.chunk) {
+                                currentText += data.chunk;
+                                setResult(currentText);
+                            }
+                        } catch (e) { /* partial chunk */ }
+                    }
+                }
             }
         } catch (err: any) {
              setError('System interrupt in Synthesis module. Neural link failed.');

@@ -56,31 +56,64 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
         };
 
         setMessages(prev => [...prev, userMsg]);
+        const currentInput = input;
         setInput('');
         setLoading(true);
 
+        const aiMsgId = (Date.now() + 1).toString();
+        const initialAiMsg: Message = {
+            id: aiMsgId,
+            text: '',
+            sender: 'ai',
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, initialAiMsg]);
+
         try {
-            const { data } = await api.post('/api/ai/assistant', {
-                message: input,
-                context: editorContent,
-                wpm: wpm
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/assistant-stream`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: currentInput,
+                    context: editorContent,
+                    wpm: wpm
+                }),
             });
 
-            const aiMsg: Message = {
-                id: (Date.now() + 1).toString(),
-                text: data.reply || "Neural link stable. Insight synchronized.",
-                sender: 'ai',
-                timestamp: new Date()
-            };
-            setMessages(prev => [...prev, aiMsg]);
+            if (!response.ok) throw new Error('Neural link failed.');
+
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder();
+            if (!reader) throw new Error('Stream logic failed.');
+
+            let streamedText = '';
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.replace('data: ', '');
+                        if (dataStr === '[DONE]') break;
+                        try {
+                            const data = JSON.parse(dataStr);
+                            if (data.chunk) {
+                                streamedText += data.chunk;
+                                setMessages(prev => prev.map(m => 
+                                    m.id === aiMsgId ? { ...m, text: streamedText } : m
+                                ));
+                            }
+                        } catch (e) { /* partial chunk */ }
+                    }
+                }
+            }
         } catch (err: unknown) {
-             const aiMsg: Message = {
-                id: (Date.now() + 1).toString(),
-                text: "Neural interrupt detected. Please re-synchronize protocol.",
-                sender: 'ai',
-                timestamp: new Date()
-            };
-            setMessages(prev => [...prev, aiMsg]);
+             setMessages(prev => prev.map(m => 
+                m.id === aiMsgId ? { ...m, text: "Neural interrupt detected. Please re-synchronize protocol." } : m
+             ));
         } finally {
             setLoading(false);
         }

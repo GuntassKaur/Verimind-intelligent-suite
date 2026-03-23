@@ -54,3 +54,24 @@ def generate_answer(prompt, domain="General", response_type="Brief"):
         return _call_gemini(system_prompt, prompt)
     except Exception:
         return "Service temporarily unavailable. Please try again."
+
+def generate_answer_stream(prompt, domain="General", response_type="Brief"):
+    """
+    Generator for real-time streaming of content generation.
+    """
+    from .gemini_service import stream_gemini
+    
+    # Mode-specific rules (duplicated for stream logic)
+    if response_type == "Research":
+        style_rules = "RESEARCH MODE: Provide a comprehensive, in-depth analysis."
+    else:
+        style_rules = "BRIEF MODE: Provide a concise and accurate answer under 5 lines."
+
+    system_prompt = f"You are VeriMind, a professional content assistant. Domain: {domain}. {style_rules}. Use strictly neutral tone. No model names."
+
+    try:
+        return stream_gemini(prompt, system_instruction=system_prompt)
+    except Exception:
+        # Yielding error message instead of returning
+        def error_gen(): yield "Neural link failed. Please retry."
+        return error_gen()

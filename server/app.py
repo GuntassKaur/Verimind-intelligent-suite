@@ -1,9 +1,10 @@
 import os
+import json
 import datetime
 import jwt
 import logging
 from functools import wraps
-from flask import Flask, request, jsonify, render_template, session, make_response
+from flask import Flask, request, jsonify, render_template, session, make_response, Response, stream_with_context
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -18,11 +19,11 @@ from pydantic import ValidationError
 from services.verification_service import verify_claims, analyze_screenshot
 from services.dna_service import analyze_writing_dna
 from services.visualizer_service import generate_visual_intelligence
-from services.generation_service import generate_answer
+from services.generation_service import generate_answer, generate_answer_stream
 from services.plagiarism_service import check_plagiarism
 from services.humanize_service import humanize_text
 from services.typing_service import get_typing_text
-from services.assistant_service import process_assistant_query
+from services.assistant_service import process_assistant_query, process_assistant_query_stream
 from utils.processors import extract_text_from_pdf, extract_text_from_url
 
 # Configuration & Validation
@@ -177,6 +178,22 @@ def generate():
     auth.save_history(request.user['user_id'], "generation", prompt[:100], result)
     return create_response(data={"answer": result})
 
+@app.route("/api/ai/generate-stream", methods=["POST"])
+@login_required
+def generate_stream():
+    data = request.json or {}
+    prompt = data.get("prompt") or data.get("query")
+    
+    ok, msg = validate_text_input(prompt)
+    if not ok: return create_response(success=False, error=msg, status=400)
+    
+    def generate():
+        for chunk in generate_answer_stream(prompt, data.get("domain", "General"), data.get("response_type", "Research")):
+            yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return Response(stream_with_context(generate()), content_type='text/event-stream')
+
 @app.route("/api/plagiarism/check", methods=["POST"])
 @app.route("/api/ai/plagiarism/check", methods=["POST"])
 @login_required
@@ -251,6 +268,23 @@ def assistant():
     
     result = process_assistant_query(message, context, wpm)
     return create_response(data={"reply": result})
+
+@app.route("/api/ai/assistant-stream", methods=["POST"])
+@login_required
+def assistant_stream():
+    data = request.json or {}
+    message = data.get("message")
+    context = data.get("context", "")
+    wpm = data.get("wpm", 0)
+    
+    if not message: return create_response(success=False, error="Message substrate missing.", status=400)
+
+    def generate():
+        for chunk in process_assistant_query_stream(message, context, wpm):
+            yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return Response(stream_with_context(generate()), content_type='text/event-stream')
 
 @app.route("/api/process/url", methods=["POST"])
 @login_required
