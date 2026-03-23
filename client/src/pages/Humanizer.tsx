@@ -3,9 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Wand2,
     Loader2,
-    Activity,
-    Cpu,
-    Target,
     Printer,
     CheckCircle2,
     RotateCcw,
