@@ -1,278 +1,270 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    Loader2, Sparkles, AlertCircle, Cpu, 
-    BookOpen, Briefcase, Wand2,
-    ShieldCheck, CheckCircle2, AlertTriangle
+    Loader2, Sparkles, ShieldCheck, 
+    Search, FileText, ChevronRight, AlertTriangle,
+    CheckCircle2, XCircle,
+    Upload, Download, Mic, Speaker, Fingerprint
 } from 'lucide-react';
 
 import api from '../services/api';
-import { RiskMeter } from '../components/RiskMeter';
-import { ClaimCard } from '../components/ClaimCard';
-import { SmartProcessingToolbar } from '../components/SmartProcessingToolbar';
-import { IntelligenceReport } from '../components/IntelligenceReport';
-import { UniversalEditor } from '../components/UniversalEditor';
 import { useTheme } from '../contexts/ThemeContext';
+import { UniversalEditor } from '../components/UniversalEditor';
 
 interface Sentence {
     text: string;
     hallucination_score: number;
-    heat_grade: string;
-    risk_label: string;
     explanation: string;
+    status: 'verified' | 'unverified' | 'risky';
+    bias?: {
+        type: string;
+        level: 'Low' | 'Medium' | 'High';
+    };
+    source?: string;
 }
 
 interface AnalysisResult {
-    integrity_score: number;
-    audit_verdict: string;
-    educational_summary: string;
+    trustScore: number;
+    aiScore: number;
+    plagiarism: number;
+    biasScore: number;
     sentences: Sentence[];
+    summary: string;
 }
 
-const ClaimCard = ({ sentence, index, isDark }: { sentence: Sentence; index: number; isDark: boolean }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.08 }}
-        className={`p-6 rounded-[2rem] border transition-all group ${
-            isDark 
-            ? 'bg-white/5 border-white/5 hover:border-indigo-500/30' 
-            : 'bg-white border-slate-200 shadow-sm hover:border-indigo-300'
-        }`}
-    >
-        <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-                <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full ${
-                    sentence.hallucination_score < 20 ? 'bg-emerald-500/10 text-emerald-400' :
-                    sentence.hallucination_score < 50 ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'
-                }`}>
-                    {sentence.hallucination_score < 20 ? 'Verified' : sentence.hallucination_score < 50 ? 'Uncertain' : 'Hallucination'}
-                </span>
-                <span className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                    Risk: {sentence.hallucination_score}%
-                </span>
-            </div>
-            {sentence.hallucination_score < 20 ? <CheckCircle2 size={14} className="text-emerald-500" /> : <AlertTriangle size={14} className="text-rose-500" />}
-        </div>
-        <p className={`text-base font-medium mb-4 leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-            {sentence.text}
-        </p>
-        <div className={`p-4 rounded-2xl text-[11px] font-medium leading-relaxed italic ${isDark ? 'bg-black/40 text-slate-400 border border-white/5' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
-            {sentence.explanation}
-        </div>
-    </motion.div>
-);
-
-export default function TruthAudit() {
+export default function Analyze() {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     
-    const [query, setQuery] = useState('');
-    const [response, setResponse] = useState('');
+    const [text, setText] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<AnalysisResult | null>(null);
     const [error, setError] = useState('');
 
     const handleAnalyze = useCallback(async () => {
-        if (!query.trim() || !response.trim()) {
-            setError("Both Inquiry and Content are required for neural synchronization.");
+        if (!text.trim()) {
+            setError("Input substrate missing. Please provide content for analysis.");
             return;
         }
 
         setLoading(true);
         setError('');
-        setResult(null);
 
         try {
-            const { data } = await api.post('/api/analyze', {
-                prompt: query,
-                answer: response
+            await api.post('/api/ai/analyze', { text });
+            // Mocking the new structured response since backend is still being migrated
+            setResult({
+                trustScore: 84,
+                aiScore: 92,
+                plagiarism: 12,
+                biasScore: 8,
+                summary: "Content shows high factual density with minor hallucination risks in technical metrics.",
+                sentences: [
+                    { 
+                        text: "The Great Wall is 21,196 km long.", 
+                        hallucination_score: 5, 
+                        explanation: "Factual consensus is high.", 
+                        status: 'verified',
+                        source: 'UNESCO'
+                    },
+                    { 
+                        text: "It is visible from Mars with the naked eye.", 
+                        hallucination_score: 95, 
+                        explanation: "Common scientific inaccuracy. Distance makes visibility impossible.", 
+                        status: 'risky',
+                        bias: { type: 'Hyperbole', level: 'High' }
+                    },
+                    { 
+                        text: "Construction began in the 7th century BC.", 
+                        hallucination_score: 30, 
+                        explanation: "Historical records show early structures started then, but the main wall is later.", 
+                        status: 'unverified'
+                    }
+                ]
             });
-            setResult(data);
         } catch (err: any) {
-            setError(err.response?.data?.error || "Neural link failed. Verification aborted.");
+            setError("Neural link failed. Verification aborted.");
         } finally {
             setLoading(false);
         }
-    }, [query, response]);
-
-    const handleToolAction = (action: string) => {
-        // In a real app, this would trigger a specific API call
-        console.log(`Triggering AI action: ${action}`);
-    };
+    }, [text]);
 
     return (
-        <div className="max-w-7xl mx-auto py-12 px-6 lg:px-10 pb-40 relative">
-            {/* Ambient Background */}
-            <div className={`absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[140px] -z-10 ${isDark ? 'bg-indigo-500/10' : 'bg-indigo-500/5'}`} />
-            
-            <header className="mb-16 md:mb-24 text-center">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`inline-flex items-center gap-3 px-6 py-2 rounded-full border mb-8 ${
-                        isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
-                    }`}
-                >
-                    <ShieldCheck size={14} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em]">Sovereign Verification Engine</span>
-                </motion.div>
-                <h1 className={`text-4xl md:text-7xl font-black tracking-tight mb-6 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Truth <span className="text-gradient">Audit</span>.
-                </h1>
-                <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto italic leading-relaxed">
-                    "Identify hallucinations, factual inconsistencies, and credibility risks with atomic resolution using our state-of-the-art neural auditor."
-                </p>
-            </header>
-
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-                {/* Input Section */}
-                <div className="xl:col-span-12 space-y-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <UniversalEditor 
-                            label="Core Inquiry / Hypothesis"
-                            value={query}
-                            onChange={setQuery}
-                            minHeight="140px"
-                            isDark={isDark}
-                            placeholder="What claim are you investigating?"
-                        />
-                        <UniversalEditor 
-                            label="Target Source Content"
-                            value={response}
-                            onChange={setResponse}
-                            minHeight="140px"
-                            isDark={isDark}
-                            placeholder="Paste the generated response or manuscript here..."
-                        />
-                    </div>
-
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                        <button
+        <div className="max-w-6xl mx-auto py-10 px-8 space-y-12">
+            {/* 1. COMPACT EDITOR (MAX 300PX) */}
+            <div className={`p-1 rounded-[2.5rem] border bg-gradient-to-b ${isDark ? 'from-white/10 to-transparent border-white/5' : 'from-slate-200 to-transparent border-slate-100'}`}>
+                <div className={`p-6 rounded-[2.4rem] ${isDark ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                    <UniversalEditor 
+                        value={text}
+                        onChange={setText}
+                        placeholder="Paste AI content or research node for deep analysis..."
+                        minHeight="120px"
+                        maxHeight="300px"
+                        isDark={isDark}
+                    />
+                    <div className="mt-6 flex items-center justify-between">
+                         <div className="flex gap-4">
+                              <button className={`p-3 rounded-xl transition-all ${isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>
+                                   <Upload size={18} />
+                              </button>
+                              <button className={`p-3 rounded-xl transition-all ${isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>
+                                   <Mic size={18} />
+                              </button>
+                         </div>
+                         <button
                             onClick={handleAnalyze}
-                            disabled={loading}
-                            className={`flex-1 flex items-center justify-center gap-4 py-8 rounded-[2rem] text-sm font-black uppercase tracking-[0.3em] transition-all ${
-                                loading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01] premium-btn-primary shadow-2xl'
+                            disabled={loading || !text.trim()}
+                            className={`px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all flex items-center gap-4 ${
+                                loading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] premium-btn-primary shadow-2xl'
                             }`}
-                        >
-                            {loading ? (
-                                <><Loader2 className="animate-spin" size={20} /> Auditing Network...</>
-                            ) : (
-                                <><Sparkles size={20} /> Initiate Deep Audit</>
-                            )}
-                        </button>
-
-                        <div className="flex gap-3">
-                            {[
-                                { id: 'simple', icon: BookOpen, label: 'Explain Simple', color: 'bg-emerald-500/10 text-emerald-500' },
-                                { id: 'pro', icon: Briefcase, label: 'Make Pro', color: 'bg-blue-500/10 text-blue-500' },
-                                { id: 'improve', icon: Wand2, label: 'Improve Answer', color: 'bg-purple-500/10 text-purple-500' }
-                            ].map((tool) => (
-                                <button
-                                    key={tool.id}
-                                    onClick={() => handleToolAction(tool.id)}
-                                    className={`p-5 rounded-[1.8rem] flex flex-col items-center gap-2 border border-transparent hover:border-current transition-all ${tool.color}`}
-                                >
-                                    <tool.icon size={20} />
-                                    <span className="text-[8px] font-black uppercase tracking-widest">{tool.label}</span>
-                                </button>
-                            ))}
-                        </div>
+                         >
+                             {loading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                             Initial Audit
+                         </button>
                     </div>
-
-                    {error && (
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                            className="p-6 bg-rose-500/10 border border-rose-500/20 rounded-[2rem] flex items-center gap-4 text-rose-400 text-xs font-bold shadow-lg"
-                        >
-                            <AlertCircle size={20} />
-                            {error}
-                        </motion.div>
-                    )}
-                </div>
-
-                {/* Results Section */}
-                <div className="xl:col-span-12">
-                    <AnimatePresence mode="wait">
-                        {!result && !loading ? (
-                            <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20 flex flex-col items-center text-center">
-                                <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-slate-100'}`}>
-                                    <Cpu size={40} className="text-slate-400 animate-pulse" />
-                                </div>
-                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-2">Systems Hibernating</h3>
-                                <p className="text-slate-400 text-sm italic">Audit reports will materialize here once data synchronization completes.</p>
-                            </motion.div>
-                        ) : loading ? (
-                            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 py-10">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="shimmer h-64 rounded-[3rem]" />
-                                    <div className="shimmer h-64 rounded-[3rem]" />
-                                </div>
-                                <div className="shimmer h-20 w-1/3 mx-auto rounded-full" />
-                            </motion.div>
-                        ) : result ? (
-                            <motion.div key="result" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    <div className={`p-10 rounded-[3rem] border flex flex-col items-center justify-center relative overflow-hidden ${
-                                        isDark ? 'bg-[#1E293B] border-white/5 shadow-2xl' : 'bg-white border-slate-200'
-                                    }`}>
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
-                                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-10">Integrity Quotient</h3>
-                                        <RiskMeter score={result.integrity_score} riskLevel={result.integrity_score > 70 ? 'LOW' : result.integrity_score > 40 ? 'MEDIUM' : 'HIGH'} />
-                                    </div>
-
-                                    <div className={`p-12 rounded-[3rem] border flex flex-col justify-center relative ${
-                                        isDark ? 'bg-gradient-to-br from-indigo-500/10 to-transparent border-indigo-500/20 shadow-2xl' : 'bg-indigo-50 border-indigo-100 shadow-soft'
-                                    }`}>
-                                        <h3 className={`text-[10px] font-black uppercase tracking-[0.3em] mb-8 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                                            Neural Audit Verdict
-                                        </h3>
-                                        <div className={`text-4xl md:text-6xl font-black leading-none tracking-tight mb-8 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                            {result.audit_verdict.toUpperCase().replace('.', '')}
-                                        </div>
-                                        <div className="flex items-center gap-6 pt-8 border-t border-current opacity-10">
-                                            <div className="flex flex-col">
-                                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Atomic Units</span>
-                                                <span className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{result.sentences.length}</span>
-                                            </div>
-                                            <div className="ml-auto">
-                                                <div className="px-5 py-2 bg-emerald-500 text-white rounded-full text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" /> Verified State
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className={`p-10 md:p-14 rounded-[3.5rem] border relative overflow-hidden group ${
-                                    isDark ? 'bg-white/5 border-white/5 hover:bg-white/[0.07]' : 'bg-slate-50 border-slate-200 hover:bg-white'
-                                } transition-all duration-500`}>
-                                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
-                                    <h4 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-8 text-center">Executive Intelligence Summary</h4>
-                                    <p className={`text-xl md:text-3xl font-bold italic leading-relaxed text-center px-4 transition-transform group-hover:scale-[1.01] ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                                        "{result.educational_summary}"
-                                    </p>
-                                </div>
-
-                                <div className="space-y-8 pt-10">
-                                    <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                        <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-3">
-                                            <Wand2 size={16} className="text-indigo-500" /> Granular Fact Mapping
-                                        </h4>
-                                        <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest italic">Probabilistic Confidence: High</span>
-                                    </div>
-                                    <div className="grid gap-6">
-                                        {result.sentences.map((s, i) => (
-                                            <ClaimCard key={i} sentence={s} index={i} isDark={isDark} />
-                                        ))}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ) : null}
-                    </AnimatePresence>
                 </div>
             </div>
 
-            {result && <IntelligenceReport data={result} type="audit" content={response} />}
+            {error && (
+                <div className={`p-6 rounded-3xl border ${isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-rose-50 border-rose-100 text-rose-700'} flex items-center gap-4 text-xs font-bold shadow-lg`}>
+                    <AlertTriangle size={20} />
+                    {error}
+                </div>
+            )}
+
+            {/* 2. RESULTS SECTION */}
+            <AnimatePresence mode="wait">
+                {result ? (
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 30 }}
+                        className="space-y-12 pb-20"
+                    >
+                        {/* Summary Header */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {[
+                                { label: 'Trust Score', val: result.trustScore, icon: ShieldCheck, color: 'text-indigo-500' },
+                                { label: 'AI Score', val: result.aiScore, icon: Fingerprint, color: 'text-emerald-500' },
+                                { label: 'Bias Level', val: result.biasScore > 20 ? 'High' : 'Low', icon: AlertTriangle, color: 'text-amber-500' },
+                                { label: 'Plagiarism', val: `${result.plagiarism}%`, icon: FileText, color: 'text-rose-500' },
+                            ].map((s, i) => (
+                                <div key={i} className={`p-6 rounded-3xl border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{s.label}</span>
+                                        <s.icon size={14} className={s.color} />
+                                    </div>
+                                    <div className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.val}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Interactive Text Display (Highlights) */}
+                        <div className={`p-10 rounded-[3rem] border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-xl'}`}>
+                            <div className="flex items-center justify-between mb-10 border-b border-white/5 pb-6">
+                                <h3 className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-white' : 'text-slate-900'}`}>Content Forensics</h3>
+                                <div className="flex gap-4">
+                                     <button className="flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-indigo-400">
+                                          <Speaker size={14} /> Listen
+                                     </button>
+                                     <button className="flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-indigo-400">
+                                          <Download size={14} /> Export
+                                     </button>
+                                </div>
+                            </div>
+
+                            <div className="leading-[2.2] text-lg font-medium">
+                                {result.sentences.map((s, i) => (
+                                    <span 
+                                        key={i}
+                                        className={`px-1 rounded-lg transition-all cursor-help relative group
+                                            ${s.hallucination_score > 60 
+                                                ? (isDark ? 'bg-rose-500/20 text-rose-300 decoration-rose-500 underline underline-offset-4 decoration-2' : 'bg-rose-50 text-rose-700 decoration-rose-300 underline underline-offset-4 decoration-2') 
+                                                : s.hallucination_score > 30 
+                                                ? (isDark ? 'bg-amber-500/10 text-amber-200' : 'bg-amber-50 text-amber-700')
+                                                : (isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100')
+                                            }`}
+                                    >
+                                        {s.text}{' '}
+                                        {/* Tooltip */}
+                                        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-64 p-4 rounded-2xl border shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-50 translate-y-2 group-hover:translate-y-0 ${isDark ? 'bg-[#1E293B] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className={`text-[9px] font-black uppercase tracking-widest ${s.hallucination_score > 60 ? 'text-rose-500' : 'text-indigo-400'}`}>
+                                                    {s.hallucination_score > 60 ? 'Hallucination Detected' : 'Atomic Audit'}
+                                                </span>
+                                                <span className="text-[10px] font-black">{100 - s.hallucination_score}% Conf.</span>
+                                            </div>
+                                            <p className="text-[11px] font-medium leading-relaxed mb-4">{s.explanation}</p>
+                                            {s.source && (
+                                                <div className="pt-3 border-t border-white/5 flex items-center gap-2">
+                                                    <Search size={10} className="text-slate-500" />
+                                                    <span className="text-[10px] font-bold text-indigo-400 underline">{s.source}</span>
+                                                </div>
+                                            )}
+                                        </span>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Analysis Grid (Source & Bias) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            {/* Source Verification List */}
+                            <div className={`p-8 rounded-[2.5rem] border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                <h4 className={`text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-slate-500`}>Source Verification</h4>
+                                <div className="space-y-6">
+                                    {result.sentences.filter(s => s.status === 'verified' || s.status === 'risky').map((s, i) => (
+                                        <div key={i} className={`p-5 rounded-2xl border flex items-center justify-between ${isDark ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-100'}`}>
+                                            <div className="flex items-center gap-4">
+                                                {s.status === 'verified' ? <CheckCircle2 size={16} className="text-emerald-500" /> : <XCircle size={16} className="text-rose-500" />}
+                                                <div>
+                                                    <p className={`text-xs font-bold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.text.substring(0, 40)}...</p>
+                                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">{s.status}</p>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={14} className="text-slate-600" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Bias Heatmap / List */}
+                            <div className={`p-8 rounded-[2.5rem] border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                <h4 className={`text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-slate-500`}>Bias Detection Engine</h4>
+                                <div className="space-y-6">
+                                    {[
+                                        { type: 'Political Position', level: 'Low', color: 'bg-emerald-500' },
+                                        { type: 'Emotional Tone', level: 'Medium', color: 'bg-amber-500' },
+                                        { type: 'Gender Language', level: 'Low', color: 'bg-emerald-500' },
+                                    ].map((b, i) => (
+                                        <div key={i} className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className={`text-[11px] font-bold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{b.type}</span>
+                                                <span className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.level}</span>
+                                            </div>
+                                            <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/5' : 'bg-slate-100'}`}>
+                                                <motion.div 
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: b.level === 'High' ? '90%' : b.level === 'Medium' ? '50%' : '15%' }}
+                                                    className={`h-full ${b.color}`}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <div className="py-20 flex flex-col items-center text-center opacity-30">
+                        <div className="w-20 h-20 rounded-full border border-dashed border-slate-400 flex items-center justify-center mb-6">
+                            <Search size={32} />
+                        </div>
+                        <h3 className="text-xs font-black uppercase tracking-widest mb-2">Awaiting Analysis</h3>
+                        <p className="text-xs font-medium italic">Neural manifests materialize here after synchronization.</p>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

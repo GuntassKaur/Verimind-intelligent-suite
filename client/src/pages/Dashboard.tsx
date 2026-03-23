@@ -7,7 +7,8 @@ import {
     ArrowUpRight,
     Trophy,
     Flame,
-    BarChart3
+    BarChart3,
+    Activity
 } from 'lucide-react';
 import {
   Chart as ChartJS,

@@ -18,6 +18,7 @@ const TruthAudit = lazy(() => import('./pages/TruthAudit'));
 const UserDashboard = lazy(() => import('./pages/Dashboard'));
 const RewriteModes = lazy(() => import('./pages/RewriteModes'));
 const TypingLab = lazy(() => import('./pages/TypingLab'));
+const Comparison = lazy(() => import('./pages/Comparison'));
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { GlobalTypingTracker } from './components/GlobalTypingTracker';
 import { Logo } from './components/Logo';
@@ -108,6 +109,7 @@ function AppContent() {
                     <Route path="flowchart" element={<Visualizer />} />
                     <Route path="research" element={<Research />} />
                     <Route path="typing" element={<TypingLab />} />
+                    <Route path="comparison" element={<Comparison />} />
                     <Route path="history" element={user ? <History /> : <Navigate to="/login" replace />} />
                     <Route path="settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
                 </Route>

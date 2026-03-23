@@ -4,8 +4,9 @@ import mermaid from 'mermaid';
 // Initialize with a cleaner default theme for maximum readability
 mermaid.initialize({
     startOnLoad: false,
-    theme: 'default',
-    securityLevel: 'loose'
+    theme: 'dark', // Changed to dark for the premium theme
+    securityLevel: 'loose',
+    fontFamily: 'Inter, sans-serif'
 });
 
 interface MermaidProps {
@@ -39,7 +40,7 @@ export const Mermaid: React.FC<MermaidProps> = ({ code }) => {
             } catch (error) {
                 console.error('Mermaid rendering error:', error);
                 if (isMounted) {
-                     setSvg(`<div class="text-rose-500 font-bold p-4 bg-rose-50 border border-rose-200 rounded-xl">Error rendering visual map. Invalid flowchart syntax from AI.</div>`);
+                     setSvg(`<div class="text-rose-500 font-bold p-6 bg-rose-50/5 border border-rose-500/20 rounded-3xl">Neural Map Error: Invalid flowchart syntax detected. Spectrum synchronization aborted.</div>`);
                 }
             }
         };
@@ -50,9 +51,15 @@ export const Mermaid: React.FC<MermaidProps> = ({ code }) => {
 
     return (
         <div 
-            ref={ref} 
-            className={`w-full overflow-auto flex justify-center py-6 [&_svg]:min-w-[600px] [&_svg]:h-auto`}
-            dangerouslySetInnerHTML={{ __html: svg }}
-        />
+            className="w-full max-w-full overflow-x-auto overflow-y-hidden custom-scrollbar bg-[#0f172a]/40 rounded-[2.5rem] border border-white/5 p-8 md:p-12 mb-8 shadow-2xl"
+            style={{ paddingLeft: '24px', paddingRight: '24px' }}
+        >
+            <div 
+                ref={ref} 
+                style={{ margin: 'auto', display: 'flex', justifyContent: 'center', width: 'fit-content', minWidth: '100%' }}
+                className="mermaid-container [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:min-w-[400px] flex justify-center"
+                dangerouslySetInnerHTML={{ __html: svg }}
+            />
+        </div>
     );
 };

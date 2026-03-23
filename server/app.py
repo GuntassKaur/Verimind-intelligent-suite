@@ -22,6 +22,7 @@ from services.generation_service import generate_answer
 from services.plagiarism_service import check_plagiarism
 from services.humanize_service import humanize_text
 from services.typing_service import get_typing_text
+from services.assistant_service import process_assistant_query
 from utils.processors import extract_text_from_pdf, extract_text_from_url
 
 # Configuration & Validation
@@ -237,6 +238,19 @@ def get_typing_quote():
     category = request.args.get("category", "General Knowledge")
     quote = get_typing_text(difficulty, category)
     return create_response(data={"quote": quote})
+
+@app.route("/api/ai/assistant", methods=["POST"])
+@login_required
+def assistant():
+    data = request.json or {}
+    message = data.get("message")
+    context = data.get("context", "")
+    wpm = data.get("wpm", 0)
+    
+    if not message: return create_response(success=False, error="Message substrate missing.", status=400)
+    
+    result = process_assistant_query(message, context, wpm)
+    return create_response(data={"reply": result})
 
 @app.route("/api/process/url", methods=["POST"])
 @login_required
