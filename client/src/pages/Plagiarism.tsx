@@ -7,11 +7,8 @@ import {
     Activity, 
     ShieldAlert, 
     FileText, 
-    Download,
     Terminal,
-    Sparkles,
     Printer,
-    Copy,
     Info
 } from 'lucide-react';
 import api from '../services/api';

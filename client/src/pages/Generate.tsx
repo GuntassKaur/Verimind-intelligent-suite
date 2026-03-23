@@ -5,7 +5,6 @@ import {
     Loader2, 
     CheckCircle2,
     Copy,
-    Download,
     Terminal,
     Sparkles,
     Printer,

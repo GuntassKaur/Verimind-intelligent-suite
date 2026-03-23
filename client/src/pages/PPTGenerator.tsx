@@ -4,13 +4,9 @@ import {
     MonitorPlay, 
     Sparkles, 
     Download, 
-    PlusCircle, 
-    Plus, 
-    Terminal, 
     ChevronRight, 
     FileText,
     Loader2,
-    CheckCircle2,
     Copy
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';

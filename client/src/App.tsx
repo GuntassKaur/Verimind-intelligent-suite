@@ -9,15 +9,12 @@ const Settings = lazy(() => import('./pages/Settings'));
 const Login = lazy(() => import('./pages/Login'));
 const Workspace = lazy(() => import('./pages/Workspace'));
 const Visualizer = lazy(() => import('./pages/Visualizer'));
-const Research = lazy(() => import('./pages/Research'));
 const Register = lazy(() => import('./pages/Register'));
 const Generate = lazy(() => import('./pages/Generate'));
 const Plagiarism = lazy(() => import('./pages/Plagiarism'));
 const Humanizer = lazy(() => import('./pages/Humanizer'));
 const TruthAudit = lazy(() => import('./pages/TruthAudit'));
 const UserDashboard = lazy(() => import('./pages/Dashboard'));
-const RewriteModes = lazy(() => import('./pages/RewriteModes'));
-const TypingLab = lazy(() => import('./pages/TypingLab'));
 const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
 

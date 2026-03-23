@@ -5,17 +5,13 @@ import {
     LayoutDashboard,
     ShieldCheck,
     Zap,
-    Clock,
-    User,
     Settings,
     LogOut,
-    Search,
     MonitorPlay,
-    FileType,
     Layers,
     Menu,
     X,
-    ChevronDown
+    FileType
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useTheme } from '../contexts/ThemeContext';
