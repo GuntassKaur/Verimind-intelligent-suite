@@ -18,7 +18,7 @@ const TOOLS = [
 export default function Workspace() {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState<string | null>(null);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<{ type: string; data: Record<string, any> } | null>(null);
     const [error, setError] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +33,7 @@ export default function Workspace() {
 
         try {
             let endpoint = '';
-            let payload: any = {};
+            let payload: Record<string, unknown> = {};
 
             switch (type) {
                 case 'generate': endpoint = '/api/ai/generate'; payload = { prompt: content || 'Generate a high-fidelity research paper outline.' }; break;
@@ -51,8 +51,9 @@ export default function Workspace() {
                 setError(data.error || "Action failed.");
             }
 
-        } catch (err: any) {
-             setError(err.response?.data?.error || `Server disconnected. Ensure backend is running.`);
+        } catch (err: unknown) {
+             const errorMsg = (err as any).response?.data?.error || `Server disconnected. Ensure backend is running.`;
+             setError(errorMsg);
         } finally {
             setLoading(null);
         }
@@ -149,7 +150,7 @@ export default function Workspace() {
     );
 }
 
-function ResultBoxes({ result }: { result: any }) {
+function ResultBoxes({ result }: { result: { type: string; data: any } }) {
     const { type, data } = result;
 
     if (type === 'analyze') {

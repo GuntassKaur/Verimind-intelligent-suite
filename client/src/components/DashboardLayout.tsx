@@ -18,15 +18,21 @@ import { useTheme } from '../contexts/ThemeContext';
 
 export default function DashboardLayout() {
     const { theme } = useTheme();
-    const [userData, setUserData] = useState<{name?: string} | null>(null);
+    const [userData] = useState<{name?: string} | null>(() => {
+        try {
+            const stored = localStorage.getItem('user');
+            return stored ? JSON.parse(stored) : null;
+        } catch (e) {
+            console.error('Error parsing user data from localStorage', e);
+            return null;
+        }
+    });
+
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const location = useLocation();
 
     useEffect(() => {
-        const stored = localStorage.getItem('user');
-        if (stored) setUserData(JSON.parse(stored));
-
         const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);

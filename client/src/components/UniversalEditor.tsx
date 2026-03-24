@@ -194,8 +194,8 @@ const ActivityBar = ({ intensity, isDark }: { intensity: number, isDark: boolean
              <motion.div 
                 key={i}
                 initial={{ height: 2 }}
-                animate={{ height: `${2 + Math.random() * (intensity / 10 + 20)}%` }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse', delay: i * 0.1 }}
+                animate={{ height: `${10 + (i * 7) % 30 + (intensity / 5)}%` }}
+                transition={{ duration: 0.6 + (i * 0.1), repeat: Infinity, repeatType: 'reverse', delay: i * 0.05 }}
                 className={`w-1 rounded-full ${isDark ? 'bg-indigo-500' : 'bg-indigo-600'}`}
              />
         ))}

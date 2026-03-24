@@ -36,15 +36,16 @@ interface IntelligenceReportProps {
 }
 
 export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, type, content }) => {
+    const [verificationId, setVerificationId] = React.useState('');
+
+    React.useEffect(() => {
+        setVerificationId('VM-' + Math.random().toString(36).substring(2, 10).toUpperCase());
+    }, []);
+
     if (!data) return null;
 
     // Normalize data for display
     const resultText = data.humanized_text || data.answer || data.summary || data.explanation || '';
-
-    const [verificationId, setVerificationId] = React.useState('');
-    React.useEffect(() => {
-        setVerificationId('VM-' + Math.random().toString(36).substring(2, 10).toUpperCase());
-    }, []);
 
     // Derived Metrics
     const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;

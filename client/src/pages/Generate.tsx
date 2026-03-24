@@ -10,7 +10,7 @@ import {
     Printer,
     Activity
 } from 'lucide-react';
-import api from '../services/api';
+
 import { generatePDF } from '../utils/pdfExport';
 import { IntelligenceReport } from '../components/IntelligenceReport';
 import { UniversalEditor } from '../components/UniversalEditor';
@@ -82,7 +82,7 @@ export default function Generate() {
                     }
                 }
             }
-        } catch (err: any) {
+        } catch { // stream errors handled gracefully
              setError('System interrupt in Synthesis module. Neural link failed.');
         } finally {
             setLoading(false);

@@ -1,0 +1,221 @@
+﻿
+> client@0.0.0 lint
+> eslint .
+
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\AppAssistantPanel.tsx
+  81:32  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\AppAssistantPanel.tsx:81:32
+  79 |            </h5>
+  80 |            <p className="text-[11px] text-slate-300 leading-relaxed font-medium italic relative z-10">
+> 81 |              "{tips[Math.floor(Math.random() * tips.length)]}"
+     |                                ^^^^^^^^^^^^^ Cannot call impure function
+  82 |            </p>
+  83 |         </div>
+  84 |       </div>  react-hooks/purity
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\DashboardLayout.tsx
+  35:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx
+  34:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx:34:9
+  32 |             pathY: [0, (Math.random() - 0.5) * 400, 0]
+  33 |         }));
+> 34 |         setParticles(newParticles);
+     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  35 |     }, []);
+  36 |
+  37 |     return (  react-hooks/set-state-in-effect
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\GlobalTypingTracker.tsx
+  19:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\GlobalTypingTracker.tsx:19:13
+  17 |     useEffect(() => {
+  18 |         if (isExcludedPage) {
+> 19 |             setWpm(0);
+     |             ^^^^^^ Avoid calling setState() directly within an effect
+  20 |             return;
+  21 |         }
+  22 |  react-hooks/set-state-in-effect
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\IntelligenceReport.tsx
+    7:11  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+   43:87  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\IntelligenceReport.tsx:43:87
+  41 |                     <div className="bg-slate-100 px-4 py-2 rounded-xl mb-4 border border-slate-200">
+  42 |                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Verification ID</p>
+> 43 |                         <p className="text-sm font-black italic tracking-tighter">VM-{Math.random().toString(36).substring(2, 10).toUpperCase()}</p>
+     |                                                                                       ^^^^^^^^^^^^^ Cannot call impure function
+  44 |                     </div>
+  45 |                     <p className="text-[10px] font-bold text-slate-400">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+  46 |                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{new Date().toLocaleTimeString()}</p>  react-hooks/purity
+  133:47  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Analyzer.tsx
+   3:40  error  'CheckCircle2' is defined but never used  @typescript-eslint/no-unused-vars
+  78:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\BlogGenerator.tsx
+   9:5  error  'Layout' is defined but never used      @typescript-eslint/no-unused-vars
+  11:5  error  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+  14:5  error  'Cpu' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\EmailGenerator.tsx
+  3:86   error  'Cpu' is defined but never used       @typescript-eslint/no-unused-vars
+  3:91   error  'FileText' is defined but never used  @typescript-eslint/no-unused-vars
+  3:101  error  'Globe' is defined but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Generate.tsx
+   1:33  error  'useMemo' is defined but never used       @typescript-eslint/no-unused-vars
+   3:73  error  'FileText' is defined but never used      @typescript-eslint/no-unused-vars
+   4:10  error  'Logo' is defined but never used          @typescript-eslint/no-unused-vars
+   6:10  error  'VoiceInput' is defined but never used    @typescript-eslint/no-unused-vars
+  54:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\History.tsx
+   2:10   error  'Clock' is defined but never used            @typescript-eslint/no-unused-vars
+   2:49   error  'LayoutDashboard' is defined but never used  @typescript-eslint/no-unused-vars
+   2:66   error  'Download' is defined but never used         @typescript-eslint/no-unused-vars
+   2:76   error  'Filter' is defined but never used           @typescript-eslint/no-unused-vars
+   2:97   error  'Cpu' is defined but never used              @typescript-eslint/no-unused-vars
+   2:117  error  'Info' is defined but never used             @typescript-eslint/no-unused-vars
+  11:28   error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Humanizer.tsx
+   1:33  error  'useMemo' is defined but never used       @typescript-eslint/no-unused-vars
+   3:64  error  'Zap' is defined but never used           @typescript-eslint/no-unused-vars
+   3:74  error  'FileText' is defined but never used      @typescript-eslint/no-unused-vars
+   3:84  error  'Globe' is defined but never used         @typescript-eslint/no-unused-vars
+   4:10  error  'Logo' is defined but never used          @typescript-eslint/no-unused-vars
+   6:10  error  'VoiceInput' is defined but never used    @typescript-eslint/no-unused-vars
+  53:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Landing.tsx
+   5:5   error  'Keyboard' is defined but never used     @typescript-eslint/no-unused-vars
+   6:5   error  'ShieldAlert' is defined but never used  @typescript-eslint/no-unused-vars
+  11:5   error  'FileText' is defined but never used     @typescript-eslint/no-unused-vars
+  15:10  error  'Logo' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Login.tsx
+   4:73  error  'Cpu' is defined but never used           @typescript-eslint/no-unused-vars
+   7:8   error  'axios' is defined but never used         @typescript-eslint/no-unused-vars
+  46:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  60:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  80:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Plagiarism.tsx
+   1:33  error  'useMemo' is defined but never used       @typescript-eslint/no-unused-vars
+   3:42  error  'CheckCircle2' is defined but never used  @typescript-eslint/no-unused-vars
+   3:88  error  'Zap' is defined but never used           @typescript-eslint/no-unused-vars
+   3:93  error  'Info' is defined but never used          @typescript-eslint/no-unused-vars
+   4:10  error  'Logo' is defined but never used          @typescript-eslint/no-unused-vars
+   6:10  error  'VoiceInput' is defined but never used    @typescript-eslint/no-unused-vars
+  60:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Register.tsx
+   4:62  error  'ArrowRight' is defined but never used    @typescript-eslint/no-unused-vars
+   4:74  error  'Info' is defined but never used          @typescript-eslint/no-unused-vars
+   4:80  error  'Cpu' is defined but never used           @typescript-eslint/no-unused-vars
+   7:8   error  'axios' is defined but never used         @typescript-eslint/no-unused-vars
+  43:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Research.tsx
+  1:20  error  'useCallback' is defined but never used      @typescript-eslint/no-unused-vars
+  2:18  error  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+  3:47  error  'Sparkles' is defined but never used         @typescript-eslint/no-unused-vars
+  3:57  error  'Cpu' is defined but never used              @typescript-eslint/no-unused-vars
+  4:8   error  'api' is defined but never used              @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\TypingLab.tsx
+   1:39  error  'useCallback' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   3:10  error  'Keyboard' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   3:40  error  'Play' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   3:49  error  'RefreshCw' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   3:69  error  'Cpu' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   3:84  error  'Info' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  28:23  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  49:18  error  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  65:13  error  Error: Cannot access variable before it is declared
+
+`endTest` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\TypingLab.tsx:65:13
+  63 |
+  64 |         if (timeLeft <= 0 && status === 'PLAYING') {
+> 65 |             endTest();
+     |             ^^^^^^^ `endTest` accessed before it is declared
+  66 |         }
+  67 |
+  68 |         return () => { if (timerRef.current) clearInterval(timerRef.current); };
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\TypingLab.tsx:71:5
+  69 |     }, [status, isActive, timeLeft]);
+  70 |
+> 71 |     const endTest = () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^
+> 72 |         setIsActive(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 73 |         setStatus('FINISHED');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 74 |         if (timerRef.current) clearInterval(timerRef.current);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 75 |         if (stopTimeoutRef.current) clearTimeout(stopTimeoutRef.current);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 76 |     };
+     | ^^^^^^^ `endTest` is declared here
+  77 |
+  78 |     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  79 |         const val = e.target.value;  react-hooks/immutability
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Visualizer.tsx
+   5:11  error  'AlertCircle' is defined but never used   @typescript-eslint/no-unused-vars
+   6:5   error  'Plus' is defined but never used          @typescript-eslint/no-unused-vars
+   7:29  error  'Printer' is defined but never used       @typescript-eslint/no-unused-vars
+  49:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Workspace.tsx
+    1:33  error  'useMemo' is defined but never used          @typescript-eslint/no-unused-vars
+    1:50  error  'memo' is defined but never used             @typescript-eslint/no-unused-vars
+    4:5   error  'Search' is defined but never used           @typescript-eslint/no-unused-vars
+    5:15  error  'Zap' is defined but never used              @typescript-eslint/no-unused-vars
+    5:20  error  'Loader2' is defined but never used          @typescript-eslint/no-unused-vars
+    6:5   error  'AlertCircle' is defined but never used      @typescript-eslint/no-unused-vars
+    6:35  error  'Check' is defined but never used            @typescript-eslint/no-unused-vars
+    7:5   error  'BarChart3' is defined but never used        @typescript-eslint/no-unused-vars
+    7:16  error  'FileText' is defined but never used         @typescript-eslint/no-unused-vars
+    7:26  error  'Info' is defined but never used             @typescript-eslint/no-unused-vars
+    8:27  error  'Download' is defined but never used         @typescript-eslint/no-unused-vars
+    9:5   error  'LayoutTemplate' is defined but never used   @typescript-eslint/no-unused-vars
+    9:29  error  'X' is defined but never used                @typescript-eslint/no-unused-vars
+    9:32  error  'Cpu' is defined but never used              @typescript-eslint/no-unused-vars
+    9:37  error  'Globe' is defined but never used            @typescript-eslint/no-unused-vars
+   38:64  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+   40:12  error  'copied' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   65:26  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+   84:18  error  'err' is defined but never used              @typescript-eslint/no-unused-vars
+  190:84  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  249:17  error  'variant' is defined but never used          @typescript-eslint/no-unused-vars
+
+Γ£û 94 problems (94 errors, 0 warnings)
+

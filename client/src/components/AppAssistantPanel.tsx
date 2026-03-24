@@ -7,7 +7,7 @@ import {
     Activity,
     BrainCircuit
 } from 'lucide-react';
-import api from '../services/api';
+
 
 interface Message {
     id: string;
@@ -106,11 +106,11 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
                                     m.id === aiMsgId ? { ...m, text: streamedText } : m
                                 ));
                             }
-                        } catch (e) { /* partial chunk */ }
+                        } catch { /* partial chunk */ }
                     }
                 }
             }
-        } catch (err: unknown) {
+        } catch {
              setMessages(prev => prev.map(m => 
                 m.id === aiMsgId ? { ...m, text: "Neural interrupt detected. Please re-synchronize protocol." } : m
              ));
