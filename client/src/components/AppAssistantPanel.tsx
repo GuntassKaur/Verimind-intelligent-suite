@@ -30,7 +30,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
     const [messages, setMessages] = useState<Message[]>([
         { 
             id: '1', 
-            text: "Hey! I'm VeriMind's BrainForge AI 🧠⚡\n\nI'm your all-in-one intelligence — just tell me what you need:\n\n💬 Casual → Friendly Hinglish reply\n📚 Academic → Deep explanation + examples\n💼 Professional → Formal structured response\n💻 Coding → Code + logic + optimization\n📊 PPT → 10–15 slide structured content\n✍️ Writing → Blog, email, caption, resume\n🧪 Logical/Tricky → Step-by-step with ✅ Final Answer\n📂 File/Content → Summarize, extract, convert\n🎯 Real-Life → Practical advice + action plan\n\nBas poochho kuch bhi — main sab handle kar sakta hoon! 🚀", 
+            text: "Hey! I'm VeriMind's BrainForge AI 🧠⚡\n\nI'm your all-in-one ecosystem. Tell me what you need:\n\n💬 Chat → Friendly, Academic or Pro\n💻 Code → Logic, optimize & debug\n📊 PPT → 10-15 structured slides\n✍️ Writing → Blogs, Emails, Scripts\n🧑‍🏫 Tutor → Step-by-step learning\n🎤 Interview → Simulator with feedback\n💡 Ideas → Startup, Content & Design\n🧪 Logic → Tricky puzzle solving\n📘 Study → Notes, Summaries & Quizzes\n🎯 Career & Life → Roadmaps & advice\n🔍 Fact Check → Bias detection & logic\n📂 Files → Deep analysis & Insights\n\nKya chal raha hai dimaag mein? Ask me anything! 🚀", 
             sender: 'ai', 
             timestamp: new Date() 
         }
@@ -131,7 +131,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
                     </div>
                     <div>
                         <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white' : 'text-slate-900'}`}>VeriMind Assistant</h3>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Hinglish · English · Academic</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Chat · Code · Tutor · Ideas</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
