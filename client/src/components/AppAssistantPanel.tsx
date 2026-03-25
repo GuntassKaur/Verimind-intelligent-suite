@@ -30,7 +30,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
     const [messages, setMessages] = useState<Message[]>([
         { 
             id: '1', 
-            text: "Hey! I'm VeriMind's BrainForge AI 🧠⚡\n\nI'm your all-in-one ecosystem. Tell me what you need:\n\n💬 Chat → Friendly, Academic or Pro\n💻 Code → Logic, optimize & debug\n📊 PPT → 10-15 structured slides\n✍️ Writing → Blogs, Emails, Scripts\n🧑‍🏫 Tutor → Step-by-step learning\n🎤 Interview → Simulator with feedback\n💡 Ideas → Startup, Content & Design\n🧪 Logic → Tricky puzzle solving\n📘 Study → Notes, Summaries & Quizzes\n🎯 Career & Life → Roadmaps & advice\n🔍 Fact Check → Bias detection & logic\n📂 Files → Deep analysis & Insights\n\nKya chal raha hai dimaag mein? Ask me anything! 🚀", 
+            text: "Hey there! I'm VeriMind's BrainForge AI 🧠⚡\n\nThink of me as your helpful human-like co-pilot. Here's what we can do together:\n\n💬 Chat → Friendly Hinglish, Academic, or Pro\n💻 Code → Logic, optimize & debug\n📊 PPT → 10-15 structured slides\n✍️ Writing → Blogs, Emails, Scripts\n🧑‍🏫 Tutor → Step-by-step learning\n🎤 Interview → Simulator with feedback\n💡 Ideas → Startup, Content & Design\n🧪 Logic → Tricky puzzle solving\n📘 Study → Notes, Summaries & Quizzes\n🎯 Career & Life → Roadmaps & advice\n🔍 Fact Check → Bias detection & logic\n📂 Files → Deep analysis & Insights\n\nKya explore karna hai aaj? Ask Verimind! 🚀", 
             sender: 'ai', 
             timestamp: new Date() 
         }
@@ -165,7 +165,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
                     {loading && (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 px-2">
                             <Loader2 className="animate-spin text-indigo-500" size={14} />
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Synthesizing Insight...</span>
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Working on it...</span>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -193,7 +193,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder="Ask anything — Hinglish, English, or Academic..."
+                        placeholder="What do you want to explore today?"
                         className="bg-transparent border-none outline-none flex-1 px-6 py-3 text-[11px] font-bold text-white placeholder:text-slate-600"
                     />
                     <button 
