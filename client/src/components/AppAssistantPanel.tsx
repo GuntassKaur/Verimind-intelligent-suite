@@ -30,7 +30,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
     const [messages, setMessages] = useState<Message[]>([
         { 
             id: '1', 
-            text: "Hello, Analyst. I am your Neural Intelligence Assistant. How can I optimize your current manuscript?", 
+            text: "Hey! I'm VeriMind's BrainForge AI 🧠⚡\n\nI'm your all-in-one intelligence — just tell me what you need:\n\n💬 Casual → Friendly Hinglish reply\n📚 Academic → Deep explanation + examples\n💼 Professional → Formal structured response\n💻 Coding → Code + logic + optimization\n📊 PPT → 10–15 slide structured content\n✍️ Writing → Blog, email, caption, resume\n🧪 Logical/Tricky → Step-by-step with ✅ Final Answer\n📂 File/Content → Summarize, extract, convert\n🎯 Real-Life → Practical advice + action plan\n\nBas poochho kuch bhi — main sab handle kar sakta hoon! 🚀", 
             sender: 'ai', 
             timestamp: new Date() 
         }
@@ -130,8 +130,8 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
                         <Cpu className="text-indigo-400" size={20} />
                     </div>
                     <div>
-                        <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white' : 'text-slate-900'}`}>Synaptic Assistant</h3>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Live Intelligence Link</p>
+                        <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-white' : 'text-slate-900'}`}>VeriMind Assistant</h3>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Hinglish · English · Academic</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -193,7 +193,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder="Command assistant..."
+                        placeholder="Ask anything — Hinglish, English, or Academic..."
                         className="bg-transparent border-none outline-none flex-1 px-6 py-3 text-[11px] font-bold text-white placeholder:text-slate-600"
                     />
                     <button 
