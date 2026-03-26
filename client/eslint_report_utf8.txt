@@ -1,30 +1,65 @@
 ﻿
-C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx
-   5:48  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
-  29:33  error  Error: Cannot call impure function during render
+> client@0.0.0 lint
+> eslint .
 
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
 
-C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx:29:33
-  27 |                     initial={{ x: 0, y: 0 }}
-  28 |                     animate={{ 
-> 29 |                         x: [0, (Math.random() - 0.5) * 400, 0],
-     |                                 ^^^^^^^^^^^^^ Cannot call impure function
-  30 |                         y: [0, (Math.random() - 0.5) * 400, 0]
-  31 |                     }}
-  32 |                     transition={{   react-hooks/purity
-  30:33  error  Error: Cannot call impure function during render
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\contexts\ThemeContext.tsx
+  35:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
 
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Comparison.tsx
+  15:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
-C:\Users\Guntass Kaur\Downloads\aiproject\client\src\components\FloatingParticles.tsx:30:33
-  28 |                     animate={{ 
-  29 |                         x: [0, (Math.random() - 0.5) * 400, 0],
-> 30 |                         y: [0, (Math.random() - 0.5) * 400, 0]
-     |                                 ^^^^^^^^^^^^^ Cannot call impure function
-  31 |                     }}
-  32 |                     transition={{
-  33 |                         duration: p.duration,  react-hooks/purity
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Generate.tsx
+  81:34  error  'e' is defined but never used  @typescript-eslint/no-unused-vars
 
-Γ£û 3 problems (3 errors, 0 warnings)
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\LiveAI.tsx
+   19:35  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   27:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   27:83  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   37:44  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   73:43  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   88:26  warning  The ref value 'synthesisRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'synthesisRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+   90:8   warning  React Hook useEffect has missing dependencies: 'handleUserQuery', 'status', and 'transcript'. Either include them or remove the dependency array                                                                                                                         react-hooks/exhaustive-deps
+  199:34  error    'e' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  224:22  error    'e' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Plagiarism.tsx
+  64:18  error  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  64:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\RewriteModes.tsx
+   52:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:83  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\TruthAudit.tsx
+  85:18  error  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  85:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\TypingLab.tsx
+  307:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\TypingLab.tsx:307:9
+  305 |
+  306 |     useEffect(() => {
+> 307 |         initializeGame();
+      |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  308 |     }, [initializeGame]);
+  309 |
+  310 |     const handleCardClick = (index: number) => {  react-hooks/set-state-in-effect
+
+C:\Users\Guntass Kaur\Downloads\aiproject\client\src\pages\Workspace.tsx
+   21:79   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   55:39   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:66   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  174:62   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  204:119  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:53   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 25 problems (23 errors, 2 warnings)
 

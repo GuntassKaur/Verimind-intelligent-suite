@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Activity, X, Loader2, Sparkles } from 'lucide-react';
+import { Mic, MicOff, X, Loader2, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { AIAvatar } from '../components/AIAvatar';
+import FloatingParticles from '../components/FloatingParticles';
 
 export default function LiveAI() {
     const { theme } = useTheme();
@@ -14,6 +16,7 @@ export default function LiveAI() {
     const [aiResponse, setAiResponse] = useState('');
     const [status, setStatus] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
     const [currentSpokenWordIndex, setCurrentSpokenWordIndex] = useState(-1);
+    const [audioLevel, setAudioLevel] = useState(0);
     
     // Refs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,6 +25,9 @@ export default function LiveAI() {
     const textBuffer = useRef('');
     const spokenBuffer = useRef('');
     const abortControllerRef = useRef<AbortController | null>(null);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
 
     // Initialize Speech Recognition
     useEffect(() => {
@@ -247,6 +253,61 @@ export default function LiveAI() {
             startListening();
         }
     };
+
+    // Audio Analysis Logic
+    useEffect(() => {
+        if (status === 'listening' && isListening) {
+            const startAnalysing = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                    const analyser = audioContext.createAnalyser();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    
+                    analyser.fftSize = 256;
+                    source.connect(analyser);
+                    
+                    audioContextRef.current = audioContext;
+                    analyserRef.current = analyser;
+                    
+                    const bufferLength = analyser.frequencyBinCount;
+                    const dataArray = new Uint8Array(bufferLength);
+                    
+                    const updateLevel = () => {
+                        if (!analyserRef.current) return;
+                        analyserRef.current.getByteFrequencyData(dataArray);
+                        
+                        let sum = 0;
+                        for (let i = 0; i < bufferLength; i++) {
+                            sum += dataArray[i];
+                        }
+                        const average = sum / bufferLength;
+                        setAudioLevel(average / 128); // Normalize to 0-1 range roughly
+                        
+                        animationFrameRef.current = requestAnimationFrame(updateLevel);
+                    };
+                    
+                    updateLevel();
+                } catch (err) {
+                    console.error("Error accessing microphone for visualizer:", err);
+                }
+            };
+            
+            startAnalysing();
+        } else {
+            // Cleanup
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+            if (audioContextRef.current) audioContextRef.current.close();
+            audioContextRef.current = null;
+            analyserRef.current = null;
+            setAudioLevel(0);
+        }
+        
+        return () => {
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+            if (audioContextRef.current) audioContextRef.current.close();
+        };
+    }, [status, isListening]);
     
     // Auto-start on mount
     useEffect(() => {
@@ -259,6 +320,7 @@ export default function LiveAI() {
         <div className={`fixed inset-0 z-[1000] flex flex-col ${theme === 'dark' ? 'bg-[#0A0514] text-white' : 'bg-slate-900 text-white'}`}>
             {/* Background elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <FloatingParticles count={40} />
                 <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
                 <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDelay: '1s' }} />
             </div>
@@ -302,82 +364,32 @@ export default function LiveAI() {
             <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10 w-full max-w-4xl mx-auto p-8">
                 
                 {/* Visualizer / Avatar Area */}
-                <div className="relative mb-16 flex items-center justify-center h-64">
-                    {/* Glowing outer rings */}
-                    <motion.div 
-                        animate={{ 
-                            scale: status === 'speaking' ? [1, 1.2, 1] : status === 'listening' ? [1, 1.05, 1] : 1,
-                            opacity: status === 'speaking' ? [0.5, 0.8, 0.5] : 0.3
-                        }}
-                        transition={{ 
-                            duration: status === 'speaking' ? 1.5 : 2, 
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                        className="absolute inset-0 border-2 border-indigo-500/30 rounded-full"
-                    />
+                <div className="relative mb-8 flex flex-col items-center justify-center">
+                    <AIAvatar status={status} audioLevel={audioLevel} />
                     
-                    <motion.div 
-                        animate={{ 
-                            scale: status === 'speaking' ? [1, 1.5, 1] : status === 'listening' ? [1, 1.1, 1] : 1,
-                        }}
-                        transition={{ 
-                            duration: status === 'speaking' ? 1 : 2.5, 
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                        className="absolute inset-4 border border-purple-500/20 rounded-full"
-                    />
-
-                    {/* Central Orb / Button */}
-                    <button
+                    {/* Small Mic Button under Robot */}
+                    <motion.button
                         onClick={toggleListening}
-                        className={`relative z-10 w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(79,70,229,0.3)] transition-all overflow-hidden ${
+                        animate={{
+                            scale: status === 'listening' ? [1, 1.1, 1] : 1,
+                            boxShadow: status === 'listening' 
+                                ? ['0 0 10px rgba(239,68,68,0.3)', '0 0 25px rgba(239,68,68,0.6)', '0 0 10px rgba(239,68,68,0.3)']
+                                : '0 0 10px rgba(255,255,255,0.05)'
+                        }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className={`mt-10 relative z-10 w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-colors border ${
                             status === 'listening' 
-                            ? 'bg-red-500/20 border-2 border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.4)]' 
-                            : status === 'speaking'
-                            ? 'bg-indigo-600/20 border-2 border-indigo-400 shadow-[0_0_60px_rgba(129,140,248,0.4)]'
-                            : 'bg-white/5 border border-white/10'
+                            ? 'bg-red-500/20 border-red-500 text-red-500' 
+                            : status === 'speaking' || status === 'thinking'
+                            ? 'bg-indigo-600/10 border-indigo-500/30 text-indigo-400'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
                         }`}
                     >
-                        <div className={`absolute inset-0 bg-gradient-to-tr ${status === 'listening' ? 'from-red-600/20 to-orange-500/20' : 'from-indigo-600/20 to-purple-600/20'} animate-[spin_4s_linear_infinite]`} />
-                        
-                        {status === 'thinking' ? (
-                            <Loader2 className="w-12 h-12 text-indigo-400 animate-spin relative z-10" />
-                        ) : status === 'speaking' ? (
-                            <Activity className="w-12 h-12 text-indigo-400 relative z-10" />
-                        ) : status === 'listening' ? (
-                            <Mic className="w-12 h-12 text-red-500 relative z-10" />
-                        ) : (
-                            <MicOff className="w-12 h-12 text-slate-500 relative z-10" />
+                        {status === 'listening' ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+                        {status === 'listening' && (
+                             <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-[#0A0514] rounded-full animate-ping" />
                         )}
-                    </button>
-                    
-                    {/* Live Waveform placeholder for speaking */}
-                    {status === 'speaking' && (
-                        <div className="absolute top-1/2 left-[calc(50%+80px)] -translate-y-1/2 flex items-end gap-1 h-12">
-                            {[...Array(5)].map((_, i) => (
-                                <motion.div
-                                    key={`r-${i}`}
-                                    animate={{ height: ['20%', '100%', '20%'] }}
-                                    transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.1 }}
-                                    className="w-1.5 bg-indigo-500/80 rounded-full"
-                                />
-                            ))}
-                        </div>
-                    )}
-                    {status === 'speaking' && (
-                        <div className="absolute top-1/2 right-[calc(50%+80px)] -translate-y-1/2 flex items-end gap-1 h-12">
-                            {[...Array(5)].map((_, i) => (
-                                <motion.div
-                                    key={`l-${i}`}
-                                    animate={{ height: ['20%', '100%', '20%'] }}
-                                    transition={{ duration: 0.8, repeat: Infinity, delay: (4-i) * 0.1 }}
-                                    className="w-1.5 bg-indigo-500/80 rounded-full"
-                                />
-                            ))}
-                        </div>
-                    )}
+                    </motion.button>
                 </div>
 
                 {/* Subtitles Area */}

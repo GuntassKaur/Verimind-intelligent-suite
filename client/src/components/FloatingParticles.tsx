@@ -14,11 +14,10 @@ interface Particle {
     pathY: number[];
 }
 
-export const FloatingParticles = () => {
+const FloatingParticles = ({ count = 12 }: { count?: number }) => {
     const [particles, setParticles] = useState<Particle[]>([]);
 
     useEffect(() => {
-        const count = 12;
         const newParticles = Array.from({ length: count }).map((_, i) => ({
             id: i,
             size: Math.random() * 150 + 50 + 'px',
@@ -31,12 +30,11 @@ export const FloatingParticles = () => {
             pathX: [0, (Math.random() - 0.5) * 400, 0],
             pathY: [0, (Math.random() - 0.5) * 400, 0]
         }));
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setParticles(newParticles);
-    }, []);
+    }, [count]);
 
     return (
-        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
             {particles.map((p) => (
                 <motion.div
                     key={p.id}
@@ -62,10 +60,8 @@ export const FloatingParticles = () => {
                     }}
                 />
             ))}
-            
-            {/* Additional Ambient Glows */}
-            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 blur-[150px] rounded-full animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 blur-[150px] rounded-full animate-pulse" />
         </div>
     );
 };
+
+export default FloatingParticles;

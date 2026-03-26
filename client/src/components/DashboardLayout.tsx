@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useTheme } from '../contexts/ThemeContext';
+import FloatingParticles from './FloatingParticles';
 
 export default function DashboardLayout() {
     const { theme } = useTheme();
@@ -41,17 +42,21 @@ export default function DashboardLayout() {
 
     const navItems = [
         { path: '/', label: 'Home', icon: LayoutDashboard },
-        { path: '/generator', label: 'Generate', icon: Zap },
-        { path: '/audit', label: 'Analyze', icon: ShieldCheck },
-        { path: '/plagiarism', label: 'Plagiarism', icon: Layers },
-        { path: '/ppt', label: 'PPTs', icon: MonitorPlay },
-        { path: '/visualizer', label: 'Visualizer', icon: FileType },
+        { path: '/generator', label: 'Content Forge', icon: Zap },
+        { path: '/audit', label: 'Neural Audit', icon: ShieldCheck },
+        { path: '/plagiarism', label: 'Origins Scan', icon: Layers },
+        { path: '/ppt', label: 'Visual Deck', icon: MonitorPlay },
+        { path: '/visualizer', label: 'Flow Architect', icon: FileType },
     ];
 
     const isDark = theme === 'dark';
 
     return (
-        <div className={`min-h-screen transition-colors duration-500 flex flex-col ${isDark ? 'bg-[#0F172A]' : 'bg-[#F8FAFC]'}`}>
+        <div className={`min-h-screen transition-colors duration-500 flex flex-col relative ${isDark ? 'bg-[#0A0514] text-white' : 'bg-[#F8FAFC]'}`}>
+            {/* Ambient Background */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+                <FloatingParticles count={25} />
+            </div>
             {/* ═══════════════════════════════════════════════
                PROFESSIONAL TOP NAVBAR
                ═══════════════════════════════════════════════ */}
@@ -90,9 +95,9 @@ export default function DashboardLayout() {
                     </div>
 
                     {/* User Actions */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 relative z-10">
                          <Link to="/live-ai" className={`hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] ${isDark ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}>
-                              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 🔴 Live AI
+                              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 🔴 Neural Stream Live
                          </Link>
                          <div className="hidden md:flex items-center gap-3 mr-4">
                              <div className="text-right">
@@ -133,7 +138,7 @@ export default function DashboardLayout() {
                                   onClick={() => setMobileMenuOpen(false)}
                                   className="flex items-center gap-4 p-5 rounded-2xl text-lg font-black tracking-tight bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 text-rose-500 animate-pulse"
                               >
-                                  <Mic size={22} /> 🔴 Live AI
+                                  <Mic size={22} /> 🔴 Neural Stream Live
                               </Link>
                              {navItems.map((item) => (
                                  <Link 

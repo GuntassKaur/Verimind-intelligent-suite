@@ -2,13 +2,14 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
     ShieldCheck, 
-    Zap, 
-    ArrowRight, 
-    Cpu, 
+    Zap,
+    ArrowRight,
+    Cpu,
     PenTool,
     Globe
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import FloatingParticles from '../components/FloatingParticles';
 
 export default function Landing() {
     const { scrollYProgress } = useScroll();
@@ -37,7 +38,11 @@ export default function Landing() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#05070a] text-slate-300 overflow-x-hidden selection:bg-indigo-500/30 font-sans">
+        <div className="min-h-screen bg-[#05070a] text-slate-300 overflow-x-hidden selection:bg-indigo-500/30 font-sans relative">
+            {/* Ambient Background */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-50">
+                <FloatingParticles count={50} />
+            </div>
             {/* ═══════════════════════════════════════════════
                PREMIUM NAVIGATION
                ═══════════════════════════════════════════════ */}
@@ -57,7 +62,7 @@ export default function Landing() {
 
                 <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-6 pointer-events-auto">
                     <Link to="/login" className="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors px-6">Login</Link>
-                    <Link to="/register" className="premium-btn-primary px-8 py-4 rounded-2xl text-[10px] uppercase font-black tracking-widest shadow-2xl shadow-indigo-500/10">Initial Access</Link>
+                    <Link to="/register" className="premium-btn-primary px-8 py-4 rounded-2xl text-[10px] uppercase font-black tracking-widest shadow-2xl shadow-indigo-500/10">Establish Identity</Link>
                 </motion.div>
             </nav>
 
@@ -92,12 +97,12 @@ export default function Landing() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-10">
                          <Link to="/workspace" className="premium-btn-primary w-full sm:w-auto px-16 py-7 rounded-[2.5rem] flex items-center justify-center gap-6 text-[13px] uppercase tracking-[0.25em] shadow-2xl shadow-indigo-600/20">
                              <Zap size={20} />
-                             <span>Authorize Workspace</span>
+                             <span>Initialize Neural Suite</span>
                              <ArrowRight size={18} />
                          </Link>
                          <button className="w-full sm:w-auto px-12 py-7 rounded-[2.5rem] border border-white/5 bg-white/5 text-white font-black uppercase tracking-widest hover:bg-white/10 transition-all text-[11px] flex items-center justify-center gap-4 backdrop-blur-3xl shadow-2xl">
                               <ShieldCheck size={20} className="text-indigo-400" />
-                              Inspect The Protocols
+                              Inspect Neural Protocols
                          </button>
                     </div>
 

@@ -83,7 +83,7 @@ export default function Humanizer() {
                     <span className="text-[10px] font-black uppercase tracking-[0.4em]">Neural Detection & Humanization</span>
                 </motion.div>
                 <h1 className={`text-4xl md:text-7xl font-black tracking-tight mb-6 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Writing <span className="text-gradient">DNA</span>.
+                    Neural DNA <span className="text-gradient">Audit</span>.
                 </h1>
                 <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto italic leading-relaxed">
                     "Audit AI fingerprints and inject human-like entropy into your manuscript with neural-link precision."
@@ -110,8 +110,8 @@ export default function Humanizer() {
                             }`}
                         >
                             {loading ? <Loader2 className="animate-spin" size={20} /> : <Zap size={20} />}
-                            {loading ? 'Analyzing DNA...' : 'Inject Human Flux'}
-                        </button>
+                             {loading ? 'Auditing DNA...' : 'Humanize DNA'}
+                         </button>
                     </div>
 
                     {error && (

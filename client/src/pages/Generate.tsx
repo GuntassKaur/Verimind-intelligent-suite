@@ -104,7 +104,7 @@ export default function Generate() {
                     <span className="text-[10px] font-black uppercase tracking-[0.4em]">Deep Synthesis Engine</span>
                 </motion.div>
                 <h1 className={`text-4xl md:text-7xl font-black tracking-tight mb-6 leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Nexus <span className="text-amber-500 italic">Synthesis</span>.
+                    Content <span className="text-amber-500 italic">Forge</span>.
                 </h1>
                 <p className="text-slate-500 font-medium text-lg max-w-2xl italic leading-relaxed">
                     "Initialize prompt for broad-spectrum intelligence synthesis. Manifest complex logic nodes with neural precision."
@@ -134,7 +134,7 @@ export default function Generate() {
                             }`}
                          >
                              {loading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                             {loading ? 'Synthesizing...' : 'Manifest Logic'}
+                             {loading ? 'Forging...' : 'Forge Content'}
                          </button>
                     </div>
                 </div>

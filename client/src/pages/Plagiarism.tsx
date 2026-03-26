@@ -83,7 +83,7 @@ export default function Plagiarism() {
                     <span className="text-[10px] font-black uppercase tracking-[0.4em]">Authenticity Audit</span>
                 </motion.div>
                 <h1 className={`text-4xl md:text-7xl font-black tracking-tight mb-6 leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Digital <span className="text-rose-500 italic">Integrity</span>.
+                    Origins <span className="text-rose-500 italic">Scan</span>.
                 </h1>
                 <p className="text-slate-500 font-medium text-lg max-w-2xl italic leading-relaxed">
                     "Deep-spectrum scan for digital fingerprints. Verify original biological authorship with neural-link precision."
@@ -113,7 +113,7 @@ export default function Plagiarism() {
                             }`}
                          >
                              {loading ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
-                             {loading ? 'Auditing...' : 'Initiate Audit'}
+                             {loading ? 'Scanning...' : 'Initiate Scan'}
                          </button>
                     </div>
                 </div>
