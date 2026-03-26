@@ -59,7 +59,7 @@ export default function LiveAI() {
                 // Reset silence timer on every new result
                 if (silenceTimer) clearTimeout(silenceTimer);
                 
-                // If user stops talking for 2 seconds, auto-send
+                // If user stops talking for 1.5 seconds, auto-send (made faster)
                 silenceTimer = setTimeout(() => {
                     if (currentText.trim()) {
                         recognition.stop();
@@ -67,7 +67,7 @@ export default function LiveAI() {
                         finalTranscript = '';
                         setTranscript('');
                     }
-                }, 2000);
+                }, 1500);
             };
 
             recognition.onend = () => {
@@ -123,11 +123,13 @@ export default function LiveAI() {
         
         utterance.onboundary = (event) => {
             if (event.name === 'word') {
-                 // Calculate roughly which word we are currently at in the chunk
-                 // To implement word-by-word highlight, we'd need more complex logic mapping the utterance bounds to the full text
-                 // For now, we update an index based on spoken buffer length
-                 const wordsSoFar = (spokenBuffer.current + event.charIndex).split(' ').length;
-                 setCurrentSpokenWordIndex(wordsSoFar);
+                 const textBeforeCurrentChunk = spokenBuffer.current.trim();
+                 const offsetInCurrentChunk = text.substring(0, event.charIndex).trim();
+                 
+                 const wordCountBefore = textBeforeCurrentChunk ? textBeforeCurrentChunk.split(/\s+/).length : 0;
+                 const wordCountInCurrent = offsetInCurrentChunk ? offsetInCurrentChunk.split(/\s+/).length : 0;
+                 
+                 setCurrentSpokenWordIndex(wordCountBefore + wordCountInCurrent);
             }
         };
 
@@ -135,8 +137,11 @@ export default function LiveAI() {
             spokenBuffer.current += text + " ";
             // Check if queue is empty and stream is done
             if (!synthesisRef.current.pending && status !== 'thinking') {
-                setStatus('listening');
-                startListening();
+                // If we finished speaking everything, go back to listening
+                if (textBuffer.current.trim() === spokenBuffer.current.trim()) {
+                    setStatus('listening');
+                    startListening();
+                }
             }
         };
         
@@ -309,9 +314,17 @@ export default function LiveAI() {
         };
     }, [status, isListening]);
     
-    // Auto-start on mount
+    // Auto-start on mount with greeting
     useEffect(() => {
-        startListening();
+        const greeting = "Hey 👋 I’m your Verimind AI assistant. Ask me anything — from coding to stock market insights.";
+        setAiResponse(greeting);
+        textBuffer.current = greeting;
+        setStatus('speaking');
+        
+        // Small delay to ensure voices are loaded
+        setTimeout(() => {
+            speakChunk(greeting);
+        }, 500);
     }, []);
 
     const words = aiResponse.split(' ');
@@ -424,18 +437,20 @@ export default function LiveAI() {
                                         <span className="font-bold tracking-widest text-sm uppercase">Synthesizing Logic...</span>
                                     </div>
                                 ) : (
-                                    <p className="text-lg md:text-3xl font-light leading-relaxed text-left max-w-3xl mx-auto shadow-sm">
+                                    <p className="text-xl md:text-4xl font-light leading-relaxed text-center max-w-4xl mx-auto">
                                         {words.map((word, idx) => (
-                                            <span 
+                                            <motion.span 
                                                 key={idx} 
-                                                className={`transition-colors duration-200 inline-block mr-2 mb-2 ${
+                                                initial={{ opacity: 0, y: 5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className={`transition-colors duration-300 inline-block mr-3 mb-2 ${
                                                     idx <= currentSpokenWordIndex 
-                                                        ? 'text-white font-normal' 
-                                                        : 'text-slate-500 font-light'
+                                                        ? 'text-white font-medium drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' 
+                                                        : 'text-white/30 font-light'
                                                 }`}
                                             >
                                                 {word}
-                                            </span>
+                                            </motion.span>
                                         ))}
                                     </p>
                                 )}

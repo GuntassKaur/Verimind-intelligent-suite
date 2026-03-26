@@ -61,7 +61,10 @@ export default function Landing() {
                 </motion.div>
 
                 <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-6 pointer-events-auto">
-                    <Link to="/login" className="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors px-6">Login</Link>
+                    <Link to="/live-ai" className="hidden sm:flex items-center gap-2 p-3 rounded-xl text-[10px] font-black uppercase tracking-widest animate-pulse bg-red-500/10 text-red-500 border border-red-500/20 mr-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span> 🔴 Live AI
+                    </Link>
+                    <Link to="/login" className="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors px-4">Login</Link>
                     <Link to="/register" className="premium-btn-primary px-8 py-4 rounded-2xl text-[10px] uppercase font-black tracking-widest shadow-2xl shadow-indigo-500/10">Establish Identity</Link>
                 </motion.div>
             </nav>
@@ -95,10 +98,16 @@ export default function Landing() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-10">
-                         <Link to="/workspace" className="premium-btn-primary w-full sm:w-auto px-16 py-7 rounded-[2.5rem] flex items-center justify-center gap-6 text-[13px] uppercase tracking-[0.25em] shadow-2xl shadow-indigo-600/20">
-                             <Zap size={20} />
+                         <Link to="/workspace" className="premium-btn-primary w-full sm:w-auto px-16 py-7 rounded-[2.5rem] flex items-center justify-center gap-6 text-[13px] uppercase tracking-[0.25em] shadow-2xl shadow-indigo-600/20 group">
+                             <Zap size={20} className="group-hover:scale-110 transition-transform" />
                              <span>Initialize Neural Suite</span>
-                             <ArrowRight size={18} />
+                         </Link>
+                         <Link to="/live-ai" className="bg-white/5 border border-white/10 w-full sm:w-auto px-16 py-7 rounded-[2.5rem] flex items-center justify-center gap-6 text-[13px] uppercase tracking-[0.25em] hover:bg-white/10 transition-all shadow-2xl group">
+                              <div className="relative">
+                                   <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75" />
+                                   <div className="relative w-3 h-3 bg-red-600 rounded-full" />
+                              </div>
+                              <span>Live AI</span>
                          </Link>
                          <button className="w-full sm:w-auto px-12 py-7 rounded-[2.5rem] border border-white/5 bg-white/5 text-white font-black uppercase tracking-widest hover:bg-white/10 transition-all text-[11px] flex items-center justify-center gap-4 backdrop-blur-3xl shadow-2xl">
                               <ShieldCheck size={20} className="text-indigo-400" />
