@@ -59,7 +59,7 @@ export default function LiveAI() {
                 // Reset silence timer on every new result
                 if (silenceTimer) clearTimeout(silenceTimer);
                 
-                // If user stops talking for 1.5 seconds, auto-send (made faster)
+                // If user stops talking for 1s, auto-send (made even faster)
                 silenceTimer = setTimeout(() => {
                     if (currentText.trim()) {
                         recognition.stop();
@@ -67,7 +67,7 @@ export default function LiveAI() {
                         finalTranscript = '';
                         setTranscript('');
                     }
-                }, 1500);
+                }, 1000);
             };
 
             recognition.onend = () => {
@@ -165,8 +165,11 @@ export default function LiveAI() {
         }
         abortControllerRef.current = new AbortController();
 
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        console.log("Assistant Request:", { query, apiUrl });
+
         try {
-            const response = await fetch('/api/ai/assistant-stream', {
+            const response = await fetch(`${apiUrl}/api/ai/assistant-stream`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -175,8 +178,13 @@ export default function LiveAI() {
                 signal: abortControllerRef.current.signal,
             });
 
-            if (!response.body) throw new Error('No response body');
+            console.log("Assistant Response Status:", response.status);
 
+            if (!response.ok) {
+                throw new Error(`Neural link failed with status: ${response.status}`);
+            }
+
+            if (!response.body) throw new Error('No response body from Synthesis module.');
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             
@@ -225,7 +233,11 @@ export default function LiveAI() {
 
         } catch (error) {
             console.error('Error fetching live response:', error);
-            setStatus('idle');
+            const fallback = "I’m having trouble responding right now, please try again.";
+            setAiResponse(fallback);
+            textBuffer.current = fallback;
+            setStatus('speaking');
+            speakChunk(fallback);
         }
     };
 
@@ -316,15 +328,15 @@ export default function LiveAI() {
     
     // Auto-start on mount with greeting
     useEffect(() => {
-        const greeting = "Hey 👋 I’m your Verimind AI assistant. Ask me anything — from coding to stock market insights.";
+        const greeting = "Hey 👋 I’m your Verimind AI assistant. Ask me anything — I’m listening.";
         setAiResponse(greeting);
         textBuffer.current = greeting;
         setStatus('speaking');
         
-        // Small delay to ensure voices are loaded
+        // Ensure greeting text is fully available for captions
         setTimeout(() => {
             speakChunk(greeting);
-        }, 500);
+        }, 800);
     }, []);
 
     const words = aiResponse.split(' ');

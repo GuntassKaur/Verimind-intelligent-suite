@@ -120,7 +120,13 @@ export const AIAvatar: React.FC<AIAvatarProps> = ({ status, audioLevel = 0 }) =>
                 <img 
                     src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png" 
                     alt="AI Assistant"
+                    loading="eager"
                     className="w-48 h-48 object-contain"
+                    onError={(e) => {
+                         // Fallback in case of flaticon outage
+                         (e.target as HTMLImageElement).src = "https://www.flaticon.com/free-icon/robot_4712109";
+                         // If that fails, just hide the broken image and use the glows/rings
+                    }}
                 />
                 
                 {/* Eyes/Face Glow Overlay */}
