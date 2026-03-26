@@ -17,6 +17,7 @@ const TruthAudit = lazy(() => import('./pages/TruthAudit'));
 const UserDashboard = lazy(() => import('./pages/Dashboard'));
 const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
+const LiveAI = lazy(() => import('./pages/LiveAI'));
 
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { GlobalTypingTracker } from './components/GlobalTypingTracker';
@@ -111,6 +112,7 @@ function AppContent() {
                     <Route path="settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
                 </Route>
                 <Route path="/overview" element={<Landing />} />
+                <Route path="/live-ai" element={<LiveAI />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Suspense>
