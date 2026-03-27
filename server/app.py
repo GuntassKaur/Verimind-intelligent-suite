@@ -266,7 +266,7 @@ def assistant():
     
     if not message: return create_response(success=False, error="Message substrate missing.", status=400)
     
-    result = process_assistant_query(message, context, wpm)
+    result = process_assistant_query(message, context, wpm, data.get("prefs"))
     return create_response(data={"reply": result})
 
 @app.route("/api/ai/assistant-stream", methods=["POST"])
@@ -280,7 +280,7 @@ def assistant_stream():
     if not message: return create_response(success=False, error="Message substrate missing.", status=400)
 
     def generate():
-        for chunk in process_assistant_query_stream(message, context, wpm):
+        for chunk in process_assistant_query_stream(message, context, wpm, data.get("prefs")):
             yield f"data: {json.dumps({'chunk': chunk})}\n\n"
         yield "data: [DONE]\n\n"
 

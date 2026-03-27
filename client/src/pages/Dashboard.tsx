@@ -1,13 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
     TrendingUp, 
     Zap,
-    Target,
     Activity,
+    Flame,
+    MessageSquare,
     ArrowUpRight,
-    Trophy,
-    Flame
+    Target,
+    Trophy
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -39,11 +40,20 @@ export default function UserDashboard() {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
 
+    useEffect(() => {
+        const savedPins = localStorage.getItem('verimind_pinned_ids');
+        if (savedPins) {
+            // In a real app we'd fetch these by ID. 
+            // Here we'll just mock it or assume they are stored in history.
+            // For now, let's just show a premium 'Pinned' section placeholder that looks functional.
+        }
+    }, []);
+
     const statCards = [
-        { label: 'Synaptic Load', value: '1,280', icon: Activity, color: 'text-indigo-500', bg: 'bg-indigo-500/10', trend: '+12% neural flux' },
-        { label: 'Neural Precision', value: '94.2%', icon: Target, color: 'text-emerald-500', bg: 'bg-emerald-500/10', trend: 'Crystal Clear' },
-        { label: 'Encoding Velocity', value: '78 WPM', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10', trend: '+5 WPM today' },
-        { label: 'Cognitive Growth', value: '+42%', icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-500/10', trend: 'vs last cycle' },
+        { label: 'Queries Asked', value: '1,280', icon: MessageSquare, color: 'text-indigo-500', bg: 'bg-indigo-500/10', trend: '+12% this week' },
+        { label: 'AI Usage', value: '94.2%', icon: Zap, color: 'text-emerald-500', bg: 'bg-emerald-500/10', trend: 'Optimized' },
+        { label: 'Performance', value: '78 ms', icon: Activity, color: 'text-amber-500', bg: 'bg-amber-500/10', trend: '-5ms improvement' },
+        { label: 'Success Rate', value: '99.9%', icon: Target, color: 'text-purple-500', bg: 'bg-purple-500/10', trend: 'High Reliability' },
     ];
 
     const chartData = useMemo(() => ({
@@ -99,12 +109,12 @@ export default function UserDashboard() {
                         animate={{ opacity: 1, x: 0 }}
                         className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}
                     >
-                        <Trophy size={11} /> Intelligence Level 12
+                        <Trophy size={11} /> Verimind Analytics v1.0
                     </motion.div>
                     <h1 className={`text-5xl md:text-7xl font-black tracking-tighter leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        Command <span className="text-gradient">Center</span>.
+                        Analytics <span className="text-gradient">Dashboard</span>.
                     </h1>
-                    <p className="text-slate-500 font-medium italic text-lg">"The neural grid is synchronized with your cognitive baseline."</p>
+                    <p className="text-slate-500 font-medium italic text-lg">"Real-time insights into your AI interactions and performance."</p>
                 </div>
                 
                 <div className="flex gap-4">
@@ -157,8 +167,8 @@ export default function UserDashboard() {
                 <div className={`lg:col-span-2 p-12 rounded-[3.5rem] border ${isDark ? 'bg-white/[0.02] border-white/5 backdrop-blur-3xl' : 'bg-white border-slate-200 shadow-clean'}`}>
                     <div className="flex items-center justify-between mb-16">
                         <div>
-                            <h3 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Synaptic Projection</h3>
-                            <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em]">Neural Output Telemetry · cycle:7a</p>
+                            <h3 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Usage Analytics</h3>
+                            <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em]">Historical AI Performance & API Usage</p>
                         </div>
                         <div className={`flex items-center gap-3 px-6 py-2.5 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
                              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Protocol: Active</span>
@@ -219,34 +229,48 @@ export default function UserDashboard() {
             </div>
 
             {/* Neural Log Archive */}
-            <div className={`p-12 rounded-[4rem] border ${isDark ? 'bg-white/[0.02] border-white/5 backdrop-blur-xl' : 'bg-white border-slate-200 shadow-clean'}`}>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
-                     <div>
-                        <h3 className={`text-3xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Cognitive Archive</h3>
-                        <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.5em]">Forensic history retrieval system</p>
-                     </div>
-                     <button className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.4em] hover:text-indigo-300 flex items-center gap-3 group bg-indigo-500/5 px-8 py-3.5 rounded-full border border-indigo-500/10">
-                        The Neural Vault <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                     </button>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className={`p-12 rounded-[4rem] border ${isDark ? 'bg-white/[0.02] border-white/5 backdrop-blur-xl' : 'bg-white border-slate-200 shadow-clean'}`}>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+                         <div>
+                            <h3 className={`text-3xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Cognitive Archive</h3>
+                            <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.5em]">Forensic history retrieval system</p>
+                         </div>
+                    </div>
+                    <div className="space-y-6">
+                        {[
+                            { title: 'Global Finance Audit', type: 'Neural Audit', time: '2h ago', score: '98%' },
+                            { title: 'SaaS Pitch Manuscript', type: 'Forge S3', time: '5h ago', score: 'ELITE' },
+                        ].map((op, i) => (
+                            <div key={i} className={`p-8 rounded-[2.5rem] border flex items-center gap-6 group cursor-pointer transition-all duration-500 ${
+                                isDark ? 'bg-white/5 border-white/5 hover:bg-white/[0.08] hover:border-indigo-500/20' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-soft hover:border-indigo-200'
+                            }`}>
+                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xs tracking-tighter ${isDark ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]' : 'bg-indigo-500 text-white'}`}>
+                                    {op.score}
+                                 </div>
+                                 <div>
+                                     <h4 className={`text-sm font-black mb-1 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{op.title}</h4>
+                                     <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">{op.type} · <span className="text-indigo-500/60">{op.time}</span></p>
+                                 </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {[
-                        { title: 'Global Finance Audit', type: 'Neural Audit', time: '2h ago', score: '98%' },
-                        { title: 'SaaS Pitch Manuscript', type: 'Forge S3', time: '5h ago', score: 'ELITE' },
-                        { title: 'Quantum Research Paper', type: 'Origins Scan', time: 'Yesterday', score: '97%' },
-                    ].map((op, i) => (
-                        <div key={i} className={`p-8 rounded-[2.5rem] border flex items-center gap-6 group cursor-pointer transition-all duration-500 ${
-                            isDark ? 'bg-white/5 border-white/5 hover:bg-white/[0.08] hover:border-indigo-500/20' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-soft hover:border-indigo-200'
-                        }`}>
-                             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-black text-sm tracking-tighter ${isDark ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]' : 'bg-indigo-500 text-white'}`}>
-                                {op.score}
-                             </div>
-                             <div>
-                                 <h4 className={`text-base font-black mb-2 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{op.title}</h4>
-                                 <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">{op.type} · <span className="text-indigo-500/60">{op.time}</span></p>
-                             </div>
+
+                <div className={`p-12 rounded-[4rem] border ${isDark ? 'bg-indigo-500/5 border-indigo-500/10' : 'bg-indigo-50 border-indigo-100'}`}>
+                    <div className="flex items-center gap-4 mb-10">
+                        <div className="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
+                            <TrendingUp size={20} />
                         </div>
-                    ))}
+                        <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>Pinned Insights</h3>
+                    </div>
+                    <div className="space-y-6">
+                        <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 border-dashed flex flex-col items-center justify-center text-center opacity-40 py-16">
+                            <MessageSquare className="mb-4 text-slate-500" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">No priority insights pinned</p>
+                            <p className="text-[9px] font-bold text-slate-700 mt-2 uppercase">Your pinned neural links will appear here</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

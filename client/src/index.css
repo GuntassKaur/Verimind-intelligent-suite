@@ -22,19 +22,21 @@
 }
 
 .dark {
-  /* Dark Theme - Spec Specified Deep Space */
-  --bg-app:        #050208;
-  --bg-card:       #0A0514;
-  --bg-side:       #050208;
-  --bg-header:     rgba(5, 2, 8, 0.8);
-  --primary:       #6366F1;
-  --primary-hover: #818CF8;
-  --accent-soft:   rgba(99, 102, 241, 0.05);
-  --text-main:     #F1F5F9;
-  --text-muted:    #64748B;
-  --border-soft:   rgba(255, 255, 255, 0.03);
-  --shadow-clean:  0 20px 50px -12px rgba(0, 0, 0, 0.8);
-  --shadow-hover:  0 30px 80px -15px rgba(0, 0, 0, 0.9);
+  /* Dark Theme - Clean Modern Reset */
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --accent: #8b5cf6;
+  --muted: #64748b;
+  --border: rgba(255, 255, 255, 0.05);
+  --text-main:     #F8FAFC;
+  --text-muted:    #94A3B8;
+  --border-soft:   rgba(255, 255, 255, 0.05);
+  --shadow-clean:  0 20px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-hover:  0 30px 80px -15px rgba(0, 0, 0, 0.6);
 }
 
 *, *::before, *::after { box-sizing: border-box; }

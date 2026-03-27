@@ -4,7 +4,7 @@ import DashboardLayout from './components/DashboardLayout';
 
 // Lazy load pages for performance
 const Landing = lazy(() => import('./pages/Landing'));
-const History = lazy(() => import('./pages/History'));
+const Chat = lazy(() => import('./pages/History'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Login = lazy(() => import('./pages/Login'));
 const Workspace = lazy(() => import('./pages/Workspace'));
@@ -18,6 +18,7 @@ const UserDashboard = lazy(() => import('./pages/Dashboard'));
 const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
 const LiveAI = lazy(() => import('./pages/LiveAI'));
+const About = lazy(() => import('./pages/About'));
 
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { GlobalTypingTracker } from './components/GlobalTypingTracker';
@@ -97,22 +98,24 @@ function AppContent() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/" element={<DashboardLayout />}>
-                    <Route index element={<UserDashboard />} />
+                    <Route index element={<Landing />} />
+                    <Route path="dashboard" element={<UserDashboard />} />
+                    <Route path="live-ai" element={<LiveAI />} />
+                    <Route path="chat" element={user ? <Chat /> : <Navigate to="/login" replace />} />
+                    <Route path="about" element={<About />} />
+                    
+                    {/* Feature Routes (Still accessible but not in main nav) */}
                     <Route path="generator" element={<Generate />} />
                     <Route path="audit" element={<TruthAudit />} />
                     <Route path="plagiarism" element={<Plagiarism />} />
                     <Route path="ppt" element={<PPTGenerator />} />
                     <Route path="visualizer" element={<Visualizer />} />
-                    
-                    {/* Secondary Routes */}
                     <Route path="workspace" element={<Workspace />} />
                     <Route path="humanizer" element={<Humanizer />} />
                     <Route path="comparison" element={<Comparison />} />
-                    <Route path="history" element={user ? <History /> : <Navigate to="/login" replace />} />
                     <Route path="settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
                 </Route>
-                <Route path="/overview" element={<Landing />} />
-                <Route path="/live-ai" element={<LiveAI />} />
+                <Route path="/overview" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Suspense>

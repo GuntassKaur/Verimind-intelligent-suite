@@ -3,15 +3,14 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard,
-    ShieldCheck,
     Zap,
+    MessageSquare,
+    BarChart3,
+    Info,
     Settings,
     LogOut,
-    MonitorPlay,
-    Layers,
     Menu,
     X,
-    FileType,
     Mic
 } from 'lucide-react';
 import { Logo } from './Logo';
@@ -42,11 +41,10 @@ export default function DashboardLayout() {
 
     const navItems = [
         { path: '/', label: 'Home', icon: LayoutDashboard },
-        { path: '/generator', label: 'Content Forge', icon: Zap },
-        { path: '/audit', label: 'Neural Audit', icon: ShieldCheck },
-        { path: '/plagiarism', label: 'Origins Scan', icon: Layers },
-        { path: '/ppt', label: 'Visual Deck', icon: MonitorPlay },
-        { path: '/visualizer', label: 'Flow Architect', icon: FileType },
+        { path: '/live-ai', label: 'Live AI', icon: Mic },
+        { path: '/chat', label: 'Chat', icon: MessageSquare },
+        { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
+        { path: '/about', label: 'About', icon: Info },
     ];
 
     const isDark = theme === 'dark';
@@ -96,9 +94,6 @@ export default function DashboardLayout() {
 
                     {/* User Actions */}
                     <div className="flex items-center gap-4 relative z-10">
-                         <Link to="/live-ai" className={`hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] ${isDark ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}>
-                              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 🔴 Neural Stream Live
-                         </Link>
                          <div className="hidden md:flex items-center gap-3 mr-4">
                              <div className="text-right">
                                   <p className={`text-xs font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{userData?.name || 'Guest Analyst'}</p>
@@ -133,13 +128,6 @@ export default function DashboardLayout() {
                         className={`fixed inset-0 z-[90] lg:hidden p-6 pt-24 ${isDark ? 'bg-[#0F172A]' : 'bg-white'}`}
                     >
                          <div className="space-y-4">
-                              <Link 
-                                  to="/live-ai" 
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="flex items-center gap-4 p-5 rounded-2xl text-lg font-black tracking-tight bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 text-rose-500 animate-pulse"
-                              >
-                                  <Mic size={22} /> 🔴 Neural Stream Live
-                              </Link>
                              {navItems.map((item) => (
                                  <Link 
                                     key={item.path} 

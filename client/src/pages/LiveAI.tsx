@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, X, Loader2, Sparkles } from 'lucide-react';
+import { 
+    Mic, 
+    MicOff, 
+    X, 
+    Loader2, 
+    Sparkles, 
+    Square, 
+    RotateCcw,
+    Bookmark,
+    BookmarkCheck,
+    Zap,
+    Scale
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { AIAvatar } from '../components/AIAvatar';
@@ -9,15 +21,25 @@ import FloatingParticles from '../components/FloatingParticles';
 export default function LiveAI() {
     const { theme } = useTheme();
     const navigate = useNavigate();
-    
+
     // State
+    const [messages, setMessages] = useState<any[]>([]);
     const [isListening, setIsListening] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
     const [transcript, setTranscript] = useState('');
-    const [aiResponse, setAiResponse] = useState('');
     const [status, setStatus] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
     const [currentSpokenWordIndex, setCurrentSpokenWordIndex] = useState(-1);
     const [audioLevel, setAudioLevel] = useState(0);
-    
+    const [streamingContent, setStreamingContent] = useState('');
+    const [prefs, setPrefs] = useState({
+        language: 'English',
+        interest: 'General',
+        mode: 'Standard'
+    });
+    const [simplifyMode, setSimplifyMode] = useState(false);
+    const [pinnedMessages, setPinnedMessages] = useState<string[]>([]);
+    const [showPrefs, setShowPrefs] = useState(false);
+
     // Refs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognitionRef = useRef<any>(null);
@@ -28,6 +50,22 @@ export default function LiveAI() {
     const audioContextRef = useRef<AudioContext | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
     const animationFrameRef = useRef<number | null>(null);
+    const chatEndRef = useRef<HTMLDivElement>(null);
+    const [inputValue, setInputValue] = useState('');
+
+    // Auto-scroll to bottom
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages, streamingContent, transcript]);
+
+    useEffect(() => {
+        const checkAuth = () => {
+            if (!localStorage.getItem('user_name')) {
+                navigate('/login?redirect=/live-ai');
+            }
+        };
+        checkAuth();
+    }, [navigate]);
 
     // Initialize Speech Recognition
     useEffect(() => {
@@ -152,54 +190,70 @@ export default function LiveAI() {
         synthesisRef.current.speak(utterance);
     };
 
-    const handleUserQuery = async (query: string) => {
+    const handleUserQuery = async (query: string, isRetry = false) => {
+        if (isPaused) return;
+        
         setStatus('thinking');
-        setAiResponse('');
+        setStreamingContent('');
         textBuffer.current = '';
         spokenBuffer.current = '';
         setCurrentSpokenWordIndex(-1);
-        synthesisRef.current.cancel(); // Stop any current speech
+        synthesisRef.current.cancel(); 
         
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
         }
         abortControllerRef.current = new AbortController();
 
+        // Add user message to history
+        if (!isRetry) {
+            const userMsg = { id: Date.now().toString(), role: 'user', content: query, timestamp: Date.now() };
+            setMessages(prev => [...prev, userMsg]);
+        }
+
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        console.log("Assistant Request:", { query, apiUrl });
+        
+        // Build context from previous messages
+        const historyContext = messages.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n');
+        const enrichedQuery = historyContext ? `Previous context:\n${historyContext}\n\nUser: ${query}` : query;
 
         try {
             const response = await fetch(`${apiUrl}/api/ai/assistant-stream`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: query, wpm: 0 }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    message: enrichedQuery, 
+                    wpm: 0,
+                    prefs: {
+                        ...prefs,
+                        mode: simplifyMode ? 'Simple (ELI5)' : prefs.mode
+                    }
+                }),
                 signal: abortControllerRef.current.signal,
+                credentials: 'include',
             });
+            if (!response.ok) throw new Error(`Status: ${response.status}`);
+            if (!response.body) throw new Error('No stream');
 
-            console.log("Assistant Response Status:", response.status);
-
-            if (!response.ok) {
-                throw new Error(`Neural link failed with status: ${response.status}`);
-            }
-
-            if (!response.body) throw new Error('No response body from Synthesis module.');
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            
             let tempSentenceBuffer = "";
+            let lineBuffer = "";
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
                 
                 const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
+                lineBuffer += chunk;
+                
+                const lines = lineBuffer.split('\n');
+                lineBuffer = lines.pop() || ""; // Keep incomplete line in buffer
                 
                 for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const dataStr = line.replace('data: ', '').trim();
+                    const cleanLine = line.trim();
+                    if (cleanLine.startsWith('data: ')) {
+                        const dataStr = cleanLine.replace('data: ', '').trim();
                         if (dataStr === '[DONE]') break;
                         
                         try {
@@ -207,37 +261,51 @@ export default function LiveAI() {
                             if (data.chunk) {
                                 textBuffer.current += data.chunk;
                                 tempSentenceBuffer += data.chunk;
+                                setStreamingContent(textBuffer.current);
                                 
-                                setAiResponse(textBuffer.current);
-                                
-                                // Speak when a natural pause is reached
                                 if (/[.!?\n]/.test(data.chunk)) {
-                                    const naturalPauseStr = tempSentenceBuffer.trim();
-                                    if (naturalPauseStr) {
-                                        speakChunk(naturalPauseStr);
-                                    }
+                                    const pauseStr = tempSentenceBuffer.trim();
+                                    if (pauseStr) speakChunk(pauseStr);
                                     tempSentenceBuffer = "";
                                 }
                             }
-                        } catch (_) {
-                            // parse error for incomplete JSON chunk
+                        } catch (e) {
+                            console.warn("Partial JSON ignored:", dataStr);
                         }
                     }
                 }
             }
             
-            // Speak any remaining text
-            if (tempSentenceBuffer.trim()) {
-                speakChunk(tempSentenceBuffer.trim());
+            // Final check of lineBuffer for any remaining data
+            if (lineBuffer.startsWith('data: ')) {
+                try {
+                     const dataStr = lineBuffer.replace('data: ', '').trim();
+                     const data = JSON.parse(dataStr);
+                     if (data.chunk) {
+                        textBuffer.current += data.chunk;
+                        setStreamingContent(textBuffer.current);
+                     }
+                } catch (_) {}
             }
+            
+            if (tempSentenceBuffer.trim()) speakChunk(tempSentenceBuffer.trim());
+
+            // Finalize message in history
+            const assistantMsg = { id: (Date.now() + 1).toString(), role: 'assistant', content: textBuffer.current, timestamp: Date.now() };
+            setMessages(prev => [...prev, assistantMsg]);
+            setStreamingContent('');
 
         } catch (error) {
-            console.error('Error fetching live response:', error);
-            const fallback = "I’m having trouble responding right now, please try again.";
-            setAiResponse(fallback);
-            textBuffer.current = fallback;
-            setStatus('speaking');
-            speakChunk(fallback);
+            console.error('LiveAI error:', error);
+            if (!isRetry) {
+                handleUserQuery(query, true); // Automatic one-time retry
+            } else {
+                const fallback = "Neural link unstable. I’m having trouble responding right now, please try again.";
+                const errorMsg = { id: 'err-' + Date.now(), role: 'assistant', content: fallback, timestamp: Date.now() };
+                setMessages(prev => [...prev, errorMsg]);
+                setStatus('speaking');
+                speakChunk(fallback);
+            }
         }
     };
 
@@ -329,17 +397,17 @@ export default function LiveAI() {
     // Auto-start on mount with greeting
     useEffect(() => {
         const greeting = "Hey 👋 I’m your Verimind AI assistant. Ask me anything — I’m listening.";
-        setAiResponse(greeting);
+        const introMsg = { id: 'intro', role: 'assistant', content: greeting, timestamp: Date.now() };
+        setMessages([introMsg]);
         textBuffer.current = greeting;
         setStatus('speaking');
         
-        // Ensure greeting text is fully available for captions
         setTimeout(() => {
             speakChunk(greeting);
         }, 800);
     }, []);
 
-    const words = aiResponse.split(' ');
+    const words = streamingContent.split(' ');
 
     return (
         <div className={`fixed inset-0 z-[1000] flex flex-col ${theme === 'dark' ? 'bg-[#0A0514] text-white' : 'bg-slate-900 text-white'}`}>
@@ -372,112 +440,281 @@ export default function LiveAI() {
                         </div>
                     </div>
                 </div>
-                <button 
-                    onClick={() => {
-                        stopListening();
-                        synthesisRef.current.cancel();
-                        if (abortControllerRef.current) abortControllerRef.current.abort();
-                        navigate('/');
-                    }}
-                    className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
-                >
-                    <X className="w-6 h-6 text-slate-300" />
-                </button>
+                <div className="flex items-center gap-4">
+                    <button 
+                        onClick={() => setShowPrefs(true)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                    >
+                        <Scale className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Intelligence Prefs</span>
+                    </button>
+                    <button 
+                        onClick={() => {
+                            stopListening();
+                            synthesisRef.current.cancel();
+                            if (abortControllerRef.current) abortControllerRef.current.abort();
+                            navigate('/');
+                        }}
+                        className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
+                    >
+                        <X className="w-6 h-6 text-slate-300" />
+                    </button>
+                </div>
             </div>
 
-            {/* Main Center Area */}
-            <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10 w-full max-w-4xl mx-auto p-8">
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-hidden flex flex-col items-center relative z-10 w-full max-w-5xl mx-auto px-4">
                 
-                {/* Visualizer / Avatar Area */}
-                <div className="relative mb-8 flex flex-col items-center justify-center">
+                {/* Visualizer / Avatar Area (Fixed) */}
+                <div className="pt-8 pb-4 w-full flex flex-col items-center">
                     <AIAvatar status={status} audioLevel={audioLevel} />
                     
-                    {/* Small Mic Button under Robot */}
-                    <motion.button
-                        onClick={toggleListening}
-                        animate={{
-                            scale: status === 'listening' ? [1, 1.1, 1] : 1,
-                            boxShadow: status === 'listening' 
-                                ? ['0 0 10px rgba(239,68,68,0.3)', '0 0 25px rgba(239,68,68,0.6)', '0 0 10px rgba(239,68,68,0.3)']
-                                : '0 0 10px rgba(255,255,255,0.05)'
-                        }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className={`mt-10 relative z-10 w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-colors border ${
-                            status === 'listening' 
-                            ? 'bg-red-500/20 border-red-500 text-red-500' 
-                            : status === 'speaking' || status === 'thinking'
-                            ? 'bg-indigo-600/10 border-indigo-500/30 text-indigo-400'
-                            : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
-                        }`}
-                    >
-                        {status === 'listening' ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
-                        {status === 'listening' && (
-                             <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-[#0A0514] rounded-full animate-ping" />
-                        )}
-                    </motion.button>
+                    {/* Controls Row */}
+                    <div className="flex items-center gap-6 mt-8">
+                        <button
+                            onClick={() => setIsPaused(!isPaused)}
+                            className={`p-4 rounded-full border transition-all ${
+                                isPaused 
+                                    ? 'bg-amber-500/20 border-amber-500 text-amber-500' 
+                                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                            }`}
+                        >
+                            {isPaused ? <Sparkles className="w-5 h-5" /> : <Loader2 className="w-5 h-5" />}
+                        </button>
+
+                        <motion.button
+                            onClick={toggleListening}
+                            disabled={isPaused}
+                            animate={{
+                                scale: status === 'listening' ? [1, 1.1, 1] : 1,
+                                boxShadow: status === 'listening' 
+                                    ? ['0 0 10px rgba(239,68,68,0.3)', '0 0 25px rgba(239,68,68,0.6)', '0 0 10px rgba(239,68,68,0.3)']
+                                    : '0 0 10px rgba(255,255,255,0.05)'
+                            }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-colors border ${
+                                status === 'listening' 
+                                ? 'bg-red-500/20 border-red-500 text-red-500' 
+                                : isPaused ? 'opacity-30' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                            }`}
+                        >
+                            {status === 'listening' ? <Mic className="w-8 h-8" /> : <MicOff className="w-8 h-8" />}
+                        </motion.button>
+
+                        <button
+                            onClick={() => {
+                                stopListening();
+                                synthesisRef.current.cancel();
+                                if (abortControllerRef.current) abortControllerRef.current.abort();
+                                setMessages([]);
+                                setStatus('idle');
+                            }}
+                            className="flex items-center gap-2 px-6 py-4 rounded-full bg-red-500/10 border border-red-500/30 text-rose-500 hover:bg-red-500/20 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg"
+                        >
+                            <Square className="w-4 h-4 fill-current" /> 
+                            <span>Reset Trace</span>
+                        </button>
+                    </div>
+
+                    {/* Hybrid Text Input Bar */}
+                    <div className="w-full max-w-2xl mt-12 relative group">
+                        <input 
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && inputValue.trim()) {
+                                    handleUserQuery(inputValue.trim());
+                                    setInputValue('');
+                                    stopListening(); // Mute mic if user types
+                                }
+                            }}
+                            placeholder="Type or speak to interact with Verimind..."
+                            className="w-full py-6 px-10 rounded-[2.5rem] bg-white/[0.03] border border-white/10 group-hover:border-white/20 focus:border-indigo-500/50 outline-none text-lg font-light transition-all placeholder:text-slate-700 shadow-2xl backdrop-blur-md"
+                        />
+                        <button 
+                            onClick={() => {
+                                if (inputValue.trim()) {
+                                    handleUserQuery(inputValue.trim());
+                                    setInputValue('');
+                                    stopListening();
+                                }
+                            }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-indigo-500/20"
+                        >
+                            <Zap className="w-5 h-5 text-white" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Subtitles Area */}
-                <div className="w-full text-center space-y-6">
-                    {/* User Transcript */}
-                    <AnimatePresence>
-                        {(transcript || status === 'listening') && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="min-h-[60px]"
-                            >
-                                <p className="text-xl md:text-2xl font-medium text-slate-300">
-                                    {transcript || <span className="text-slate-600 animate-pulse italic">Listening...</span>}
+                {/* Scrollable Chat Area */}
+                <div className="flex-1 w-full overflow-y-auto custom-scrollbar px-4 space-y-6 pb-20 mt-4">
+                    <AnimatePresence mode="popLayout">
+                        {messages.map(msg => (
+                        <motion.div
+                            key={msg.id}
+                            initial={{ opacity: 0, x: msg.role === 'user' ? -20 : 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'} w-full`}
+                        >
+                            <div className={`max-w-[85%] rounded-3xl p-5 md:p-6 shadow-2xl ${
+                                msg.role === 'user' 
+                                    ? 'bg-white/5 border border-white/10 rounded-tl-none' 
+                                    : 'bg-indigo-600/20 border border-indigo-500/20 rounded-tr-none text-right'
+                            }`}>
+                                <p className={`text-lg md:text-xl font-light leading-relaxed ${msg.role === 'user' ? 'text-slate-300' : 'text-white'}`}>
+                                    {msg.content}
                                 </p>
-                            </motion.div>
-                        )}
+                                {msg.id.toString().startsWith('err-') && (
+                                    <button 
+                                        onClick={() => {
+                                             const lastUserMsg = messages.filter(m => m.role === 'user').pop();
+                                             if (lastUserMsg) handleUserQuery(lastUserMsg.content, true);
+                                        }}
+                                        className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 text-[9px] font-black uppercase tracking-wider transition-colors"
+                                    >
+                                        <RotateCcw className="w-3 h-3" /> Retry Neural Link
+                                    </button>
+                                )}
+                                <div className="mt-2 text-[10px] font-bold uppercase tracking-widest opacity-30">
+                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+
+                                {msg.role === 'assistant' && !msg.id.toString().startsWith('err-') && (
+                                    <div className="mt-6 flex flex-wrap items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button 
+                                            onClick={() => {
+                                                const isPinned = pinnedMessages.includes(msg.id);
+                                                setPinnedMessages(prev => isPinned ? prev.filter(id => id !== msg.id) : [...prev, msg.id]);
+                                            }}
+                                            className={`p-2 rounded-lg border transition-all ${pinnedMessages.includes(msg.id) ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-400' : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'}`}
+                                            title="Pin insight"
+                                        >
+                                            {pinnedMessages.includes(msg.id) ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+                                        </button>
+                                        <button onClick={() => handleUserQuery(`Summarize this: ${msg.content}`)} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all">Summarize</button>
+                                        <button onClick={() => handleUserQuery(`Give me examples for: ${msg.content}`)} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all">Examples</button>
+                                        <button onClick={() => handleUserQuery(`Deep dive into this: ${msg.content}`)} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all">Deep Dive</button>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    ))}
                     </AnimatePresence>
 
-                    {/* AI Response Text (Live Captions) */}
-                    <AnimatePresence>
-                        {(aiResponse || status === 'thinking') && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-xl max-h-[40vh] overflow-y-auto"
-                            >
-                                {status === 'thinking' && !aiResponse ? (
-                                    <div className="flex items-center justify-center gap-3 text-indigo-400">
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        <span className="font-bold tracking-widest text-sm uppercase">Synthesizing Logic...</span>
+                    {/* Active Streaming Content / Thinking Indicator */}
+                    {(status === 'thinking' || streamingContent) && (
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex justify-end w-full"
+                        >
+                            <div className="max-w-[85%] rounded-3xl p-5 md:p-6 bg-indigo-600/30 border border-indigo-400/30 rounded-tr-none shadow-2xl">
+                                {status === 'thinking' && !streamingContent ? (
+                                    <div className="flex items-center gap-3 text-indigo-400 p-2">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span className="text-xs font-black uppercase tracking-widest">AI is thinking...</span>
                                     </div>
                                 ) : (
-                                    <p className="text-xl md:text-4xl font-light leading-relaxed text-center max-w-4xl mx-auto">
+                                    <p className="text-xl md:text-2xl font-light leading-relaxed text-right text-white">
                                         {words.map((word, idx) => (
-                                            <motion.span 
+                                            <span 
                                                 key={idx} 
-                                                initial={{ opacity: 0, y: 5 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                className={`transition-colors duration-300 inline-block mr-3 mb-2 ${
+                                                className={`inline-block mr-2 mb-1 ${
                                                     idx <= currentSpokenWordIndex 
                                                         ? 'text-white font-medium drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' 
-                                                        : 'text-white/30 font-light'
+                                                        : 'text-white/30'
                                                 }`}
                                             >
                                                 {word}
-                                            </motion.span>
+                                            </span>
                                         ))}
                                     </p>
                                 )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    <div ref={chatEndRef} />
                 </div>
             </div>
 
-            {/* Bottom Controls / Status */}
-            <div className="relative z-10 p-6 flex justify-center pb-12">
-                 <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-500">
-                     {status === 'listening' ? 'Speak naturally. Pauses are detected automatically.' : 'Verimind Autonomous Mode'}
-                 </p>
-            </div>
+            {/* Intelligence Preferences Modal */}
+            <AnimatePresence>
+                {showPrefs && (
+                    <motion.div 
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            className="w-full max-w-md bg-[#120D1D] border border-white/10 p-10 rounded-[3rem] shadow-3xl"
+                        >
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-2xl font-black text-white italic tracking-tight">Intelligence Config</h3>
+                                <button onClick={() => setShowPrefs(false)} className="p-2 rounded-full hover:bg-white/5 text-slate-500"><X /></button>
+                            </div>
+
+                            <div className="space-y-8">
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 block mb-4">Linguistic Focus</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {['English', 'Hinglish', 'Hindi'].map(lang => (
+                                            <button 
+                                                key={lang}
+                                                onClick={() => setPrefs(prev => ({ ...prev, language: lang }))}
+                                                className={`px-4 py-3 rounded-2xl border text-[11px] font-black uppercase tracking-widest transition-all ${prefs.language === lang ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'}`}
+                                            >
+                                                {lang}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 block mb-4">Neural Bias</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {['General', 'Coding', 'Business', 'Creative'].map(interest => (
+                                            <button 
+                                                key={interest}
+                                                onClick={() => setPrefs(prev => ({ ...prev, interest: interest }))}
+                                                className={`px-4 py-3 rounded-2xl border text-[11px] font-black uppercase tracking-widest transition-all ${prefs.interest === interest ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'}`}
+                                            >
+                                                {interest}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-white/5">
+                                    <button 
+                                        onClick={() => setSimplifyMode(!simplifyMode)}
+                                        className={`w-full flex items-center justify-between p-5 rounded-3xl border transition-all ${simplifyMode ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/5 border-white/5'}`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${simplifyMode ? 'bg-amber-500 text-white' : 'bg-white/5 text-slate-500'}`}>
+                                                <Zap className="w-5 h-5" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className={`text-xs font-black uppercase tracking-widest ${simplifyMode ? 'text-amber-500' : 'text-slate-300'}`}>ELI5 Mode</p>
+                                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Explain like I'm 5</p>
+                                            </div>
+                                        </div>
+                                        <div className={`w-12 h-6 rounded-full relative transition-colors ${simplifyMode ? 'bg-amber-500' : 'bg-slate-700'}`}>
+                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${simplifyMode ? 'right-1' : 'left-1'}`} />
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button onClick={() => setShowPrefs(false)} className="w-full mt-10 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-widest text-[11px] hover:scale-105 transition-all">Save Protocols</button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
