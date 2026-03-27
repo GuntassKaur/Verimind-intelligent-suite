@@ -6,7 +6,6 @@ import {
     Activity,
     Flame,
     MessageSquare,
-    ArrowUpRight,
     Target,
     Trophy
 } from 'lucide-react';

@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { 
     MessageSquare,
     Zap,
-    ShieldCheck,
     Cpu,
     ArrowRight
 } from 'lucide-react';
