@@ -3,7 +3,7 @@ import axios from 'axios';
 // Enterprise-Level API Service
 // Implements: Automatic Token Rotation, De-duplication, and Secure Session Handling
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
+    baseURL: import.meta.env.VITE_API_URL || '',
     withCredentials: true, // Essential for HTTP-only cookies
     timeout: 60000, // 60 seconds timeout for deep neural synthesis
     headers: {

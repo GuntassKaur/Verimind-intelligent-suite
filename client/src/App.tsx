@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
 
@@ -120,6 +121,7 @@ function AppContent() {
             </Routes>
         </Suspense>
         <GlobalTypingTracker />
+        <Analytics />
     </div>
   );
 }

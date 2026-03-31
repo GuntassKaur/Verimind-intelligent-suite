@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { AIAvatar } from '../components/AIAvatar';
 import FloatingParticles from '../components/FloatingParticles';
+import { LoginModal } from '../components/LoginModal';
 
 export default function LiveAI() {
     const { theme } = useTheme();
@@ -39,6 +40,12 @@ export default function LiveAI() {
     const [simplifyMode, setSimplifyMode] = useState(false);
     const [pinnedMessages, setPinnedMessages] = useState<string[]>([]);
     const [showPrefs, setShowPrefs] = useState(false);
+    
+    // Auth & Guest flow
+    const [isGuest, setIsGuest] = useState(false);
+    const [showGuestPopup, setShowGuestPopup] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [guestMessageCount, setGuestMessageCount] = useState(0);
 
     // Refs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,11 +68,12 @@ export default function LiveAI() {
     useEffect(() => {
         const checkAuth = () => {
             if (!localStorage.getItem('user_name')) {
-                navigate('/login?redirect=/live-ai');
+                setIsGuest(true);
+                setTimeout(() => setShowGuestPopup(true), 1500); // Small delay so the user sees the AI first
             }
         };
         checkAuth();
-    }, [navigate]);
+    }, []);
 
     // Initialize Speech Recognition
     useEffect(() => {
@@ -193,6 +201,22 @@ export default function LiveAI() {
     const handleUserQuery = async (query: string, isRetry = false) => {
         if (isPaused) return;
         
+        // Guest Limit Check
+        if (isGuest && guestMessageCount >= 2) {
+             stopListening();
+             setShowLoginModal(true);
+             setStatus('idle');
+             setInputValue('');
+             const limitMsg = { id: Date.now().toString(), role: 'assistant', content: 'You have reached the limit of the Live AI demo. Please login to unlock full power.', timestamp: Date.now() };
+             setMessages(prev => [...prev, limitMsg]);
+             speakChunk('You have reached the demo limit. Please sign in to continue.');
+             return;
+        }
+
+        if (isGuest && !isRetry) {
+             setGuestMessageCount(prev => prev + 1);
+        }
+
         setStatus('thinking');
         setStreamingContent('');
         textBuffer.current = '';
@@ -712,6 +736,43 @@ export default function LiveAI() {
 
                             <button onClick={() => setShowPrefs(false)} className="w-full mt-10 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-widest text-[11px] hover:scale-105 transition-all">Save Protocols</button>
                         </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            {/* Login Modal for Guest limit */}
+            <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+
+            {/* Guest Initial Popup */}
+            <AnimatePresence>
+                {showGuestPopup && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }} 
+                        animate={{ opacity: 1, y: 0, scale: 1 }} 
+                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[3000] w-full max-w-sm"
+                    >
+                        <div className="bg-[#0B0F1A]/95 backdrop-blur-3xl border border-[#7C5CFF]/30 p-6 rounded-3xl shadow-[0_20px_60px_rgba(124,92,255,0.3)] text-center relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#7C5CFF]/10 to-transparent pointer-events-none" />
+                            <div className="w-12 h-12 bg-[#7C5CFF]/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#7C5CFF]/40">
+                                <Zap className="w-6 h-6 text-[#00D4FF]" />
+                            </div>
+                            <h3 className="text-xl font-black text-white tracking-tight mb-2">Live Demo Mode</h3>
+                            <p className="text-sm text-[#E6EAF2]/70 mb-6">Experience VeriMind with a limited demo. Login to unlock infinite context and full power.</p>
+                            <div className="flex flex-col gap-3">
+                                <button 
+                                    onClick={() => { setShowGuestPopup(false); setShowLoginModal(true); }}
+                                    className="w-full py-4 bg-[#7C5CFF] hover:bg-[#6A4BE5] text-white rounded-xl font-black uppercase tracking-widest text-xs transition-colors"
+                                >
+                                    Login Now
+                                </button>
+                                <button 
+                                    onClick={() => setShowGuestPopup(false)}
+                                    className="w-full py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black uppercase tracking-widest text-xs transition-colors border border-white/10"
+                                >
+                                    Continue Demo
+                                </button>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
