@@ -1,137 +1,62 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
-import { Analytics } from '@vercel/analytics/react';
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from './components/DashboardLayout';
+import Layout from './components/Layout';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { Loader2 } from 'lucide-react';
 
-// Lazy load pages for performance
 const Landing = lazy(() => import('./pages/Landing'));
+const LiveAI = lazy(() => import('./pages/LiveAI'));
+const UserDashboard = lazy(() => import('./pages/Dashboard'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
 const Chat = lazy(() => import('./pages/History'));
 const Settings = lazy(() => import('./pages/Settings'));
-const Login = lazy(() => import('./pages/Login'));
-const Workspace = lazy(() => import('./pages/Workspace'));
-const Visualizer = lazy(() => import('./pages/Visualizer'));
-const Register = lazy(() => import('./pages/Register'));
 const Generate = lazy(() => import('./pages/Generate'));
+const TruthAudit = lazy(() => import('./pages/TruthAudit'));
 const Plagiarism = lazy(() => import('./pages/Plagiarism'));
 const Humanizer = lazy(() => import('./pages/Humanizer'));
-const TruthAudit = lazy(() => import('./pages/TruthAudit'));
-const UserDashboard = lazy(() => import('./pages/Dashboard'));
+const Visualizer = lazy(() => import('./pages/Visualizer'));
+const Workspace = lazy(() => import('./pages/Workspace'));
 const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
-const LiveAI = lazy(() => import('./pages/LiveAI'));
-const About = lazy(() => import('./pages/About'));
 
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
-import { GlobalTypingTracker } from './components/GlobalTypingTracker';
-import { Logo } from './components/Logo';
-import { Loader2 } from 'lucide-react';
-import api from './services/api';
-import './App.css';
-
-function AppContent() {
-  const { theme } = useTheme();
-  const [user, setUser] = useState<{ id: string; name: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const timeout = setTimeout(() => {
-        setLoading(false);
-      }, 5000);
-
-      try {
-        const { data } = await api.get('/api/auth/me');
-        clearTimeout(timeout);
-        if (data.id) {
-          setUser(data);
-          localStorage.setItem('user_name', data.name);
-        } else {
-          setUser(null);
-          localStorage.removeItem('user_name');
-        }
-      } catch (err) {
-        clearTimeout(timeout);
-        console.error("Auth check failed:", err);
-        setUser(null);
-        localStorage.removeItem('user_name');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  if (loading) {
+export default function App() {
     return (
-      <div className={`h-screen w-full flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-[#05070a]' : 'bg-[#FDFBF7]'}`}>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="relative z-10 flex flex-col items-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(79,70,229,0.3)] animate-bounce">
-              <Logo variant="icon" className="w-10 h-10 text-white" />
-            </div>
-            <div className="flex flex-col items-center gap-4">
-              <div className={`flex items-center gap-3 font-black uppercase tracking-[0.4em] text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                <Loader2 className="animate-spin text-indigo-400" size={18} />
-                Establishing Secure Session
-              </div>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Initializing Truth Protocols v6.0</p>
-            </div>
-        </div>
-      </div>
+        <ThemeProvider>
+            <Suspense fallback={
+                <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B0F19]">
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 blur-3xl bg-indigo-500/20 animate-pulse rounded-full" />
+                        <span className="text-4xl font-black text-indigo-500 animate-pulse">VM</span>
+                    </div>
+                    <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl border bg-white/5 border-white/10">
+                        <Loader2 className="animate-spin text-indigo-400" size={16} />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Neural Link Initializing...</span>
+                    </div>
+                </div>
+            }>
+                <Routes>
+                    {/* WRAP ALL PAGES IN THE SINGLE GLOBAL LAYOUT TO FIX DUPLICATION */}
+                    <Route element={<Layout />}>
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/dashboard" element={<UserDashboard />} />
+                        <Route path="/live-ai" element={<LiveAI />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/chat" element={<Chat />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/generator" element={<Generate />} />
+                        <Route path="/audit" element={<TruthAudit />} />
+                        <Route path="/plagiarism" element={<Plagiarism />} />
+                        <Route path="/ppt" element={<PPTGenerator />} />
+                        <Route path="/visualizer" element={<Visualizer />} />
+                        <Route path="/workspace" element={<Workspace />} />
+                        <Route path="/humanizer" element={<Humanizer />} />
+                        <Route path="/comparison" element={<Comparison />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Route>
+                </Routes>
+            </Suspense>
+        </ThemeProvider>
     );
-  }
-
-  return (
-    <div className={`min-h-screen transition-colors duration-500 ${theme === 'dark' ? 'bg-[#05070a] text-white selection:bg-indigo-500/30' : 'bg-[#FDFBF7] text-slate-900 selection:bg-indigo-200/50'}`}>
-        <Suspense fallback={
-            <div className={`fixed inset-0 flex flex-col items-center justify-center z-[100] ${theme === 'dark' ? 'bg-[#05070a]' : 'bg-[#FDFBF7]'}`}>
-                <div className="relative mb-8">
-                    <div className="absolute inset-0 blur-3xl bg-indigo-500/20 animate-pulse rounded-full" />
-                    <Logo variant="icon" className="h-12 w-12 text-indigo-500 relative animate-bounce" />
-                </div>
-                <div className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl border ${theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'}`}>
-                    <Loader2 className="animate-spin text-indigo-400" size={16} />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Loading Neural Workspace...</span>
-                </div>
-            </div>
-        }>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/" element={<DashboardLayout />}>
-                    <Route index element={<Landing />} />
-                    <Route path="dashboard" element={<UserDashboard />} />
-                    <Route path="live-ai" element={<LiveAI />} />
-                    <Route path="chat" element={user ? <Chat /> : <Navigate to="/login" replace />} />
-                    <Route path="about" element={<About />} />
-                    
-                    {/* Feature Routes (Still accessible but not in main nav) */}
-                    <Route path="generator" element={<Generate />} />
-                    <Route path="audit" element={<TruthAudit />} />
-                    <Route path="plagiarism" element={<Plagiarism />} />
-                    <Route path="ppt" element={<PPTGenerator />} />
-                    <Route path="visualizer" element={<Visualizer />} />
-                    <Route path="workspace" element={<Workspace />} />
-                    <Route path="humanizer" element={<Humanizer />} />
-                    <Route path="comparison" element={<Comparison />} />
-                    <Route path="settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
-                </Route>
-                <Route path="/overview" element={<Navigate to="/" replace />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-        </Suspense>
-        <GlobalTypingTracker />
-        <Analytics />
-    </div>
-  );
 }
-
-function App() {
-  return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  );
-}
-
-export default App;
