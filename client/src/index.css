@@ -5,38 +5,31 @@
 @tailwind utilities;
 
 :root {
-  /* Light Theme - Modern SaaS Slate */
-  --bg-app:        #F8FAFC; /* Slate 50 */
-  --bg-card:       #FFFFFF;
-  --bg-side:       #F1F5F9; /* Slate 100 */
-  --bg-header:     rgba(248, 250, 252, 0.8);
-  --primary:       #6366F1; /* Indigo 500 */
-  --primary-hover: #4F46E5; /* Indigo 600 */
-  --accent-soft:   #EEF2FF; /* Indigo 50 */
-  --text-main:     #0F172A; /* Slate 900 */
-  --text-muted:    #64748B; /* Slate 500 */
-  --border-soft:   #E2E8F0; /* Slate 200 */
-  --shadow-clean:  0 10px 30px -10px rgba(0, 0, 0, 0.04);
-  --shadow-hover:  0 20px 40px -15px rgba(0, 0, 0, 0.08);
-  --font-main:     'Inter', sans-serif;
+  /* Dynamic Design Tokens */
+  --bg-app: #0B0F19;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-side: #0F172A;
+  --primary: #6366F1;
+  --primary-glow: rgba(99, 102, 241, 0.5);
+  --accent-teal: #14B8A6;
+  --accent-purple: #8B5CF6;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(12px);
+  --font-display: 'Outfit', 'Inter', sans-serif;
+  --font-main: 'Inter', sans-serif;
+  
+  /* Transitions */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark {
-  /* Dark Theme - Clean Modern Reset */
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --accent: #8b5cf6;
-  --muted: #64748b;
-  --border: rgba(255, 255, 255, 0.05);
-  --text-main:     #F8FAFC;
-  --text-muted:    #94A3B8;
-  --border-soft:   rgba(255, 255, 255, 0.05);
-  --shadow-clean:  0 20px 50px -12px rgba(0, 0, 0, 0.5);
-  --shadow-hover:  0 30px 80px -15px rgba(0, 0, 0, 0.6);
+  --background: #0B1120;
+  --foreground: #F8FAFC;
+  --primary: #6366F1;
+  --accent: #8B5CF6;
+  --border-soft: rgba(255, 255, 255, 0.05);
 }
 
 *, *::before, *::after { box-sizing: border-box; }

@@ -20,6 +20,8 @@ const Workspace = lazy(() => import('./pages/Workspace'));
 const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
 
+const TypingLab = lazy(() => import('./pages/TypingLab'));
+
 export default function App() {
     return (
         <ThemeProvider>
@@ -48,6 +50,7 @@ export default function App() {
                         <Route path="/generator" element={<Generate />} />
                         <Route path="/audit" element={<TruthAudit />} />
                         <Route path="/plagiarism" element={<Plagiarism />} />
+                        <Route path="/speed-lab" element={<TypingLab />} />
                         <Route path="/ppt" element={<PPTGenerator />} />
                         <Route path="/visualizer" element={<Visualizer />} />
                         <Route path="/workspace" element={<Workspace />} />
