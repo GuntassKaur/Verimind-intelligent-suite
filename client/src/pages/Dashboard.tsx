@@ -1,13 +1,14 @@
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-    CheckCircle2, 
     AlertCircle, 
     Search, 
     ShieldCheck, 
     Activity,
     TrendingUp,
     Zap,
-    Trophy
+    Trophy,
+    ArrowRight
 } from 'lucide-react';
 
 export default function UserDashboard() {
@@ -39,7 +40,7 @@ export default function UserDashboard() {
                     </motion.div>
                     <div className="space-y-2">
                         <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none">
-                            Verimind <span className="text-indigo-500">Suite</span>.
+                            Verimind <span className="text-indigo-500 italic">Suite</span>.
                         </h1>
                         <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-sm">Ensuring AI Reliability • Production Mode</p>
                     </div>
@@ -110,11 +111,11 @@ export default function UserDashboard() {
                     </div>
 
                     <div className="mt-12 w-full grid grid-cols-2 gap-4">
-                        <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col items-center">
+                        <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col items-center group/card hover:bg-white/5 transition-all">
                             <span className="text-2xl font-black text-white">4.2s</span>
                             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Avg Latency</span>
                         </div>
-                        <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col items-center">
+                        <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col items-center group/card hover:bg-white/5 transition-all">
                             <span className="text-2xl font-black text-white">99.8%</span>
                             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">API Uptime</span>
                         </div>
@@ -157,46 +158,45 @@ export default function UserDashboard() {
                         </motion.div>
                     ))}
 
-                    <motion.div 
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
+                    <Link 
+                        to="/visualizer"
                         className="sm:col-span-2 p-10 rounded-[3rem] bg-gradient-to-r from-indigo-600 to-purple-600 shadow-2xl shadow-indigo-600/20 flex items-center justify-between relative overflow-hidden group cursor-pointer"
                     >
                          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none" />
                          <div className="relative z-10 flex flex-col">
-                             <h4 className="text-2xl font-black text-white tracking-tight">Initiate Real-Time Logic Flow</h4>
-                             <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-[0.3em]">Unlock premium agent-based automation systems</p>
+                             <h4 className="text-2xl font-black text-white tracking-tight">Initiate Neural Logic Flow</h4>
+                             <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-[0.3em]">Visualizing premium agent-based automation systems</p>
                          </div>
                          <div className="w-16 h-16 rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center group-hover:scale-110 transition-transform">
-                             <CheckCircle2 className="text-white" />
+                             <ArrowRight className="text-white" />
                          </div>
-                    </motion.div>
+                    </Link>
                 </div>
 
             </div>
 
             {/* LOWER TOOLING DASHBOARD */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                <ToolCard title="Neural Forge" desc="High-precision text generation with 99% human-readability score." icon={Zap} />
-                <ToolCard title="Truth Auditor" desc="Cross-referencing claims against 450M verifiable neural records." icon={Search} />
-                <ToolCard title="Logic Stream" desc="Diagramming engine with live Markdown-to-Mermaid conversion." icon={ShieldCheck} />
+                <ToolCard title="Neural Forge" desc="High-precision text & code generation with 99% human-readability score." icon={Zap} path="/forge" color="from-emerald-500/20" />
+                <ToolCard title="Truth Auditor" desc="Cross-referencing claims against 450M verifiable neural records." icon={Search} path="/audit" color="from-indigo-500/20" />
+                <ToolCard title="Neural Workspace" desc="Integrated collaboration environment for deep-ai research nodes." icon={ShieldCheck} path="/workspace" color="from-purple-500/20" />
             </div>
         </div>
     );
 }
 
-function ToolCard({ title, desc, icon: Icon }: { title: string, desc: string, icon: any }) {
+function ToolCard({ title, desc, icon: Icon, path, color }: { title: string, desc: string, icon: any, path: string, color: string }) {
     return (
-        <div className="p-10 rounded-[3.5rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all group">
-            <div className="w-16 h-16 rounded-3xl bg-indigo-600/10 flex items-center justify-center mb-8 border border-indigo-500/20 group-hover:scale-110 transition-all duration-500">
-                <Icon size={28} className="text-indigo-400" />
+        <Link to={path} className="p-10 rounded-[3.5rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all group relative overflow-hidden flex flex-col h-full">
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${color} to-transparent blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity`} />
+            <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mb-8 border border-white/10 group-hover:scale-110 group-hover:bg-indigo-600 transition-all duration-500">
+                <Icon size={28} className="text-white group-hover:text-white" />
             </div>
             <h5 className="text-xl font-black tracking-tight text-white mb-2">{title}</h5>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium mb-8">{desc}</p>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full w-1/3 bg-indigo-500 rounded-full" />
+            <p className="text-slate-500 text-sm leading-relaxed font-medium mb-8 flex-grow">{desc}</p>
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:translate-x-2 transition-transform">
+                Launch Protocol <ArrowRight size={14} />
             </div>
-        </div>
+        </Link>
     );
 }
