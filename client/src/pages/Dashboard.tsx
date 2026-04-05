@@ -8,7 +8,9 @@ import {
     TrendingUp,
     Zap,
     Trophy,
-    ArrowRight
+    ArrowRight,
+    Sparkles,
+    Globe
 } from 'lucide-react';
 
 export default function UserDashboard() {
@@ -174,6 +176,50 @@ export default function UserDashboard() {
                 </div>
 
             </div>
+
+            {/* SPARK HERO BOARD */}
+            <Link 
+                to="/spark"
+                className="block p-12 md:p-20 rounded-[5rem] bg-gradient-to-br from-[#1E293B] to-[#0F172A] border border-white/10 relative overflow-hidden group shadow-2xl"
+            >
+                <div className="absolute inset-0 bg-purple-600/10 blur-[150px] animate-pulse" />
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-purple-500/10 to-transparent" />
+                
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
+                     <div className="space-y-10">
+                          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-[10px] font-black uppercase tracking-[0.4em] text-purple-400">
+                               <Sparkles size={12} /> Flagship: Neural Spark Engine
+                          </div>
+                          <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none">
+                               Synthesis beyond <br/>
+                               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 italic">Ordinary Research.</span>
+                          </h2>
+                          <p className="text-slate-500 text-lg md:text-xl font-bold leading-relaxed italic max-w-xl">
+                               The first AI engine that doesn't just search—it executes research, builds dynamic spark-pages, and cross-references entire corpora in real-time.
+                          </p>
+                          <div className="flex items-center gap-6">
+                               <div className="px-10 py-5 rounded-[2rem] bg-purple-600 text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-purple-600/40 group-hover:scale-105 transition-all">Launch Spark Protocol</div>
+                               <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">v4.0 Core Active</span>
+                          </div>
+                     </div>
+                     <div className="hidden lg:flex flex-col gap-6">
+                          <div className="p-8 rounded-[3rem] bg-white/5 border border-white/5 transform -rotate-2 group-hover:rotate-0 transition-transform">
+                               <div className="flex items-center gap-4 mb-4">
+                                    <Globe className="text-purple-400" size={20} />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Global Scan Active</span>
+                               </div>
+                               <div className="space-y-2">
+                                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                         <div className="h-full w-4/5 bg-purple-500" />
+                                    </div>
+                                    <div className="h-2 w-2/3 bg-white/5 rounded-full overflow-hidden">
+                                         <div className="h-full w-1/2 bg-indigo-500" />
+                                    </div>
+                               </div>
+                          </div>
+                     </div>
+                </div>
+            </Link>
 
             {/* LOWER TOOLING DASHBOARD */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">

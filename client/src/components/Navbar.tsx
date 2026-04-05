@@ -32,6 +32,7 @@ export const Navbar = ({ onLoginClick }: NavbarProps) => {
     const navItems = [
         { path: '/', label: 'Portal' },
         { path: '/dashboard', label: 'Command' },
+        { path: '/spark', label: 'Neural Spark' },
         { 
             label: 'Analyze', 
             items: [

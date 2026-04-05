@@ -19,6 +19,7 @@ const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
 const TypingLab = lazy(() => import('./pages/TypingLab'));
 const NeuralForge = lazy(() => import('./pages/NeuralForge'));
+const NeuralSpark = lazy(() => import('./pages/NeuralSpark'));
 
 export default function App() {
     return (
@@ -52,6 +53,7 @@ export default function App() {
                         <Route path="/humanizer" element={<Humanizer />} />
                         <Route path="/comparison" element={<Comparison />} />
                         <Route path="/forge" element={<NeuralForge />} />
+                        <Route path="/spark" element={<NeuralSpark />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
                 </Routes>
