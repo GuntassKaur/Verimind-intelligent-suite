@@ -36,14 +36,14 @@ export const Navbar = ({ onLoginClick }: NavbarProps) => {
             label: 'Analyze', 
             items: [
                 { path: '/audit', label: 'Truth Audit' },
-                { path: '/plagiarism', label: 'Plagiarism' },
+                { path: '/plagiarism', label: 'Origins Scan' },
                 { path: '/comparison', label: 'Comparison' }
             ]
         },
         { 
             label: 'Generate', 
             items: [
-                { path: '/generator', label: 'Neural Forge' },
+                { path: '/forge', label: 'Neural Forge' },
                 { path: '/humanizer', label: 'Humanizer' },
                 { path: '/ppt', label: 'PPT Engine' }
             ]
@@ -52,8 +52,8 @@ export const Navbar = ({ onLoginClick }: NavbarProps) => {
             label: 'Labs', 
             items: [
                 { path: '/visualizer', label: 'Logic Flow' },
-                { path: '/workspace', label: 'Workspace' },
-                { path: '/live-ai', label: 'Live Link' }
+                { path: '/workspace', label: 'Neural Workspace' },
+                { path: '/typing-lab', label: 'Typing Lab' }
             ]
         }
     ];

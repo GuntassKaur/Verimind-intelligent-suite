@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -9,9 +9,7 @@ const LiveAI = lazy(() => import('./pages/LiveAI'));
 const UserDashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
-const Chat = lazy(() => import('./pages/History'));
 const Settings = lazy(() => import('./pages/Settings'));
-const Generate = lazy(() => import('./pages/Generate'));
 const TruthAudit = lazy(() => import('./pages/TruthAudit'));
 const Plagiarism = lazy(() => import('./pages/Plagiarism'));
 const Humanizer = lazy(() => import('./pages/Humanizer'));
@@ -19,8 +17,8 @@ const Visualizer = lazy(() => import('./pages/Visualizer'));
 const Workspace = lazy(() => import('./pages/Workspace'));
 const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
-
 const TypingLab = lazy(() => import('./pages/TypingLab'));
+const NeuralForge = lazy(() => import('./pages/NeuralForge'));
 
 export default function App() {
     return (
@@ -38,24 +36,22 @@ export default function App() {
                 </div>
             }>
                 <Routes>
-                    {/* WRAP ALL PAGES IN THE SINGLE GLOBAL LAYOUT TO FIX DUPLICATION */}
                     <Route element={<Layout />}>
                         <Route path="/" element={<Landing />} />
                         <Route path="/dashboard" element={<UserDashboard />} />
                         <Route path="/live-ai" element={<LiveAI />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
-                        <Route path="/chat" element={<Chat />} />
                         <Route path="/settings" element={<Settings />} />
-                        <Route path="/generator" element={<Generate />} />
                         <Route path="/audit" element={<TruthAudit />} />
                         <Route path="/plagiarism" element={<Plagiarism />} />
-                        <Route path="/speed-lab" element={<TypingLab />} />
+                        <Route path="/typing-lab" element={<TypingLab />} />
                         <Route path="/ppt" element={<PPTGenerator />} />
                         <Route path="/visualizer" element={<Visualizer />} />
                         <Route path="/workspace" element={<Workspace />} />
                         <Route path="/humanizer" element={<Humanizer />} />
                         <Route path="/comparison" element={<Comparison />} />
+                        <Route path="/forge" element={<NeuralForge />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
                 </Routes>

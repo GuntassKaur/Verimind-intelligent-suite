@@ -1,27 +1,25 @@
 import { motion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
     Zap,
     Cpu,
     ArrowRight,
-    Star,
-    BarChart3,
     Network,
     ShieldCheck,
     Bot,
     Globe,
-    Code,
     LayoutDashboard,
     Keyboard
 } from 'lucide-react';
 
 export default function Landing() {
-    const fadeUp = {
+    const fadeUp: Variants = {
         hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "circOut" } }
     };
 
-    const staggerContainer = {
+    const staggerContainer: Variants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
@@ -30,10 +28,10 @@ export default function Landing() {
     };
 
     const features = [
-        { title: "Neural Forge", desc: "Advanced AI text generation with creative vs precise precision toggles.", icon: Zap, path: "/generator" },
+        { title: "Neural Forge", desc: "Advanced AI text generation with creative vs precise precision toggles.", icon: Zap, path: "/forge" },
         { title: "Truth Auditor", desc: "Cross-reference claims against 450M verifiable neural records instantly.", icon: ShieldCheck, path: "/audit" },
         { title: "Logic Stream", desc: "Real-time diagramming engine with live Markdown-to-Mermaid conversion.", icon: Network, path: "/visualizer" },
-        { title: "Typing Accelerator", desc: "Measure the delta between thought and digital input in our speed lab.", icon: Keyboard, path: "/speed-lab" },
+        { title: "Typing Accelerator", desc: "Measure the delta between thought and digital input in our speed lab.", icon: Keyboard, path: "/typing-lab" },
         { title: "Humanizer Prime", desc: "Sophisticated re-writing engine to ensure 99% human-readability scores.", icon: Bot, path: "/humanizer" },
         { title: "Global Intelligence", desc: "Multi-modal processing across 50+ languages with zero-latency edge.", icon: Globe, path: "/live-ai" }
     ];
