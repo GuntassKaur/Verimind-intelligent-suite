@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
-    MessageSquare,
     Zap,
     Cpu,
     ArrowRight,
     Star,
-    CheckCircle2,
     BarChart3,
     Network,
     ShieldCheck,
