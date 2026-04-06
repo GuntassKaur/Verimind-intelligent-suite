@@ -2,7 +2,7 @@
   "name": "aiproject-root",
   "private": true,
   "scripts": {
-    "build": "npm run build --prefix client",
-    "install": "npm install --prefix client"
+    "postinstall": "cd client && npm install",
+    "build": "cd client && npm run build"
   }
 }
