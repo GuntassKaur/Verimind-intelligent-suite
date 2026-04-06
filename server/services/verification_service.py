@@ -2,6 +2,7 @@ import json
 import re
 import logging
 from .gemini_service import call_gemini
+from utils.response_formatter import format_ai_response
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +38,9 @@ def verify_claims(text, context="General"):
       "risk_level": "Low" | "Medium" | "High",
       "ai_probability": number (0-100),
       "verdict": "string",
+      "analysis_text": "In-depth explanation of why the text is considered risky or safe.",
       "simple_explanation": "A very easy-to-understand summary in simple English (max 2 sentences).",
       "reason_for_score": "Exact reason why this score was assigned.",
-      "why_this_result": {
-          "problematic_parts": ["list of confusing or risky phrases"],
-          "analysis": "In-depth explanation of why the text is considered risky or safe."
-      },
       "suggestions": ["specific advice like 'Add sources' or 'Be more specific'"],
       "claims": [
         {
@@ -61,33 +59,22 @@ def verify_claims(text, context="General"):
 
     try:
         text_response = _call_gemini(system_prompt, user_input)
+        
+        # Check for non-JSON responses (Spectrum Errors from gemini_service)
+        if "Spectrum Error" in text_response or "Nexus Error" in text_response:
+            return format_ai_response({"analysis_text": text_response}, fallback_text="Neural synchronization failure.")
+
         match = re.search(r'\{.*\}', text_response, re.DOTALL)
         if match:
             data = json.loads(match.group(0))
-            # Inject mandatory production keys if missing
-            data['plagiarism_score'] = data.get('ai_probability', 0) 
-            data['analysis_text'] = data.get('why_this_result', {}).get('analysis', data.get('verdict', ''))
-            if 'suggestions' not in data: data['suggestions'] = ["Be more specific.", "Verify citations."]
-            return data
+            return format_ai_response(data)
         else:
-            raise ValueError("No JSON found in response")
+            # If no JSON, try formatting the raw response
+            return format_ai_response({"analysis_text": text_response})
+            
     except Exception as e:
         logger.error(f"Truth Engine Error: {str(e)}")
-        return {
-            "credibility_score": 0,
-            "plagiarism_score": 0,
-            "risk_level": "High",
-            "ai_probability": 0,
-            "verdict": "Audit Failed",
-            "analysis_text": "Unable to generate full report, showing partial analysis. System encountered a neural synchronization failure.",
-            "simple_explanation": "Critical error during deep semantic audit.",
-            "reason_for_score": "Internal processing error or malformed AI response.",
-            "why_this_result": {"problematic_parts": [], "analysis": "N/A"},
-            "suggestions": ["Verify connectivity.", "Reduce input length."],
-            "claims": []
-        }
-
-
+        return format_ai_response({}, fallback_text=f"Spectral Audit Status: {str(e)[:100]}")
 
 
 def analyze_screenshot(extracted_text):

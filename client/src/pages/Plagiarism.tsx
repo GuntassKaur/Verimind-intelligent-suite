@@ -17,9 +17,9 @@ import { UniversalEditor } from '../components/UniversalEditor';
 
 interface PlagiarismData {
     plagiarism_score: number;
-    summary: string;
+    analysis_text: string;
     suspicious_segments: string[];
-    explanation: string;
+    suggestions: string[];
 }
 
 export default function Plagiarism() {
@@ -206,7 +206,7 @@ export default function Plagiarism() {
 
                                     <div className="space-y-12 relative z-10">
                                         <p className="text-3xl md:text-5xl font-bold text-slate-300 italic leading-[1.1] selection:bg-rose-500/30">
-                                            "{result.summary}"
+                                            "{result.analysis_text}"
                                         </p>
 
                                         <div className="space-y-6 pt-10 border-t border-white/5">

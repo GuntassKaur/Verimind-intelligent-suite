@@ -46,41 +46,32 @@ export default function Analyze() {
 
         setLoading(true);
         setError('');
+        setResult(null);
 
         try {
-            await api.post('/api/ai/analyze', { text });
-            // Mocking high-end response for demo
-            setResult({
-                trustScore: 84,
-                aiScore: 92,
-                plagiarism: 12,
-                biasScore: 8,
-                summary: "Content shows high factual density with minor hallucination risks in technical metrics.",
-                sentences: [
-                    { 
-                        text: "Verimind utilizes high-dimensional vector space analysis.", 
-                        hallucination_score: 5, 
-                        explanation: "Core architecture verified.", 
-                        status: 'verified',
-                        source: 'Research Lab'
-                    },
-                    { 
-                        text: "The system can predict future stock market moves with 100% certainty.", 
-                        hallucination_score: 95, 
-                        explanation: "Impossible deterministic claim. Market variables are stochastic.", 
-                        status: 'risky',
-                        bias: { type: 'Hyperbole', level: 'High' }
-                    },
-                    { 
-                        text: "Integrated neural links provide zero-latency inference.", 
-                        hallucination_score: 30, 
-                        explanation: "Near-zero latency achieved, but physical limits apply.", 
-                        status: 'unverified'
-                    }
-                ]
-            });
+            const { data } = await api.post('/api/ai/analyze', { text });
+            
+            if (data.success) {
+                const d = data.data || data;
+                setResult({
+                    trustScore: d.credibility_score || d.score || 0,
+                    aiScore: d.ai_probability || 0,
+                    plagiarism: d.plagiarism_score || 0,
+                    biasScore: d.bias_score || (d.risk_level === 'High' ? 80 : d.risk_level === 'Medium' ? 40 : 10),
+                    summary: d.analysis_text || d.verdict || d.simple_explanation || "Audit complete.",
+                    sentences: (d.claims || []).map((c: any) => ({
+                        text: c.claim,
+                        hallucination_score: 100 - (c.confidence || 80),
+                        explanation: c.reasoning || "Neural record verified.",
+                        status: c.verdict === 'Verified' ? 'verified' : c.verdict === 'Misleading' ? 'risky' : 'unverified',
+                        source: 'Global Manifest'
+                    }))
+                });
+            } else {
+                setError(data.error || "Neural link failure during audit.");
+            }
         } catch (err: any) {
-            setError("Neural link failed. Verification aborted.");
+            setError("Neural link failure. Spectral sync interrupted.");
         } finally {
             setLoading(false);
         }

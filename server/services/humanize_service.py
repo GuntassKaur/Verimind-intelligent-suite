@@ -1,6 +1,10 @@
 import json
 import re
+import logging
 from .gemini_service import call_gemini
+from utils.response_formatter import format_ai_response
+
+logger = logging.getLogger(__name__)
 
 def _call_gemini(prompt):
     return call_gemini(prompt)
@@ -28,17 +32,20 @@ def humanize_text(text, tone="Professional"):
     - improvements (list of what was changed, e.g., "Varying sentence length")
     """
 
-    import re
     try:
         text_response = _call_gemini(prompt)
+        
+        # Check for error strings
+        if "Spectrum Error" in text_response or "Nexus Error" in text_response:
+             return format_ai_response({"humanized_text": text_response}, fallback_text="Neural synchronization failure.")
+
         match = re.search(r'\{.*\}', text_response, re.DOTALL)
         if match:
-            return json.loads(match.group(0))
+            data = json.loads(match.group(0))
+            return format_ai_response(data)
         else:
-            raise ValueError("No JSON found in response")
-    except Exception:
-        return {
-            "humanized_text": text,
-            "confidence_score": 0,
-            "improvements": ["Service temporarily unavailable. Please try again."]
-        }
+            return format_ai_response({"humanized_text": text_response})
+            
+    except Exception as e:
+        logger.error(f"Humanization Failure: {str(e)}")
+        return format_ai_response({}, fallback_text=f"Neural sync failed: {str(e)[:50]}")

@@ -18,8 +18,9 @@ const Workspace = lazy(() => import('./pages/Workspace'));
 const Comparison = lazy(() => import('./pages/Comparison'));
 const PPTGenerator = lazy(() => import('./pages/PPTGenerator'));
 const TypingLab = lazy(() => import('./pages/TypingLab'));
-const NeuralForge = lazy(() => import('./pages/NeuralForge'));
+const NeuralForge = lazy(() => import('./pages/Generate'));
 const NeuralSpark = lazy(() => import('./pages/NeuralSpark'));
+const DigitalArtLab = lazy(() => import('./pages/DigitalArtLab'));
 
 export default function App() {
     return (
@@ -54,6 +55,7 @@ export default function App() {
                         <Route path="/comparison" element={<Comparison />} />
                         <Route path="/forge" element={<NeuralForge />} />
                         <Route path="/spark" element={<NeuralSpark />} />
+                        <Route path="/art-lab" element={<DigitalArtLab />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
                 </Routes>

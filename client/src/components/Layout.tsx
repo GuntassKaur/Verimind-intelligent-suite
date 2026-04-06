@@ -1,37 +1,53 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
+import { Sidebar } from './Sidebar';
 import { LoginModal } from './LoginModal';
 
 export default function Layout() {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const location = useLocation();
 
-    const handleLoginOpen = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsLoginOpen(true);
-    };
+    // Check if we are on landing to hide sidebar
+    const isLanding = location.pathname === '/';
 
-    // Navbar is used ONLY here globally
     return (
-        <div className="min-h-screen flex flex-col bg-[#0B0F19] text-[#E2E8F0]">
-            <Navbar onLoginClick={handleLoginOpen} />
-            
-            <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+        <div className="min-h-screen bg-[#0b0f1a] text-[#f8fafc] flex flex-col font-main selection:bg-purple-500/30">
+            {/* Ambient Animated Mesh Background */}
+            <div className="bg-mesh-container fixed inset-0">
+                <div className="bg-mesh" />
+            </div>
 
-            <main className="flex-1 pt-24 pb-12 relative z-10">
-                <Outlet context={{ openLoginModal: () => setIsLoginOpen(true) }} />
+            {/* Glowing Effects */}
+            <div className="glowing-orb glow-purple w-[800px] h-[800px] -top-96 -left-96 opacity-40" />
+            <div className="glowing-orb glow-blue w-[600px] h-[600px] bottom-0 right-0 opacity-20" />
+
+            <Navbar onLoginClick={() => setIsLoginOpen(true)} />
+            
+            {!isLanding && <Sidebar />}
+
+            <main className={`flex-1 transition-all duration-500 relative z-10 
+                ${!isLanding ? 'lg:pl-64' : ''} 
+                pt-24 pb-12
+            `}>
+                <div className={`mx-auto ${!isLanding ? 'max-w-6xl px-6' : 'w-full'}`}>
+                    <Outlet context={{ openLoginModal: () => setIsLoginOpen(true) }} />
+                </div>
             </main>
 
-            <footer className="py-12 border-t border-white/5 text-center bg-[#0B0F19] relative z-10">
-                <div className="max-w-7xl mx-auto px-6">
-                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">© 2026 VeriMind Neural Suite v1.0</p>
-                    <div className="flex justify-center gap-6 mt-4 opacity-40 hover:opacity-100 transition-opacity">
-                        <a href="#" className="text-xs font-medium hover:text-indigo-400">Terms</a>
-                        <a href="#" className="text-xs font-medium hover:text-indigo-400">Privacy</a>
+            <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+
+            {isLanding && (
+                <footer className="py-20 border-t border-white/5 text-center bg-[#0b0f1a] relative z-10">
+                    <div className="max-w-7xl mx-auto px-6">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">© 2026 Verimind Neural Suite • Research Phase 4</p>
+                        <div className="flex justify-center gap-10 mt-10">
+                            <a href="#" className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Matrix Protocols</a>
+                            <a href="#" className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Neural Privacy</a>
+                        </div>
                     </div>
-                </div>
-            </footer>
+                </footer>
+            )}
         </div>
     );
 }
