@@ -28,7 +28,7 @@ export default function PPTGenerator() {
         } catch (err) {
             setError('Neural link failure. Spectral sync interrupted.');
         } finally {
-            setLoading(null);
+            setLoading(false);
         }
     };
 

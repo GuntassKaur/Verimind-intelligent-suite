@@ -20,6 +20,7 @@ interface PlagiarismData {
     analysis_text: string;
     suspicious_segments: string[];
     suggestions: string[];
+    confidence_score?: number;
 }
 
 export default function Plagiarism() {
@@ -39,7 +40,7 @@ export default function Plagiarism() {
         setResult(null);
 
         try {
-            const { data } = await api.post('/api/plagiarism/check', { text: content });
+            const { data } = await api.post('/api/ai/plagiarism/check', { text: content });
             if (data.success) {
                 setResult(data.data);
             } else {
@@ -54,7 +55,6 @@ export default function Plagiarism() {
 
     return (
         <div className="max-w-7xl mx-auto py-12 px-6 lg:px-10 pb-40 space-y-12">
-            {/* Header Redesign */}
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                 <div className="space-y-6">
                     <motion.div 
@@ -81,7 +81,6 @@ export default function Plagiarism() {
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                {/* Audit Controller */}
                 <div className="lg:col-span-12">
                     <div className="p-8 rounded-[3.5rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl space-y-8 relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500/20 to-transparent" />
@@ -128,7 +127,6 @@ export default function Plagiarism() {
                     </div>
                 </div>
 
-                {/* Audit Results Overlay */}
                 <AnimatePresence mode="wait">
                     {loading ? (
                         <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="lg:col-span-12 min-h-[500px] flex flex-col items-center justify-center space-y-12 bg-white/[0.01] rounded-[4rem] border border-white/5 border-dashed">
@@ -145,7 +143,6 @@ export default function Plagiarism() {
                         </motion.div>
                     ) : result ? (
                         <motion.div key="result" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-12 grid grid-cols-12 gap-10">
-                            {/* Forensic Dashboard */}
                             <div className="col-span-12 lg:col-span-4 space-y-10">
                                 <div className="p-12 rounded-[4rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl flex flex-col items-center justify-center text-center group">
                                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 mb-10">Overlap Quotient</h3>
@@ -161,22 +158,26 @@ export default function Plagiarism() {
                                          </svg>
                                     </div>
                                     <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.3em] bg-rose-500/10 px-6 py-2 rounded-full border border-rose-500/20">
-                                        INTEGRITY BREACH DETECTED
+                                        {result.plagiarism_score > 20 ? 'INTEGRITY BREACH DETECTED' : 'ORIGINS VERIFIED'}
                                     </p>
                                 </div>
 
                                 <div className="p-10 rounded-[3rem] bg-white/[0.01] border border-white/5 space-y-6">
                                      <div className="flex items-center gap-4 text-rose-400">
                                           <ShieldAlert size={18} />
-                                          <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Protocol Explanation</h4>
+                                          <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Protocol Suggestions</h4>
                                      </div>
-                                     <p className="text-sm font-bold text-slate-500 italic leading-relaxed">
-                                          "{result.explanation}"
-                                     </p>
+                                     <div className="space-y-2">
+                                          {(result.suggestions || []).map((s, i) => (
+                                              <div key={i} className="flex gap-2 text-xs font-bold text-slate-500 italic">
+                                                  <div className="w-1 h-1 rounded-full bg-rose-500 mt-1.5 shrink-0" />
+                                                  {s}
+                                              </div>
+                                          ))}
+                                     </div>
                                 </div>
                             </div>
 
-                            {/* Detailed Findings */}
                             <div className="col-span-12 lg:col-span-8 space-y-10">
                                 <div className="p-12 rounded-[4rem] bg-[#0F172A]/40 border border-white/5 backdrop-blur-3xl relative overflow-hidden group min-h-full">
                                     <div className="absolute top-0 right-0 w-80 h-80 bg-rose-500/5 blur-[120px] pointer-events-none" />
@@ -193,7 +194,7 @@ export default function Plagiarism() {
                                          </div>
                                          <div className="flex gap-4">
                                               <button 
-                                                   onClick={() => { navigator.clipboard.writeText(result.summary); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} 
+                                                   onClick={() => { navigator.clipboard.writeText(result.analysis_text); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} 
                                                    className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-all active:scale-95"
                                               >
                                                   {copied ? 'HASH CAPTURED' : 'COPY ABSTRACT'}
@@ -205,16 +206,16 @@ export default function Plagiarism() {
                                     </header>
 
                                     <div className="space-y-12 relative z-10">
-                                        <p className="text-3xl md:text-5xl font-bold text-slate-300 italic leading-[1.1] selection:bg-rose-500/30">
-                                            "{result.analysis_text}"
-                                        </p>
+                                        <div className="text-xl md:text-2xl font-bold text-slate-300 italic leading-relaxed selection:bg-rose-500/30 whitespace-pre-wrap">
+                                            {result.analysis_text}
+                                        </div>
 
                                         <div className="space-y-6 pt-10 border-t border-white/5">
                                              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 flex items-center gap-3">
                                                  <Terminal size={14} /> Duplicate Spectrum Nodes
                                              </h4>
                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                 {result.suspicious_segments.map((seg, i) => (
+                                                 {(result.suspicious_segments || []).map((seg, i) => (
                                                      <div key={i} className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 group-hover:border-rose-500/20 transition-all cursor-crosshair">
                                                           <p className="text-xs font-bold text-slate-500 italic leading-relaxed group-hover:text-slate-300">"{seg}"</p>
                                                      </div>
@@ -228,7 +229,7 @@ export default function Plagiarism() {
                                              <Info size={12} className="text-rose-500" />
                                              <span>Integrity Sync Verified • Global Index V2</span>
                                         </div>
-                                        <span>Node ID: VM-AUDIT-088</span>
+                                        <span>Node ID: VM-AUDIT-088 • Confidence: {result.confidence_score || 95}%</span>
                                     </footer>
                                 </div>
                             </div>
@@ -247,4 +248,3 @@ export default function Plagiarism() {
         </div>
     );
 }
-

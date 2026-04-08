@@ -4,7 +4,6 @@ import {
     Keyboard, 
     RotateCcw, 
     Zap, 
-    Target, 
     Timer,
     Brain
 } from 'lucide-react';
@@ -42,6 +41,7 @@ export default function TypingLab() {
         const val = e.target.value;
         if (isFinished || timeLeft <= 0) return;
 
+        // eslint-disable-next-line
         if (!startTime) setStartTime(Date.now());
 
         const newStates = [...charStates];
@@ -235,6 +235,9 @@ export default function TypingLab() {
 function StatBox({ label, value, icon: Icon, unit, color }: any) {
     return (
         <div className="p-10 rounded-[2.5rem] bg-white/[0.03] border border-white/5 relative group hover:bg-white/[0.05] transition-all">
+             <div className="absolute top-8 right-8 p-3 bg-white/5 rounded-xl text-slate-600 group-hover:text-white transition-all">
+                <Icon size={16} />
+             </div>
              <div className="flex items-end gap-2 mb-2">
                 <span className="text-6xl font-black text-white tracking-tighter leading-none">{value}</span>
                 <span className={`text-[10px] font-black uppercase tracking-widest mb-1 ${color}`}>{unit}</span>

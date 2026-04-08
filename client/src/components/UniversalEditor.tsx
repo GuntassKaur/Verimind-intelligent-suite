@@ -78,7 +78,7 @@ export const UniversalEditor: React.FC<UniversalEditorProps> = ({
     return (
         <div className={`w-full transition-all duration-700 ${isFocusMode ? 'fixed inset-0 z-50 bg-[#0b0f1a] p-12 overflow-y-auto' : ''}`}>
             
-            <div className={`editor-container relative group transition-all duration-500 rounded-3xl ${isFocusMode ? 'max-w-4xl' : 'max-w-[700px]'} mx-auto overflow-hidden border border-white/10 shadow-2xl`}>
+            <div className={`editor-container relative group transition-all duration-500 rounded-3xl ${isFocusMode ? 'max-w-4xl' : 'max-w-[700px]'} mx-auto overflow-hidden border ${isDark ? 'border-white/10 shadow-2xl' : 'border-slate-200 shadow-xl'} bg-[#0b0f1a]/40`}>
                 
                 {/* TOOLBAR */}
                 <div className="editor-toolbar flex items-center justify-between px-6 py-3 bg-white/5 backdrop-blur-xl border-b border-white/10">
@@ -150,7 +150,7 @@ export const UniversalEditor: React.FC<UniversalEditorProps> = ({
                         minHeight: isFocusMode ? '70vh' : minHeight,
                         maxHeight: isFocusMode ? 'none' : maxHeight 
                     }}
-                    className={`editor-content w-full bg-[#0b0f1a]/40 text-slate-200 placeholder:text-slate-600 outline-none resize-none p-10 text-lg md:text-xl font-medium leading-relaxed custom-scrollbar`}
+                    className={`editor-content w-full bg-transparent text-slate-200 placeholder:text-slate-600 outline-none resize-none p-10 text-lg md:text-xl font-medium leading-relaxed custom-scrollbar`}
                 />
                 
                 <div className="absolute bottom-6 left-10 flex items-center gap-4 pointer-events-none opacity-40">

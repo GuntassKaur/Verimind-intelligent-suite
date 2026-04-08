@@ -1,9 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import {
-    ShieldCheck,
     Loader2, 
     Inbox, 
-    Check,
     Sparkles,
     Activity
 } from 'lucide-react';
@@ -74,7 +72,7 @@ export default function Workspace() {
             {/* Error Area */}
             {error && (
                 <div className="max-w-[700px] mx-auto mb-10 p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-xs flex items-center gap-4 font-bold animate-fade-in shadow-lg shadow-rose-500/5">
-                    <ShieldCheck size={20} /> {error}
+                    <Activity size={20} /> {error}
                 </div>
             )}
 

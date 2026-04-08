@@ -15,7 +15,20 @@ interface Particle {
 }
 
 const FloatingParticles = ({ count = 12 }: { count?: number }) => {
-    const [particles, setParticles] = useState<Particle[]>([]);
+    const [particles, setParticles] = useState<Particle[]>(() => 
+        Array.from({ length: count }).map((_, i) => ({
+            id: i,
+            size: Math.random() * 150 + 50 + 'px',
+            left: Math.random() * 100 + '%',
+            top: Math.random() * 100 + '%',
+            duration: Math.random() * 40 + 40,
+            delay: Math.random() * -60,
+            opacity: Math.random() * 0.08 + 0.02,
+            color: Math.random() > 0.5 ? '#6366f1' : Math.random() > 0.5 ? '#a855f7' : '#06b6d4',
+            pathX: [0, (Math.random() - 0.5) * 400, 0],
+            pathY: [0, (Math.random() - 0.5) * 400, 0]
+        }))
+    );
 
     useEffect(() => {
         const newParticles = Array.from({ length: count }).map((_, i) => ({

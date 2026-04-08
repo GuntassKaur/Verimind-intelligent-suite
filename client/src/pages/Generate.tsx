@@ -1,17 +1,15 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Zap, 
     Loader2, 
     CheckCircle2,
-    Copy,
     Terminal,
     Sparkles,
     Printer,
     Activity,
     Code,
     FileText,
-    Eye,
     Globe
 } from 'lucide-react';
 

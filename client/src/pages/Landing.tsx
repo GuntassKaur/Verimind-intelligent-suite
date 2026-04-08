@@ -9,7 +9,6 @@ import {
     ShieldCheck,
     Bot,
     Globe,
-    LayoutDashboard,
     Keyboard,
     Play,
     Sparkles
