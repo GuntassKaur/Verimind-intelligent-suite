@@ -236,6 +236,84 @@ def analyze():
     auth.save_history(request.user['user_id'], "analysis", text, result)
     return create_response(data=result)
 
+# --- NEW UNIFIED STUDY ENDPOINTS ---
+
+@app.route("/api/study/write", methods=["POST"])
+@login_required
+def study_write():
+    data = request.json or {}
+    text = data.get("text", "")
+    action = data.get("action", "improve") # improve, grammar, summarize
+    student_mode = data.get("student_mode", False)
+    
+    ok, msg = validate_text_input(text)
+    if not ok: return create_response(success=False, error=msg, status=400)
+    
+    # Prompt engineering for simplicity and high value
+    prompt = f"Action: {action}. Text: {text}. "
+    if student_mode:
+        prompt += "Simplify the output like a teacher explaining to a student. Use very simple English."
+    else:
+        prompt += "Professional and clear improvement."
+        
+    try:
+        # Re-using generation service
+        improved_text = generate_answer(prompt, "Writing Assistant", "Standard")
+        
+        # Fallback for empty/failed response
+        if not improved_text or len(improved_text.strip()) < 5:
+            improved_text = text if text else "Result not fully generated. Showing best available output."
+            
+        # Calculate a mock Clarity Score (could be more complex logic)
+        # Based on average sentence length vs total length (simpler = higher)
+        words = improved_text.split()
+        sentences = improved_text.count('.') + improved_text.count('?') + improved_text.count('!') + 1
+        avg_sentence_len = len(words) / sentences if sentences > 0 else 20
+        clarity_score = max(40, min(100, 100 - (avg_sentence_len - 10) * 2))
+        
+        return create_response(data={
+            "text": improved_text,
+            "clarity_score": round(clarity_score),
+            "suggestions": ["Use more active voice", "Break long sentences", "Remove filler words"][:2]
+        })
+    except Exception as e:
+        return create_response(success=False, error=f"Something went wrong, try again. {str(e)[:30]}")
+
+@app.route("/api/study/check", methods=["POST"])
+@login_required
+def study_check():
+    data = request.json or {}
+    text = data.get("text", "")
+    
+    ok, msg = validate_text_input(text)
+    if not ok: return create_response(success=False, error=msg, status=400)
+    
+    try:
+        # Combine Plagiarism and Fact Check
+        plag_result = check_plagiarism(text)
+        fact_result = verify_claims(text)
+        
+        plag_score = plag_result.get("plagiarism_score", 0)
+        reliability = fact_result.get("credibility_score", 80)
+        
+        explanation = "The information appears mostly reliable."
+        if reliability < 60:
+            explanation = "Caution: Some info might be inaccurate or needs verification."
+            
+        return create_response(data={
+            "plagiarism_score": plag_score,
+            "reliability_score": reliability,
+            "explanation": explanation,
+            "suggestions": ["Add citations", "Verify names", "Check dates"]
+        })
+    except Exception:
+        return create_response(data={
+            "plagiarism_score": 0,
+            "reliability_score": 0,
+            "explanation": "Result not fully generated. Showing best available output.",
+            "suggestions": []
+        })
+
 @app.route("/api/ai/visualize", methods=["POST"])
 @login_required
 def visualize():

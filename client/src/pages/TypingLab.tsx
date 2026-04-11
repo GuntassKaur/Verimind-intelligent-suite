@@ -5,10 +5,11 @@ import {
     RotateCcw, 
     Zap, 
     Timer,
-    Brain
+    Brain,
+    CheckCircle
 } from 'lucide-react';
 
-const SAMPLE_TEXT = "Intelligence is the ability to adapt to change. In the realm of neural architectures, the speed of thought is only limited by the frequency of your synaptic cycles. Verimind empowers human cognition by bridging the gap between raw data and actionable insight.";
+const SAMPLE_TEXT = "Intelligence is the ability to adapt to change. Learning is a lifelong process that shapes our understanding of the world. By improving your typing speed, you can communicate your ideas more effectively and keep up with the fast-paced digital environment. Practice consistently and you will see progress.";
 
 export default function TypingLab() {
     const [text, setText] = useState('');
@@ -18,7 +19,7 @@ export default function TypingLab() {
     const [accuracy, setAccuracy] = useState(100);
     const [isFinished, setIsFinished] = useState(false);
     const [charStates, setCharStates] = useState<number[]>([]); // 0: untyped, 1: correct, 2: wrong
-    const [suggestions, setSuggestions] = useState<string[]>(["Focus on flow.", "Minimize cognitive noise.", "Synchronize input buffers."]);
+    const [suggestions, setSuggestions] = useState<string[]>(["Keep your wrists level.", "Use all ten fingers.", "Don't look at the keys."]);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const reset = useCallback(() => {
@@ -29,7 +30,7 @@ export default function TypingLab() {
         setAccuracy(100);
         setIsFinished(false);
         setCharStates(new Array(SAMPLE_TEXT.length).fill(0));
-        setSuggestions(["Focus on flow.", "Minimize cognitive noise.", "Synchronize input buffers."]);
+        setSuggestions(["Keep your wrists level.", "Use all ten fingers.", "Don't look at the keys."]);
         setTimeout(() => inputRef.current?.focus(), 100);
     }, []);
 
@@ -41,7 +42,6 @@ export default function TypingLab() {
         const val = e.target.value;
         if (isFinished || timeLeft <= 0) return;
 
-        // eslint-disable-next-line
         if (!startTime) setStartTime(Date.now());
 
         const newStates = [...charStates];
@@ -73,8 +73,16 @@ export default function TypingLab() {
             const timeElapsed = (Date.now() - startTime) / 60000;
             setWpm(Math.round((text.length / 5) / timeElapsed));
         }
-        setSuggestions(["High-fidelity output.", "Neural link optimal.", "Buffer cleared."]);
-    }, [startTime, text]);
+        
+        // Dynamic suggestions based on WPM
+        if (wpm < 30) {
+            setSuggestions(["Focus on accuracy first.", "Try typing games.", "Practice every day."]);
+        } else if (wpm < 60) {
+            setSuggestions(["Try to look at the screen.", "Relax your hands.", "Focus on rhythm."]);
+        } else {
+            setSuggestions(["Great speed!", "Try harder texts.", "Focus on flow."]);
+        }
+    }, [startTime, text, wpm]);
 
     // Timer Logic
     useEffect(() => {
@@ -100,46 +108,46 @@ export default function TypingLab() {
     }, [startTime, isFinished, timeLeft, text, handleFinish]);
 
     return (
-        <div className="max-w-6xl mx-auto py-12 px-6 lg:px-10 space-y-12 pb-32">
+        <div className="max-w-6xl mx-auto py-12 px-6 space-y-12">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
                 <div className="space-y-4">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
-                        <Keyboard size={11} /> Cognitive Speed Lab
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-400">
+                        <Keyboard size={14} /> Productivity Hub
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none">
-                        Typing <span className="text-indigo-500">Accelerator</span>.
+                    <h1 className="text-4xl md:text-6xl font-black tracking-tight">
+                        Focus <span className="text-purple-500">Typing Lab</span>.
                     </h1>
                 </div>
-                <div className="flex gap-6 mb-2">
+                <div className="flex gap-10 mb-2">
                     <div className="text-right">
-                        <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Time Remaining</span>
-                        <span className="text-4xl font-black text-white tracking-tighter">{timeLeft}s</span>
+                        <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Time Left</span>
+                        <span className="text-4xl font-black text-white">{timeLeft}s</span>
                     </div>
                     <div className="text-right">
-                        <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Live Precision</span>
-                        <span className="text-4xl font-black text-indigo-400 tracking-tighter">{accuracy}%</span>
+                        <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Accuracy</span>
+                        <span className="text-4xl font-black text-purple-400">{accuracy}%</span>
                     </div>
                 </div>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
                 {/* Stats Sidebar */}
-                <div className="space-y-8">
-                    <StatBox label="Words Per Minute" value={wpm} icon={Zap} unit="WPM" color="text-indigo-400" />
-                    <div className="p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/5 space-y-6">
+                <div className="space-y-6">
+                    <StatBox label="Words Per Minute" value={wpm} icon={Zap} unit="WPM" color="text-purple-400" />
+                    <div className="glass-card p-8 space-y-6">
                         <div className="flex items-center gap-3">
                             <Brain size={16} className="text-purple-400" />
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Neural Suggestions</span>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tips for you</span>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {suggestions.map((s, i) => (
                                 <motion.div 
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     key={i} 
-                                    className="flex items-center gap-3 text-xs font-bold text-slate-300"
+                                    className="flex items-center gap-3 text-sm text-slate-300 font-medium"
                                 >
-                                    <div className="w-1 h-1 rounded-full bg-purple-500" />
+                                    <CheckCircle size={12} className="text-purple-500" />
                                     {s}
                                 </motion.div>
                             ))}
@@ -147,21 +155,20 @@ export default function TypingLab() {
                     </div>
                 </div>
 
-                {/* Main Interaction Lab */}
-                <div className="lg:col-span-3 space-y-10">
-                    <div className="p-12 md:p-16 rounded-[4rem] bg-[#0b0f1a]/60 border border-white/5 backdrop-blur-3xl relative overflow-hidden shadow-2xl">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 opacity-20 animate-pulse" />
+                {/* Typing Area */}
+                <div className="lg:col-span-3 space-y-8">
+                    <div className="glass-card p-10 md:p-14 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-purple-500 to-indigo-500 opacity-30" />
                         
-                        <div className="mb-12 relative">
-                             {/* Sample Text Display */}
-                            <div className="text-2xl md:text-3xl font-bold leading-relaxed tracking-tight break-words font-main opacity-80 select-none">
+                        <div className="mb-10 relative">
+                            <div className="text-2xl md:text-3xl font-medium leading-relaxed tracking-tight select-none">
                                 {SAMPLE_TEXT.split('').map((char, i) => (
                                     <span 
                                         key={i} 
                                         className={`${
                                             charStates[i] === 1 ? 'text-white' : 
-                                            charStates[i] === 2 ? 'text-rose-500 bg-rose-500/10' : 
-                                            'text-slate-700'
+                                            charStates[i] === 2 ? 'text-red-500 bg-red-500/10' : 
+                                            'text-slate-600'
                                         } transition-all duration-75`}
                                     >
                                         {char}
@@ -169,7 +176,6 @@ export default function TypingLab() {
                                 ))}
                             </div>
                             
-                            {/* Hidden Input Layer */}
                             <input 
                                 ref={inputRef}
                                 type="text"
@@ -182,24 +188,20 @@ export default function TypingLab() {
                         </div>
 
                         {!startTime && !isFinished && (
-                            <div className="flex items-center gap-4 text-indigo-400 font-black uppercase text-[10px] tracking-widest animate-pulse border-t border-white/5 pt-10">
-                                <Timer size={14} /> Neural Interface Standing By. Start typing to initialize...
+                            <div className="text-purple-400 font-bold uppercase text-xs tracking-widest animate-pulse pt-8 border-t border-white/5">
+                                Start typing to begin your session...
                             </div>
                         )}
 
-                        {/* Controls */}
-                        <div className="pt-10 border-t border-white/5 flex items-center justify-between">
-                            <div className="flex items-center gap-8">
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Protocol</span>
-                                    <span className="text-xs font-bold text-white uppercase italic tracking-tighter">Standard 60s Burst</span>
-                                </div>
+                        <div className="pt-8 border-t border-white/5 flex items-center justify-between">
+                            <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">
+                                Mode: 60s Practice
                             </div>
                             <button 
                                 onClick={reset}
-                                className="flex items-center gap-3 px-10 py-5 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[.3em] text-slate-300 hover:bg-white/10 hover:text-white transition-all active:scale-95 shadow-2xl"
+                                className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors"
                             >
-                                <RotateCcw size={14} /> Re-Sync
+                                <RotateCcw size={16} /> Reset Lab
                             </button>
                         </div>
                     </div>
@@ -207,21 +209,22 @@ export default function TypingLab() {
                     <AnimatePresence>
                         {(isFinished || timeLeft <= 0) && (
                             <motion.div 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="p-12 rounded-[3.5rem] bg-indigo-600 shadow-[0_0_80px_rgba(79,70,229,0.3)] flex flex-col md:flex-row items-center justify-between gap-10 border border-white/20 relative"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="glass-card p-10 bg-purple-600 border-none shadow-[0_0_50px_rgba(147,51,234,0.3)] flex flex-col md:flex-row items-center justify-between gap-8"
                             >
                                 <div>
-                                    <h4 className="text-4xl font-black text-white tracking-tighter mb-1">Session Terminated.</h4>
-                                    <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-[0.3em] opacity-80">Sync Delta: {accuracy}% Accuracy Level</p>
+                                    <h4 className="text-3xl font-black text-white mb-1">Session Complete</h4>
+                                    <p className="text-purple-100 text-sm font-medium">Your accuracy was {accuracy}%</p>
                                 </div>
-                                <div className="flex items-center gap-10 bg-black/20 p-8 rounded-[2.5rem] border border-white/10">
+                                <div className="flex items-center gap-8 bg-black/20 p-6 rounded-3xl">
                                     <div className="text-center">
-                                        <div className="text-5xl font-black text-white tracking-tighter">{wpm}</div>
-                                        <div className="text-[9px] font-black text-indigo-200 uppercase tracking-widest mt-1">Final WPM</div>
+                                        <div className="text-4xl font-black text-white">{wpm}</div>
+                                        <div className="text-xs font-bold text-purple-200 uppercase tracking-widest">WPM</div>
                                     </div>
-                                    <div className="w-px h-12 bg-white/5" />
-                                    <button onClick={reset} className="px-8 py-4 bg-white text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">Run New Sync</button>
+                                    <button onClick={reset} className="px-8 py-3 bg-white text-purple-600 rounded-xl font-bold hover:scale-105 transition-transform">
+                                        Try Again
+                                    </button>
                                 </div>
                             </motion.div>
                         )}
@@ -234,15 +237,13 @@ export default function TypingLab() {
 
 function StatBox({ label, value, icon: Icon, unit, color }: any) {
     return (
-        <div className="p-10 rounded-[2.5rem] bg-white/[0.03] border border-white/5 relative group hover:bg-white/[0.05] transition-all">
-             <div className="absolute top-8 right-8 p-3 bg-white/5 rounded-xl text-slate-600 group-hover:text-white transition-all">
-                <Icon size={16} />
+        <div className="glass-card p-8 relative group">
+             <div className="flex flex-col gap-2">
+                <span className="text-5xl font-black text-white tracking-tight">{value}</span>
+                <span className={`text-xs font-bold uppercase tracking-widest ${color}`}>{unit}</span>
              </div>
-             <div className="flex items-end gap-2 mb-2">
-                <span className="text-6xl font-black text-white tracking-tighter leading-none">{value}</span>
-                <span className={`text-[10px] font-black uppercase tracking-widest mb-1 ${color}`}>{unit}</span>
-             </div>
-             <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em]">{label}</p>
+             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-4">{label}</p>
         </div>
     );
 }
+
