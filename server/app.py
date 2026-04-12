@@ -435,5 +435,7 @@ def api_generate_ppt():
         "suggestions": ["Add speaker notes.", "Verify image placeholders."],
         "confidence_score": 92.0
     })
+
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

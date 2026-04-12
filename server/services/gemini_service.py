@@ -16,7 +16,7 @@ MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-flash-latest")
 
 import time
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-
+_use_new_sdk = False
 try:
     from google import genai
     if api_key and api_key != "your_gemini_key_here":
