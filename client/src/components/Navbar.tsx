@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Sparkles, ShieldCheck, Keyboard, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LogOut, Sparkles, ShieldCheck, Keyboard, LayoutDashboard, Brain, ArrowRight } from 'lucide-react';
+
 
 interface NavbarProps {
     onLoginClick: (e: React.MouseEvent) => void;
