@@ -25,9 +25,9 @@ export default function Landing() {
     return (
         <div className="relative min-h-screen bg-transparent overflow-x-hidden selection:bg-purple-500/30">
             {/* HERO SECTION */}
-            <section className="relative pt-40 pb-20 px-6">
-                 {/* Hero Mesh Gradient Overlay */}
-                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-purple-600/10 blur-[120px] rounded-full -z-10 animate-pulse-slow" />
+            <section className="relative pt-32 md:pt-40 pb-20 px-4 md:px-6">
+                 {/* Hero Mesh Gradient Overlay (Optimized) */}
+                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[300px] md:h-[500px] bg-purple-600/10 blur-[60px] md:blur-[120px] rounded-full -z-10" />
                  
                  <div className="max-w-6xl mx-auto text-center relative z-10">
                     <motion.div 
@@ -40,10 +40,10 @@ export default function Landing() {
 
                     <motion.h1 
                         custom={1} initial="hidden" animate="visible" variants={fadeUp}
-                        className="text-7xl md:text-[120px] font-black tracking-tighter mb-10 leading-[0.85] text-white"
+                        className="text-5xl sm:text-7xl md:text-[120px] font-black tracking-tighter mb-8 md:mb-10 leading-[1.1] md:leading-[0.85] text-white"
                     >
-                        Elevate <br />
-                        Your <span className="text-gradient">Academics.</span>
+                        Elevate <br className="hidden md:block" />
+                        Your <span className="text-gradient break-words">Academics.</span>
                     </motion.h1>
 
                     <motion.p 
@@ -145,17 +145,17 @@ export default function Landing() {
             </section>
 
             {/* Large Feature / Showcase */}
-            <section className="py-40 px-6">
-                <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-20">
-                    <div className="lg:w-1/2 space-y-8">
+            <section className="py-24 md:py-40 px-4 md:px-6">
+                <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 md:gap-20">
+                    <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
                         <span className="text-purple-500 font-black uppercase text-xs tracking-[0.5em]">The Philosophy</span>
-                        <h2 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter">Academic Integrity meets <span className="text-gradient">Neural Power.</span></h2>
-                        <p className="text-slate-400 text-lg md:text-xl font-medium leading-relaxed">
+                        <h2 className="text-4xl sm:text-5xl md:text-7xl font-black leading-tight tracking-tighter">Academic Integrity meets <span className="text-gradient">Neural Power.</span></h2>
+                        <p className="text-slate-400 text-base md:text-xl font-medium leading-relaxed">
                             We don't just generate text; we help you refine your logic. Verimind is built on the principle that AI should be a tool for enhancement, not just replacement. Our goal is to empower students through technology while maintaining the highest standards of academic honesty.
                         </p>
-                        <div className="flex gap-4 pt-4">
-                            <Link to="/register" className="btn-primary">Get Access</Link>
-                            <Link to="/about" className="px-8 py-4 border border-white/10 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-white/5 transition-colors">Learn More</Link>
+                        <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
+                            <Link to="/register" className="btn-primary justify-center w-full sm:w-auto">Get Access</Link>
+                            <Link to="/about" className="px-8 py-4 border border-white/10 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-white/5 transition-colors text-center w-full sm:w-auto">Learn More</Link>
                         </div>
                     </div>
                     <div className="lg:w-1/2 w-full">
