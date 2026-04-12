@@ -70,7 +70,7 @@ export const AppAssistantPanel: React.FC<AppAssistantPanelProps> = ({
         setMessages(prev => [...prev, initialAiMsg]);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/assistant-stream`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/ai/assistant-stream`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

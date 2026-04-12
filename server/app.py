@@ -45,19 +45,23 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.getenv("SESSION_SECRET", "verimind_session_secret_2026")
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB Limit
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SECURE'] = False 
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
-# 1. CORS Restricted Origins - Explicitly allowing Vercel domain and wildcards for reliability
-# Note: Temporarily allowing all origins to fix the "Service Unavailable" CORS block if Vercel URL changed
-CORS(app, supports_credentials=True, origins="*")
+FRONTEND_URL = os.getenv("CLIENT_URL", "https://verimind-intelligent-suite-np75.vercel.app")
+is_prod = not app.debug or os.getenv("FLASK_ENV") == "production"
+
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True if is_prod else False 
+app.config['SESSION_COOKIE_SAMESITE'] = 'None' if is_prod else 'Lax'
+
+# 1. CORS Restricted Origins - Explicitly allowing Vercel domain correctly
+CORS(app, supports_credentials=True, origins=[FRONTEND_URL, "http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5000", "http://127.0.0.1:5173", "http://127.0.0.1:5174"])
 
 # 2. Security: Minimal Talisman to avoid proxy header blocks on Render
 talisman = Talisman(
     app,
     content_security_policy=None, 
     force_https=False 
+
 )
 
 # --- Standardized Response Helper ---
@@ -111,9 +115,9 @@ def register():
         
         if result.get('success'):
             response = create_response(data={"user": result['user']}, status=201)
-            is_prod = not app.debug
-            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
-            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
+            samesite_policy = 'None' if is_prod else 'Lax'
+            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite=samesite_policy, max_age=86400)
+            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite=samesite_policy, max_age=7*24*3600)
             return response
         return create_response(success=False, error=result.get('error', 'Synthesis failed.'), status=result.get('status', 400))
     except ValidationError:
@@ -127,9 +131,9 @@ def login():
         result = auth.login_user(data.email, data.password)
         if result.get('success'):
             response = create_response(data={"user": result['user']})
-            is_prod = not app.debug
-            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=86400)
-            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite='Lax', max_age=7*24*3600)
+            samesite_policy = 'None' if is_prod else 'Lax'
+            response.set_cookie('access_token', result['access_token'], httponly=True, secure=is_prod, samesite=samesite_policy, max_age=86400)
+            response.set_cookie('refresh_token', result['refresh_token'], httponly=True, secure=is_prod, samesite=samesite_policy, max_age=7*24*3600)
             return response
         return create_response(success=False, error=result.get('error', 'Access denied.'), status=401)
     except ValidationError:
