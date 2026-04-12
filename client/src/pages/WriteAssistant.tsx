@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Sparkles, 
     Zap, 
-    BookOpen, 
     FileText, 
     Check, 
     Loader2, 
@@ -13,9 +12,15 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 
+interface WriteResult {
+    text: string;
+    clarity_score: number;
+    suggestions: string[];
+}
+
 export default function WriteAssistant() {
     const [text, setText] = useState('');
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<WriteResult | null>(null);
     const [loading, setLoading] = useState(false);
     const [studentMode, setStudentMode] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -40,7 +45,7 @@ export default function WriteAssistant() {
             } else {
                 setError(data.error || 'Something went wrong.');
             }
-        } catch (err) {
+        } catch {
             setError('Connection error. Please try again.');
         } finally {
             setLoading(false);
@@ -168,7 +173,14 @@ export default function WriteAssistant() {
     );
 }
 
-function ActionButton({ icon: Icon, label, onClick, color }: any) {
+interface ActionButtonProps {
+    icon: React.ElementType;
+    label: string;
+    onClick: () => void;
+    color: string;
+}
+
+function ActionButton({ icon: Icon, label, onClick, color }: ActionButtonProps) {
     return (
         <button 
             onClick={onClick}

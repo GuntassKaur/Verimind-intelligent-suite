@@ -3,18 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ShieldCheck, 
     Search, 
-    AlertTriangle, 
-    CheckCircle, 
     Loader2, 
-    HelpCircle,
     Info,
     ArrowRight
 } from 'lucide-react';
 import api from '../services/api';
 
+interface TruthResult {
+    plagiarism_score: number;
+    reliability_score: number;
+    explanation: string;
+    suggestions: string[];
+}
+
 export default function TruthChecker() {
     const [text, setText] = useState('');
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<TruthResult | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -33,7 +37,7 @@ export default function TruthChecker() {
             } else {
                 setError(data.error || 'Check failed.');
             }
-        } catch (err) {
+        } catch {
             setError('Connection error.');
         } finally {
             setLoading(false);
@@ -134,7 +138,7 @@ export default function TruthChecker() {
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center py-20 glass-card text-center px-10">
                                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                                    <HelpCircle size={40} className="text-slate-800" />
+                                    <Search size={40} className="text-slate-800" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-500">No results yet</h3>
                                 <p className="text-slate-600 text-sm mt-2">Paste text and click verify to start the audit.</p>

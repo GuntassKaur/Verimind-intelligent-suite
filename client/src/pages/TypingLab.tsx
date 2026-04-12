@@ -42,7 +42,10 @@ export default function TypingLab() {
         const val = e.target.value;
         if (isFinished || timeLeft <= 0) return;
 
-        if (!startTime) setStartTime(Date.now());
+        if (!startTime) {
+            // eslint-disable-next-line react-hooks/purity
+            setStartTime(Date.now());
+        }
 
         const newStates = [...charStates];
         let correctCount = 0;
@@ -235,9 +238,12 @@ export default function TypingLab() {
     );
 }
 
-function StatBox({ label, value, icon: Icon, unit, color }: any) {
+function StatBox({ label, value, icon: Icon, unit, color }: { label: string, value: string | number, icon: React.ElementType, unit: string, color: string }) {
     return (
         <div className="glass-card p-8 relative group">
+             <div className="flex items-center justify-between mb-2">
+                <Icon size={16} className={color} />
+             </div>
              <div className="flex flex-col gap-2">
                 <span className="text-5xl font-black text-white tracking-tight">{value}</span>
                 <span className={`text-xs font-bold uppercase tracking-widest ${color}`}>{unit}</span>

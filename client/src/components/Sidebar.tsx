@@ -1,31 +1,21 @@
 import { NavLink } from 'react-router-dom';
 import { 
     LayoutDashboard, 
-    Zap, 
     ShieldCheck, 
-    Search, 
     Brain, 
-    Network, 
     Keyboard, 
-    Presentation, 
-    Code, 
-    Eye,
-    Sparkles
+    Sparkles,
+    Network
 } from 'lucide-react';
 
 export const Sidebar = () => {
     const navItems = [
         { path: '/dashboard', label: 'Command Hub', icon: LayoutDashboard },
-        { path: '/spark', label: 'Neural Spark', icon: Sparkles },
-        { path: '/audit', label: 'Truth Audit', icon: ShieldCheck },
-        { path: '/plagiarism', label: 'Origins Scan', icon: Search },
-        { path: '/forge', label: 'Neural Forge', icon: Zap },
-        { path: '/humanizer', label: 'Humanizer', icon: Brain },
-        { path: '/ppt', label: 'PPT Engine', icon: Presentation },
-        { path: '/visualizer', label: 'Logic Flow', icon: Network },
-        { path: '/workspace', label: 'Workspace', icon: Code },
-        { path: '/typing-lab', label: 'Typing Lab', icon: Keyboard },
-        { path: '/art-lab', label: 'Art Lab', icon: Eye },
+        { path: '/write', label: 'Smart Writing', icon: Sparkles },
+        { path: '/check', label: 'Truth & Plagiarism', icon: ShieldCheck },
+        { path: '/humanize', label: 'AI Humanizer', icon: Brain },
+        { path: '/typing', label: 'Typing Lab', icon: Keyboard },
+        { path: '/settings', label: 'Settings', icon: Network },
     ];
 
     return (

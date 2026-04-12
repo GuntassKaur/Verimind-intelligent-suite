@@ -8,6 +8,7 @@ const Landing = lazy(() => import('./pages/Landing'));
 const UserDashboard = lazy(() => import('./pages/Dashboard'));
 const WriteAssistant = lazy(() => import('./pages/WriteAssistant'));
 const TruthChecker = lazy(() => import('./pages/TruthChecker'));
+const Humanizer = lazy(() => import('./pages/Humanizer'));
 const TypingLab = lazy(() => import('./pages/TypingLab'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
@@ -24,7 +25,7 @@ export default function App() {
                     </div>
                     <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl border bg-white/5 border-white/10">
                         <Loader2 className="animate-spin text-purple-400" size={16} />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Initializing Study Assistant...</span>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Initializing Neural Matrix...</span>
                     </div>
                 </div>
             }>
@@ -34,6 +35,7 @@ export default function App() {
                         <Route path="/dashboard" element={<UserDashboard />} />
                         <Route path="/write" element={<WriteAssistant />} />
                         <Route path="/check" element={<TruthChecker />} />
+                        <Route path="/humanize" element={<Humanizer />} />
                         <Route path="/typing" element={<TypingLab />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />

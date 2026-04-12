@@ -10,7 +10,7 @@ export const AIAvatar: React.FC<AIAvatarProps> = ({ status, audioLevel = 0 }) =>
     const [simulatedLevel, setSimulatedLevel] = React.useState(0);
 
     React.useEffect(() => {
-        let interval: any;
+        let interval: ReturnType<typeof setInterval> | undefined;
         if (status === 'speaking') {
             interval = setInterval(() => {
                 setSimulatedLevel(0.3 + Math.random() * 0.7);
@@ -18,7 +18,9 @@ export const AIAvatar: React.FC<AIAvatarProps> = ({ status, audioLevel = 0 }) =>
         } else {
             setSimulatedLevel(0);
         }
-        return () => clearInterval(interval);
+        return () => {
+            if (interval) clearInterval(interval);
+        };
     }, [status]);
 
     const activeLevel = audioLevel > 0 ? audioLevel : simulatedLevel;
