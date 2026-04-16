@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import datetime
 import jwt
 import logging
@@ -24,7 +25,9 @@ from services.plagiarism_service import check_plagiarism
 from services.humanize_service import humanize_text
 from services.typing_service import get_typing_text
 from services.assistant_service import process_assistant_query, process_assistant_query_stream
+from services.ppt_service import generate_ppt_plan, create_ppt_file
 from utils.processors import extract_text_from_pdf, extract_text_from_url
+from utils.response_formatter import format_ai_response
 
 # Configuration & Validation
 from config import config
@@ -403,16 +406,7 @@ def process_image():
     
     return create_response(data={"text": text})
 
-@app.errorhandler(Exception)
-def handle_exception(e):
-    logger.error(f"VERIMIND SPECTRAL ERROR: {str(e)}", exc_info=True)
-    error_msg = str(e)
-    # limit length for client without syntax errors during typing
-    if len(error_msg) > 50:
-        error_msg = "%.50s" % error_msg + "..."
-    return create_response(success=False, error=f"Neural sync failure. ({error_msg})", status=500)
-from services.ppt_service import generate_ppt_plan, create_ppt_file
-from utils.response_formatter import format_ai_response
+
 
 @app.route("/api/ai/ppt/generate", methods=["POST"])
 @login_required
@@ -439,6 +433,97 @@ def api_generate_ppt():
         "suggestions": ["Add speaker notes.", "Verify image placeholders."],
         "confidence_score": 92.0
     })
+
+@app.route("/api/stadium/telemetry", methods=["GET"])
+def get_stadium_telemetry():
+    """
+    VeriMind Digital Twin Telemetry
+    Returns real-time synthesized node data for the stadium mesh.
+    """
+    # In a real environment, this would pull from IoT sensors or a DB.
+    # Here we synthesize "high-precision" telemetry.
+    import random
+    time_now = datetime.datetime.utcnow().isoformat()
+    
+    # Base configuration mirrored from frontend logic but managed here
+    zones = [
+        {"id": "gate-n", "label": "North Gate", "type": "Gate", "baseWait": 4, "x": 35, "y": 5, "w": 30, "h": 5},
+        {"id": "gate-s", "label": "South Gate", "type": "Gate", "baseWait": 3, "x": 35, "y": 90, "w": 30, "h": 5},
+        {"id": "sector-w", "label": "West Tier", "type": "Seating", "baseWait": 0, "x": 5, "y": 20, "w": 15, "h": 60},
+        {"id": "sector-e", "label": "East Tier", "type": "Seating", "baseWait": 0, "x": 80, "y": 20, "w": 15, "h": 60},
+        {"id": "pitch", "label": "Arena Pitch", "type": "Area", "baseWait": 0, "x": 25, "y": 15, "w": 50, "h": 70, "isPitch": True},
+    ]
+    
+    for zone in zones:
+        crowd = 20 + random.random() * 60
+        o2 = 20.9 - (crowd/100 * 2)
+        heat = 24 + (crowd/100 * 8)
+        
+        status = "NOMINAL" if o2 > 18.5 else "CRITICAL"
+        if status == "CRITICAL":
+            logger.warning(f"SYNC_ANOMALY: Zone {zone['id']} O2 dropped to {round(o2, 1)}%")
+        elif crowd > 75:
+            logger.info(f"DENSITY_ALERT: Zone {zone['id']} at {round(crowd, 1)}% capacity.")
+        
+        zone.update({
+            "crowdPercent": round(crowd, 1),
+            "o2": round(o2, 1),
+            "heat": round(heat, 1),
+            "status": status,
+            "lastSync": time_now
+        })
+        
+    return create_response(data={
+        "timestamp": time_now,
+        "attendees": 42000 + random.randint(0, 5000),
+        "zones": zones,
+        "mesh_stability": 99.8
+    })
+
+@app.route("/api/system/logs", methods=["GET"])
+def get_system_logs():
+    """
+    VeriMind Core Log Stream
+    Returns real-time server logs for the terminal interface.
+    """
+    log_path = os.path.join(os.path.dirname(__file__), "server.log")
+    if not os.path.exists(log_path):
+        return create_response(data=[{"text": "LOG_SUBSYSTEM_OFFLINE", "type": "warning"}])
+    
+    try:
+        with open(log_path, "rb") as f:
+            # Get last 1KB
+            f.seek(0, 2)
+            size = f.tell()
+            f.seek(max(0, size - 2000))
+            content = f.read()
+            
+            # Decode strategy
+            for enc in ['utf-8', 'utf-16le', 'latin-1']:
+                try:
+                    text = content.decode(enc)
+                    break
+                except:
+                    continue
+            else:
+                return create_response(data=[{"text": "LOG_DEJECTION_FAILURE", "type": "error"}])
+            
+            # Parse lines into log objects
+            lines = text.strip().split('\n')[-15:]
+            log_data = []
+            for line in lines:
+                l_type = "info"
+                if "ERROR" in line or "failure" in line.lower(): l_type = "error"
+                if "WARNING" in line: l_type = "warning"
+                if "INFO" in line: l_type = "success"
+                
+                # Strip long dates for terminal readability
+                clean_line = line.split(']')[-1].strip() if ']' in line else line
+                log_data.append({"text": clean_line[:80], "type": l_type})
+            
+            return create_response(data=log_data)
+    except Exception as e:
+        return create_response(success=False, error=str(e))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

@@ -6,12 +6,14 @@ import {
     Zap, 
     Timer,
     Brain,
-    CheckCircle
+    CheckCircle,
+    Loader2
 } from 'lucide-react';
-
-const SAMPLE_TEXT = "Intelligence is the ability to adapt to change. Learning is a lifelong process that shapes our understanding of the world. By improving your typing speed, you can communicate your ideas more effectively and keep up with the fast-paced digital environment. Practice consistently and you will see progress.";
+import api from '../services/api';
 
 export default function TypingLab() {
+    const [sampleText, setSampleText] = useState('');
+    const [fetchingQuote, setFetchingQuote] = useState(true);
     const [text, setText] = useState('');
     const [startTime, setStartTime] = useState<number | null>(null);
     const [timeLeft, setTimeLeft] = useState(60);
@@ -22,6 +24,25 @@ export default function TypingLab() {
     const [suggestions, setSuggestions] = useState<string[]>(["Keep your wrists level.", "Use all ten fingers.", "Don't look at the keys."]);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const fetchQuote = async () => {
+        setFetchingQuote(true);
+        try {
+            const { data } = await api.get('/api/typing/quote');
+            if (data.success && data.data?.quote) {
+                setSampleText(data.data.quote);
+                setCharStates(new Array(data.data.quote.length).fill(0));
+            } else {
+                setSampleText("Fallback text loaded. Typing practice helps improve cognitive synchronization.");
+                setCharStates(new Array(78).fill(0));
+            }
+        } catch {
+            setSampleText("Network unstable. Please use this pre-loaded text to test your neural response rate.");
+            setCharStates(new Array(84).fill(0));
+        } finally {
+            setFetchingQuote(false);
+        }
+    };
+
     const reset = useCallback(() => {
         setText('');
         setStartTime(null);
@@ -29,9 +50,10 @@ export default function TypingLab() {
         setWpm(0);
         setAccuracy(100);
         setIsFinished(false);
-        setCharStates(new Array(SAMPLE_TEXT.length).fill(0));
         setSuggestions(["Keep your wrists level.", "Use all ten fingers.", "Don't look at the keys."]);
-        setTimeout(() => inputRef.current?.focus(), 100);
+        fetchQuote().then(() => {
+            setTimeout(() => inputRef.current?.focus(), 100);
+        });
     }, []);
 
     useEffect(() => {
@@ -50,10 +72,10 @@ export default function TypingLab() {
         const newStates = [...charStates];
         let correctCount = 0;
 
-        for (let i = 0; i < SAMPLE_TEXT.length; i++) {
+        for (let i = 0; i < sampleText.length; i++) {
             if (i >= val.length) {
                 newStates[i] = 0;
-            } else if (val[i] === SAMPLE_TEXT[i]) {
+            } else if (val[i] === sampleText[i]) {
                 newStates[i] = 1;
                 correctCount++;
             } else {
@@ -65,7 +87,7 @@ export default function TypingLab() {
         setText(val);
         setAccuracy(val.length > 0 ? Math.round((correctCount / val.length) * 100) : 100);
 
-        if (val.length === SAMPLE_TEXT.length) {
+        if (val.length === sampleText.length) {
             handleFinish();
         }
     };
@@ -163,34 +185,42 @@ export default function TypingLab() {
                     <div className="glass-card p-10 md:p-14 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-purple-500 to-indigo-500 opacity-30" />
                         
-                        <div className="mb-10 relative">
-                            <div className="text-2xl md:text-3xl font-medium leading-relaxed tracking-tight select-none">
-                                {SAMPLE_TEXT.split('').map((char, i) => (
-                                    <span 
-                                        key={i} 
-                                        className={`${
-                                            charStates[i] === 1 ? 'text-white' : 
-                                            charStates[i] === 2 ? 'text-red-500 bg-red-500/10' : 
-                                            'text-slate-600'
-                                        } transition-all duration-75`}
-                                    >
-                                        {char}
-                                    </span>
-                                ))}
-                            </div>
-                            
-                            <input 
-                                ref={inputRef}
-                                type="text"
-                                value={text}
-                                onChange={handleInput}
-                                disabled={isFinished || timeLeft <= 0}
-                                className="absolute inset-0 opacity-0 cursor-default w-full h-full"
-                                autoFocus
-                            />
+                        <div className="mb-10 relative min-h-[150px]">
+                            {fetchingQuote ? (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Loader2 className="animate-spin text-purple-500" size={32} />
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="text-2xl md:text-3xl font-medium leading-relaxed tracking-tight select-none">
+                                        {sampleText.split('').map((char, i) => (
+                                            <span 
+                                                key={i} 
+                                                className={`${
+                                                    charStates[i] === 1 ? 'text-white' : 
+                                                    charStates[i] === 2 ? 'text-red-500 bg-red-500/10' : 
+                                                    'text-slate-600'
+                                                } transition-all duration-75`}
+                                            >
+                                                {char}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    
+                                    <input 
+                                        ref={inputRef}
+                                        type="text"
+                                        value={text}
+                                        onChange={handleInput}
+                                        disabled={isFinished || timeLeft <= 0}
+                                        className="absolute inset-0 opacity-0 cursor-default w-full h-full"
+                                        autoFocus
+                                    />
+                                </>
+                            )}
                         </div>
 
-                        {!startTime && !isFinished && (
+                        {!startTime && !isFinished && !fetchingQuote && (
                             <div className="text-purple-400 font-bold uppercase text-xs tracking-widest animate-pulse pt-8 border-t border-white/5">
                                 Start typing to begin your session...
                             </div>

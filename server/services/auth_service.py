@@ -14,29 +14,74 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# MongoDB Setup
+# MongoDB Setup with Resilient Fallback
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/verimind")
 try:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
-    db = client.get_database()
     # Test connection
     client.server_info() 
+    db = client.get_database()
+    logger.info("📡 Neural Storage Link: ESTABLISHED (MongoDB)")
 except Exception as e:
-    logger.error(f"[SECURITY ALERT] MongoDB connection failure: {str(e)}")
-    db = None
+    logger.warning(f"⚠️ Neural Storage Link: OFFLINE. Initializing In-Memory Mock Storage. (Error: {str(e)})")
+    db = "MOCK_DB"
 
-# Collections
-if db is not None:
+# Collections & Mock Implementation for local dev
+class MockCollection:
+    _storage = {} # Persistent across instances for the same name
+    def __init__(self, name):
+        self.name = name
+        if name not in self._storage: self._storage[name] = []
+    
+    def find_one(self, query):
+        for item in self._storage[self.name]:
+            if all(item.get(k) == v for k, v in query.items()):
+                return item
+        return None
+        
+    def insert_one(self, doc):
+        doc['_id'] = secrets.token_hex(12)
+        self._storage[self.name].append(doc)
+        return type('obj', (object,), {'inserted_id': doc['_id']})
+        
+    def update_one(self, query, update, upsert=False):
+        item = self.find_one(query)
+        if item:
+            if '$set' in update: item.update(update['$set'])
+            return type('obj', (object,), {'modified_count': 1})
+        elif upsert:
+            new_doc = {**query}
+            if '$set' in update: new_doc.update(update['$set'])
+            self.insert_one(new_doc)
+        return type('obj', (object,), {'modified_count': 0})
+        
+    def delete_one(self, query):
+        item = self.find_one(query)
+        if item:
+            self._storage[self.name].remove(item)
+        return None
+        
+    def find(self, query):
+        results = [i for i in self._storage[self.name] if all(i.get(k) == v for k, v in query.items())]
+        return type('obj', (object,), {
+            'sort': lambda self, *a: self, 
+            'limit': lambda self, *a: results,
+            '__iter__': lambda self: iter(results)
+        })( )
+    
+    def create_index(self, *a, **k): pass
+
+if db != "MOCK_DB":
     users_col = db.users
     users_col.create_index("email", unique=True)
     history_col = db.history
     otps_col = db.otps
     refresh_tokens_col = db.refresh_tokens
 else:
-    users_col = None
-    history_col = None
-    otps_col = None
-    refresh_tokens_col = None
+    users_col = MockCollection("users")
+    history_col = MockCollection("history")
+    otps_col = MockCollection("otps")
+    refresh_tokens_col = MockCollection("refresh_tokens")
 
 from config import config
 
