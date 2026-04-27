@@ -27,7 +27,7 @@ export default function About() {
                     <span className="text-gradient">Modern Era.</span>
                 </h1>
                 <p className="text-xl text-slate-400 font-medium leading-relaxed max-w-2xl mx-auto">
-                    Verimind is a purpose-driven AI platform built to simplify how humans interact with machine intelligence. 
+                    VerifyAI is a purpose-driven AI platform built to simplify how humans interact with machine intelligence. 
                     We focus on clarity, reliability, and professional-grade tools.
                 </p>
             </section>
@@ -60,7 +60,7 @@ export default function About() {
             <section className="space-y-16">
                 <div className="text-center">
                     <h2 className="text-4xl font-black text-white mb-4">Core Ecosystem</h2>
-                    <p className="text-slate-500 font-black uppercase tracking-widest text-[10px]">What makes Verimind unique</p>
+                    <p className="text-slate-500 font-black uppercase tracking-widest text-[10px]">What makes VerifyAI unique</p>
                 </div>
 
                 <div className="space-y-6">
@@ -88,7 +88,7 @@ export default function About() {
                 <div className="p-16 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-[4rem] space-y-10">
                     <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">Ready to experience <br /> the future?</h2>
                     <Link to="/register" className="premium-btn-primary px-16 py-7 rounded-[2rem] flex items-center justify-center gap-4 group mx-auto w-fit shadow-2xl shadow-indigo-600/30">
-                        <span className="text-[13px] font-black uppercase tracking-widest">Join Verimind</span>
+                        <span className="text-[13px] font-black uppercase tracking-widest">Join VerifyAI</span>
                         <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
                     </Link>
                 </div>

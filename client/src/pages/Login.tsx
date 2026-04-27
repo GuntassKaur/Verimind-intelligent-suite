@@ -119,7 +119,7 @@ export default function Login() {
 
                     <div className="mt-10 pt-8 border-t border-slate-50 w-full flex items-center justify-center gap-3 opacity-50">
                          <Activity size={14} className="text-indigo-400" />
-                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Secured by VeriMind Protocol</span>
+                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Secured by VerifyAI Protocol</span>
                     </div>
                 </div>
             </motion.div>

@@ -3,10 +3,16 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// --- Database Connection ---
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/verifyai')
+    .then(() => console.log('[VerifyAI DB]: Connection established'))
+    .catch(err => console.error('[VerifyAI DB]: Connection error:', err));
 
 // --- Global Middleware ---
 app.use(helmet({
@@ -26,15 +32,15 @@ app.get('/api/health', (req, res) => {
         success: true,
         data: {
             status: 'operational',
-            system: 'VeriMind Core v2.0 (NodeJS)',
+            system: 'VerifyAI Core v1.0 (NodeJS)',
             timestamp: new Date().toISOString()
         }
     });
 });
 
 // --- API Router Injections ---
+app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/ai', require('./routes/ai.routes'));
-// app.use('/api/auth', require('./routes/auth.routes'));
 // app.use('/api/process', require('./routes/process.routes'));
 
 // --- Global Error Handler ---
@@ -49,6 +55,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`[VeriMind Node Core]: Intelligence established on port ${PORT}`);
+    console.log(`[VerifyAI Node Core]: Intelligence established on port ${PORT}`);
     console.log(`[Neural Link]: Access http://localhost:${PORT}/api/health`);
 });

@@ -40,7 +40,7 @@ export default function Layout() {
             {isLanding && (
                 <footer className="py-20 border-t border-white/5 text-center bg-[#0b0f1a] relative z-10">
                     <div className="max-w-7xl mx-auto px-6">
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">© 2026 Verimind Neural Suite • Research Phase 4</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">© 2026 VerifyAI Neural Suite • Research Phase 4</p>
                         <div className="flex justify-center gap-10 mt-10">
                             <a href="#" className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Matrix Protocols</a>
                             <a href="#" className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Neural Privacy</a>

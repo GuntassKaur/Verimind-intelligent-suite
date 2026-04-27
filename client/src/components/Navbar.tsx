@@ -17,8 +17,17 @@ export const Navbar = ({ onLoginClick }: NavbarProps) => {
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
         const updateAuth = () => {
-            const name = localStorage.getItem('user_name');
-            setUser(name ? { name } : null);
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const userData = JSON.parse(userStr);
+                    setUser(userData);
+                } catch (e) {
+                    setUser(null);
+                }
+            } else {
+                setUser(null);
+            }
         };
         window.addEventListener('scroll', handleScroll);
         window.addEventListener('storage', updateAuth);
@@ -37,7 +46,8 @@ export const Navbar = ({ onLoginClick }: NavbarProps) => {
     ];
 
     const handleLogout = useCallback(() => {
-        localStorage.clear();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.dispatchEvent(new Event('storage'));
         window.location.href = '/';
     }, []);
@@ -52,7 +62,7 @@ export const Navbar = ({ onLoginClick }: NavbarProps) => {
                         <span className="font-black text-2xl">V</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-2xl font-black tracking-tighter text-white leading-none group-hover:text-purple-400 transition-colors">VeriMind</span>
+                        <span className="text-2xl font-black tracking-tighter text-white leading-none group-hover:text-purple-400 transition-colors">VerifyAI</span>
                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1">Neural Suite</span>
                     </div>
                 </Link>

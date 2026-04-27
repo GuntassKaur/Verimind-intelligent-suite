@@ -32,7 +32,7 @@ export default function History() {
     const [pinnedIds, setPinnedIds] = useState<string[]>([]);
 
     useEffect(() => {
-        const savedPins = localStorage.getItem('verimind_pinned_ids');
+        const savedPins = localStorage.getItem('verifyai_pinned_ids');
         if (savedPins) setPinnedIds(JSON.parse(savedPins));
     }, []);
 
@@ -41,7 +41,7 @@ export default function History() {
             ? pinnedIds.filter(pid => pid !== id) 
             : [...pinnedIds, id];
         setPinnedIds(newPins);
-        localStorage.setItem('verimind_pinned_ids', JSON.stringify(newPins));
+        localStorage.setItem('verifyai_pinned_ids', JSON.stringify(newPins));
     };
 
     const fetchHistory = async () => {
@@ -191,7 +191,7 @@ export default function History() {
                                                     <div className="flex justify-end relative group">
                                                         <div className="flex flex-col max-w-[85%] items-end">
                                                             <div className="flex items-center gap-2 mb-2 px-2">
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 text-right">Verimind Protocol</span>
+                                                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 text-right">VerifyAI Protocol</span>
                                                                 <Bot size={12} className="text-indigo-400" />
                                                             </div>
                                                             <div className="bg-gradient-to-br from-indigo-500/[0.08] to-purple-500/[0.08] border border-white/10 p-8 rounded-[2.5rem] rounded-tr-none shadow-2xl relative w-full">

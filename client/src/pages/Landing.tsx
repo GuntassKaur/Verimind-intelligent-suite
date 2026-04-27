@@ -50,7 +50,7 @@ export default function Landing() {
                         custom={2} initial="hidden" animate="visible" variants={fadeUp}
                         className="max-w-3xl mx-auto text-xl md:text-2xl text-slate-400 font-medium mb-16 leading-relaxed"
                     >
-                        Verimind is the neural operating system for modern students. 
+                        VerifyAI is the neural operating system for modern students. 
                         Humanize AI responses, verify records, and master productivity in a high-fidelity workspace.
                     </motion.p>
 
@@ -151,7 +151,7 @@ export default function Landing() {
                         <span className="text-purple-500 font-black uppercase text-xs tracking-[0.5em]">The Philosophy</span>
                         <h2 className="text-4xl sm:text-5xl md:text-7xl font-black leading-tight tracking-tighter">Academic Integrity meets <span className="text-gradient">Neural Power.</span></h2>
                         <p className="text-slate-400 text-base md:text-xl font-medium leading-relaxed">
-                            We don't just generate text; we help you refine your logic. Verimind is built on the principle that AI should be a tool for enhancement, not just replacement. Our goal is to empower students through technology while maintaining the highest standards of academic honesty.
+                            We don't just generate text; we help you refine your logic. VerifyAI is built on the principle that AI should be a tool for enhancement, not just replacement. Our goal is to empower students through technology while maintaining the highest standards of academic honesty.
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
                             <Link to="/register" className="btn-primary justify-center w-full sm:w-auto">Get Access</Link>
@@ -181,7 +181,7 @@ export default function Landing() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 justify-center md:justify-start">
                             <div className="w-10 h-10 bg-white text-black rounded-xl flex items-center justify-center font-black text-lg">V</div>
-                            <span className="text-lg font-black tracking-widest uppercase">Verimind</span>
+                            <span className="text-lg font-black tracking-widest uppercase">VerifyAI</span>
                         </div>
                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.5em] max-w-xs leading-loose">
                             The definitive neural productivity suite for the next generation of academic pioneers.
@@ -208,7 +208,7 @@ export default function Landing() {
                     </div>
                 </div>
                 <div className="max-w-7xl mx-auto px-6 mt-20 pt-10 border-t border-white/5 text-center">
-                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.6em]">© 2026 Verimind Neural Suite • Secure Node Cluster 42</p>
+                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.6em]">© 2026 VerifyAI Neural Suite • Secure Node Cluster 42</p>
                 </div>
             </footer>
         </div>

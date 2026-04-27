@@ -11,7 +11,8 @@ import {
     Bold,
     Trash2,
     Copy,
-    Check
+    Check,
+    Dna
 } from 'lucide-react';
 
 interface UniversalEditorProps {
@@ -72,7 +73,8 @@ export const UniversalEditor: React.FC<UniversalEditorProps> = ({
         { id: 'improve', label: 'Optimize Syntax', icon: Zap, color: 'text-purple-400' },
         { id: 'simple', label: 'Simplify Logic', icon: Eye, color: 'text-blue-400' },
         { id: 'professional', label: 'Elevate Tone', icon: Sparkles, color: 'text-indigo-400' },
-        { id: 'audit', label: 'Fact Audit', icon: CheckCircle2, color: 'text-emerald-400' }
+        { id: 'audit', label: 'Fact Audit', icon: CheckCircle2, color: 'text-emerald-400' },
+        { id: 'dna', label: 'Extract DNA', icon: Dna, color: 'text-rose-400' }
     ];
 
     return (

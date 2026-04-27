@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Keyboard, 
@@ -122,15 +123,16 @@ export default function TypingLab() {
                     return prev - 1;
                 });
                 
-                // Live WPM
-                const timeElapsed = (Date.now() - startTime) / 60000;
+                // Live WPM calculation
+                const now = Date.now();
+                const timeElapsed = (now - (startTime || now)) / 60000;
                 if (timeElapsed > 0) {
                     setWpm(Math.round((text.length / 5) / timeElapsed));
                 }
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [startTime, isFinished, timeLeft, text, handleFinish]);
+    }, [startTime, isFinished]); // Removed text and timeLeft to avoid interval restarts
 
     return (
         <div className="max-w-6xl mx-auto py-12 px-6 space-y-12">
@@ -255,9 +257,14 @@ export default function TypingLab() {
                                         <div className="text-4xl font-black text-white">{wpm}</div>
                                         <div className="text-xs font-bold text-purple-200 uppercase tracking-widest">WPM</div>
                                     </div>
-                                    <button onClick={reset} className="px-8 py-3 bg-white text-purple-600 rounded-xl font-bold hover:scale-105 transition-transform">
-                                        Try Again
-                                    </button>
+                                    <div className="flex flex-col gap-2">
+                                        <button onClick={reset} className="px-8 py-3 bg-white text-purple-600 rounded-xl font-bold hover:scale-105 transition-transform flex items-center justify-center gap-2">
+                                            <RotateCcw size={14} /> Try Again
+                                        </button>
+                                        <Link to="/dna" className="px-8 py-3 bg-black/40 text-white rounded-xl font-bold hover:bg-black/60 transition-all text-xs uppercase tracking-widest text-center">
+                                            View Style DNA
+                                        </Link>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}

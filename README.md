@@ -1,8 +1,8 @@
-# VeriMind
+# VerifyAI
 
-VeriMind is a full-stack AI project focused on detecting hallucinations and evaluating the reliability of AI-generated content.
+VerifyAI is a full-stack AI project focused on detecting hallucinations and evaluating the reliability of AI-generated content.
 
-As large language models become more common, the risk of incorrect or fabricated information also increases. VeriMind attempts to solve this problem by introducing a structured verification layer that analyzes generated text, breaks it into smaller claims, and assigns a credibility score.
+As large language models become more common, the risk of incorrect or fabricated information also increases. VerifyAI attempts to solve this problem by introducing a structured verification layer that analyzes generated text, breaks it into smaller claims, and assigns a credibility score.
 
 This project was built to explore AI safety, system design, and full-stack development in a practical way.
 

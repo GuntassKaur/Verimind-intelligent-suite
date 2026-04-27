@@ -46,7 +46,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SESSION_SECRET", "verimind_session_secret_2026")
+app.secret_key = os.getenv("SESSION_SECRET", "verifyai_session_secret_2026")
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB Limit
 
 FRONTEND_URL = os.getenv("CLIENT_URL", "https://verimind-intelligent-suite-np75.vercel.app")
@@ -243,6 +243,19 @@ def analyze():
     auth.save_history(request.user['user_id'], "analysis", text, result)
     return create_response(data=result)
 
+@app.route("/api/ai/dna", methods=["POST"])
+@login_required
+def dna_analysis():
+    data = request.json or {}
+    text = str(data.get("text", ""))
+    
+    ok, msg = validate_text_input(text)
+    if not ok: return create_response(success=False, error=msg, status=400)
+    
+    result = analyze_writing_dna(text)
+    auth.save_history(request.user['user_id'], "dna_analysis", text[:100], result)
+    return create_response(data=result)
+
 # --- NEW UNIFIED STUDY ENDPOINTS ---
 
 @app.route("/api/study/write", methods=["POST"])
@@ -419,7 +432,7 @@ def api_generate_ppt():
     if not plan:
         return create_response(success=False, error="Neural sync failed during PPT planning.")
     
-    filename = f"verimind_ppt_{int(time.time())}.pptx"
+    filename = f"verifyai_ppt_{int(time.time())}.pptx"
     ppt_url = create_ppt_file(plan, filename)
     
     if not ppt_url:
@@ -437,7 +450,7 @@ def api_generate_ppt():
 @app.route("/api/stadium/telemetry", methods=["GET"])
 def get_stadium_telemetry():
     """
-    VeriMind Digital Twin Telemetry
+    VerifyAI Digital Twin Telemetry
     Returns real-time synthesized node data for the stadium mesh.
     """
     # In a real environment, this would pull from IoT sensors or a DB.
@@ -483,7 +496,7 @@ def get_stadium_telemetry():
 @app.route("/api/system/logs", methods=["GET"])
 def get_system_logs():
     """
-    VeriMind Core Log Stream
+    VerifyAI Core Log Stream
     Returns real-time server logs for the terminal interface.
     """
     log_path = os.path.join(os.path.dirname(__file__), "server.log")

@@ -5,7 +5,8 @@ import {
     Brain, 
     Keyboard, 
     Sparkles,
-    Network
+    Network,
+    Dna
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -14,6 +15,7 @@ export const Sidebar = () => {
         { path: '/write', label: 'Smart Writing', icon: Sparkles },
         { path: '/check', label: 'Truth & Plagiarism', icon: ShieldCheck },
         { path: '/humanize', label: 'AI Humanizer', icon: Brain },
+        { path: '/dna', label: 'Writing DNA', icon: Dna },
         { path: '/typing', label: 'Typing Lab', icon: Keyboard },
         { path: '/settings', label: 'Settings', icon: Network },
     ];

@@ -66,7 +66,7 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                         <Logo variant="icon" className="w-12 h-12 text-white -rotate-3" />
                     </div>
                     <div>
-                        <h1 className="text-5xl font-black uppercase tracking-tight text-slate-900 leading-none mb-2">VeriMind</h1>
+                        <h1 className="text-5xl font-black uppercase tracking-tight text-slate-900 leading-none mb-2">VerifyAI</h1>
                         <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">Neural Intelligence Audit Report</p>
                     </div>
                 </div>
@@ -88,7 +88,7 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                 </h3>
                 <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100 shadow-inner">
                     <p className="text-xl text-slate-800 font-serif leading-relaxed italic mb-6">
-                        {data.simple_explanation || "Primary audit analysis completed. The linguistic structure and factual density of the provided substrate have been processed through VeriMind's core neural verification layers."}
+                        {data.simple_explanation || "Primary audit analysis completed. The linguistic structure and factual density of the provided substrate have been processed through VerifyAI's core neural verification layers."}
                     </p>
                     <p className="text-sm text-slate-600 font-medium leading-relaxed">
                         {resultText || "Analysis indicates a structured data pattern. Key metrics suggest a moderate cognitive load requirements for consumer absorption."}
@@ -217,9 +217,9 @@ export const IntelligenceReport: React.FC<IntelligenceReportProps> = ({ data, ty
                     <ShieldCheck size={24} className="text-slate-900" />
                     <div className="w-12 h-1 bg-slate-100 rounded-full" />
                 </div>
-                <p className="text-sm font-black uppercase tracking-[0.4em] text-slate-900 mb-2">VERIMIND PROTOCOL V5.2.0</p>
+                <p className="text-sm font-black uppercase tracking-[0.4em] text-slate-900 mb-2">VERIFYAI PROTOCOL V5.2.0</p>
                 <p className="text-[10px] text-slate-400 font-medium italic max-w-lg">
-                    This cryptographic neural audit is probabilistic in nature. VeriMind provides intelligence signals; critical decisions should be cross-verified by domain experts.
+                    This cryptographic neural audit is probabilistic in nature. VerifyAI provides intelligence signals; critical decisions should be cross-verified by domain experts.
                 </p>
             </div>
         </div>

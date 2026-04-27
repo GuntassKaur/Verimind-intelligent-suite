@@ -4,7 +4,7 @@ interface LogoProps {
 }
 
 export function Logo({ variant = 'full', className = "w-8 h-8" }: LogoProps) {
-    const GradientId = "verimind-logo-gradient";
+    const GradientId = "verifyai-logo-gradient";
 
     const SvgIcon = (
         <svg
@@ -49,7 +49,7 @@ export function Logo({ variant = 'full', className = "w-8 h-8" }: LogoProps) {
             {SvgIcon}
             <span className="font-black tracking-tighter text-2xl leading-none flex items-center">
                 <span className="inline-block bg-clip-text text-transparent bg-gradient-to-br from-indigo-500 via-indigo-400 to-purple-600 group-hover/logo:from-indigo-400 group-hover/logo:to-purple-500 transition-all duration-300">
-                    VeriMind
+                    VerifyAI
                 </span>
             </span>
         </div>
