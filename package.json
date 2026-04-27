@@ -1,5 +1,5 @@
 {
-  "name": "aiproject-root",
+  "name": "verifyai-root",
   "private": true,
   "scripts": {
     "postinstall": "npm install --prefix client",
